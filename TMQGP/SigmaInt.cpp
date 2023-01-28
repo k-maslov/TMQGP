@@ -192,6 +192,7 @@ double sigma_ff(double om, double p, double T, Interpolator2D iImT, Interpolator
 }
 
 
+
 double func_E_int_first(double e, double om, double p, double T, double k, Interpolator2D iImT, Interpolator2D iImG){
     return x_integral_cm(e, om, p, k, iImT, iImG) * (n_f(e - om, T) + n_b(e, T)) * iImG(k, e - om);
 }
@@ -241,19 +242,24 @@ void get_T(double E, double T, Interpolator iVK, Interpolator iOmK, Interpolator
                 double *out, int dimOut){//, double * out2, int dimOut2){
     omp_set_dynamic(1);
     omp_set_num_threads(16);
-    int i;
+    int i, thr;
     double res;
     // #pragma omp parallel shared(p, out, iImT, iImG) private(i)
     {
         // #pragma omp parallel for
-        #pragma omp parallel for schedule(dynamic) shared(E, T, p, iVK, iOmK, iReGqq, iImGqq) private(i)
+        #pragma omp parallel private(thr)
+        #pragma omp for private(i)
         for (i = 0; i < dimP; i++){
-            out[i] = imag(T_solve(E, p[i], p[i], T, iVK, iOmK, iReGqq, iImGqq));
+            out[i] = T_solveRe(E, p[i], p[i], T, iVK, iOmK, iReGqq, iImGqq);
             // cout << i << "   " << p[i] << "    " <<  out[i] << endl;
             // out2[i] = imag(res);
+            thr = omp_get_thread_num();
+
+            // cout << "thread " << thr << " doing" << i << endl;
         }
     }
 }
+
 
 std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
             double Lambda){
@@ -268,14 +274,34 @@ std::complex<double> T_solve(double E, double q, double q1, double T, Interpolat
         return 2/M_PI * k*k * -iVK(k)*iVK(k) * iImGqq(k, E); 
     };
 
-    Int_gsl_adaptive integ;
+    // IntGSL<std::function<double(double)>> integ;
 
-    integ.integrate(&i_func_re, 1e-3, Lambda, res1, err);
-    integ.integrate(&i_func_im, 1e-3, Lambda, res2, err);
+    integ_T.integrate(&i_func_re, 1e-3, Lambda, res1, err);
+    integ_T.integrate(&i_func_im, 1e-3, Lambda, res2, err);
     std::complex<double> res(res1, res2);
-    return -iVK(q) * iVK(q1) / (1.0 - res);
+    return (-iVK(q) * iVK(q1) / (1.0 - res));
 }
 
+double T_solveRe(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+            double Lambda){
+    double res1, res1_l, res1_r, res2, err;
+
+    gsl_set_error_handler_off();
+    funct i_func_re = [&](double k) -> double {
+        return 2/M_PI * k*k * -iVK(k)*iVK(k) * iReGqq(k, E); 
+    };
+
+    funct i_func_im = [&](double k) -> double {
+        return 2/M_PI * k*k * -iVK(k)*iVK(k) * iImGqq(k, E); 
+    };
+
+    // IntGSL<std::function<double(double)>> integ;
+
+    integ_T.integrate(&i_func_re, 1e-3, Lambda, res1, err);
+    integ_T.integrate(&i_func_im, 1e-3, Lambda, res2, err);
+    std::complex<double> res(res1, res2);
+    return real(-iVK(q) * iVK(q1) / (1.0 - res));
+}
 double ReSigmaKK_2D(double E, double q, Interpolator2D iImS){
     gsl_set_error_handler_off();
     double res, err;

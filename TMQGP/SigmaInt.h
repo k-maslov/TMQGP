@@ -26,7 +26,8 @@ IntGSL<std::function<double(double)>> integ_x;
 IntGSL<std::function<double(double)>> integ_k;
 IntGSL<std::function<double(double)>> integ_E;
 
-Int_gsl_adaptive integ_T;
+// Int_gsl_adaptive integ_T;
+IntGSL<std::function<double(double)>> integ_T;
 // Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
 Int_gsl_cauchy inter_cauchy;
 
@@ -46,6 +47,9 @@ void get_E_int(double om, double T, Interpolator2D iImT, Interpolator2D iImG, do
 void get_T(double E, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, double * p, int dimP, 
             double *out, int dimOut);
 std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+            double Lambda = 5);
+
+double T_solveRe(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
             double Lambda = 5);
 
 double ReSigmaKK_2D(double E, double q, Interpolator2D iImS);
