@@ -26,7 +26,7 @@ IntGSL<std::function<double(double)>> integ_x;
 IntGSL<std::function<double(double)>> integ_k;
 IntGSL<std::function<double(double)>> integ_E;
 
-// Int_gsl_adaptive integ_T;
+Int_gsl_adaptive integ_Om;
 IntGSL<std::function<double(double)>> integ_T;
 // Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
 Int_gsl_cauchy inter_cauchy;
@@ -61,6 +61,30 @@ double sigma_ff(double om, double p, double T, Interpolator2D iImT, Interpolator
 double sigma_fb(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG);
 
 
+//////////////////////////////////////////////////////////////////////
+
+// Another integration variable choice
+double sigma_bb2(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG);
+double sigma_bb3(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG);
+
+double k_integral_cm2(double omp, double om, double p, Interpolator2D iImT, Interpolator2D iImG);
+double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D iImT, Interpolator2D iImG);
+
+
+void get_test(double * p, int dimP, double * out, int dimOut);
+void get_test_gsl(int N, double * p, int dimP, double * out, int dimOut);
+
+double OmQ_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG);
+double OmQ_F(double T, Interpolator2D iImG, Interpolator2D iReG);
+double OmQ_B_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG);
+double OmQ_B(double T, Interpolator2D iImG, Interpolator2D iReG);
+double delta(double om, double q, Interpolator2D iImG, Interpolator2D iReG);
+
+double OmS_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG,
+                                        Interpolator2D iImS, Interpolator2D iReS);
+
+double OmS_F(double T, Interpolator2D iImG, Interpolator2D iReG,
+                                        Interpolator2D iImS, Interpolator2D iReS);
 // class Runner {
 //     public:
 //         Runner();

@@ -70,4 +70,3 @@ double Interpolator2D::operator()(double x, double y){
 	}
 	return res;
 }
-
