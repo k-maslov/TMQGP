@@ -49,7 +49,7 @@ Interpolator2D::Interpolator2D(double *x, int dimX, double *y, int dimY,
 }
 
 double Interpolator2D::operator()(double x, double y){
-	gsl_set_error_handler_off();
+	// gsl_set_error_handler_off();
 	double res;
 	// try
 	// {

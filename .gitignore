@@ -2,3 +2,6 @@
 build/
 lib/
 wrap.cpp
+*.dat
+bin/
+.vscode/

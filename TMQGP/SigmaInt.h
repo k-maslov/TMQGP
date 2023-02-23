@@ -1,3 +1,7 @@
+
+#ifndef COMMANDS_H_
+#define COMMANDS_H_
+
 #include "Interpolator.h"
 #include "IntGSL.h"
 #include <complex>
@@ -45,12 +49,19 @@ void get_E_int(double om, double T, Interpolator2D iImT, Interpolator2D iImG, do
 // void get_T(double E, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, double * p, int dimP, 
 //             double *out, int dimOut, double * out2, int dimOut2);
 void get_T(double E, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, double * p, int dimP, 
-            double *out, int dimOut);
+            // double *out, int dimOut);
+            std::complex<double> *out, int dimOut);
 std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
             double Lambda = 5);
 
+std::complex<double> T_solve_test(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+            IntGSL<funct> integ_T, double Lambda = 5);
+
+// double T_solveRe(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+//             double Lambda, IntGSL<funct> integ);
+
 double T_solveRe(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
-            double Lambda = 5);
+            double Lambda);
 
 double ReSigmaKK_2D(double E, double q, Interpolator2D iImS);
 double ReSigmaKK(double E, Interpolator iImS);
@@ -60,7 +71,7 @@ double sigma_bf(double om, double p, double T, Interpolator2D iImT, Interpolator
 double sigma_ff(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG);
 double sigma_fb(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG);
 
-
+void get_test_gsl_interp(int N, double * p, int dimP, double * out, int dimOut);
 //////////////////////////////////////////////////////////////////////
 
 // Another integration variable choice
@@ -85,6 +96,9 @@ double OmS_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG
 
 double OmS_F(double T, Interpolator2D iImG, Interpolator2D iReG,
                                         Interpolator2D iImS, Interpolator2D iReS);
+
+std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+            double Lambda = 5);
 // class Runner {
 //     public:
 //         Runner();
@@ -94,3 +108,5 @@ double OmS_F(double T, Interpolator2D iImG, Interpolator2D iReG,
 //         Interpolator2D iImGqq;
 //         Interpolator2D iReGqq;
 // };
+
+#endif

@@ -14,22 +14,22 @@ template <class C> class IntGSL :
 public Integrator<C>
 {
 public:
-	static gsl_integration_workspace * w;
+	gsl_integration_workspace * w;
 
 	IntGSL() {
 // 		w = nullptr;
-// 		init_workspace();
+		init_workspace();
 	}
 	
 	IntGSL(C* c) : Integrator<C>(c){
 // 		w = nullptr;
-// 		init_workspace();
+		init_workspace();
 	}
 
 	void init_workspace() {
-		if (w){
-			delete w;
-		}
+		// if (w){
+		// 	delete w;
+		// }
 		w = gsl_integration_workspace_alloc(1e6);
 	}
 
@@ -59,7 +59,7 @@ public:
 	}
 };
 
-template <class C> gsl_integration_workspace * IntGSL<C>::w = gsl_integration_workspace_alloc(1e6);
+// template <class C> gsl_integration_workspace * IntGSL<C>::w = gsl_integration_workspace_alloc(1e6);
 
 class Int_gsl_adaptive : public IntGSL<funct> {
 	public:

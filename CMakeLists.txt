@@ -35,11 +35,11 @@ include_directories("/usr/include/levmar")
 include_directories("/usr/include/python3.10")
 include_directories("/usr/lib/python3.10/site-packages/numpy/core/include")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/TMQGP)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../eosstudio)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../eosstudio)
 
 link_directories("/usr/lib/levmar")
 link_directories("/usr/lib/x86_64-linux-gnu/")
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../eosstudio/lib)
+# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../eosstudio/lib)
 
 endif (UNIX)
 
@@ -77,6 +77,9 @@ set_target_properties(libTMQGP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 add_library(TMQGP SHARED ${CMAKE_CURRENT_SOURCE_DIR}/wrap.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/wrap.i)
 
+
+add_executable(DirectUse ${CMAKE_CURRENT_SOURCE_DIR}/DirectUse.cpp)
+
 set_target_properties(TMQGP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 set_target_properties(TMQGP PROPERTIES RUNTIME_OUTPUT_DIRECTORY
@@ -90,6 +93,7 @@ set_target_properties(TMQGP PROPERTIES SUFFIX .pyd)
 endif (WIN32)
 set_target_properties(TMQGP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 add_dependencies(TMQGP libTMQGP)
+add_dependencies(DirectUse libTMQGP)
 
 
 
@@ -102,8 +106,9 @@ add_dependencies(TMQGP libTMQGP)
 #)
 
 if (UNIX)
-target_link_libraries(TMQGP gsl gslcblas levmar lapack python3.10 libTMQGP EosStudio)
-target_link_libraries(libTMQGP gsl gslcblas levmar lapack python3.10 EosStudio)
+target_link_libraries(TMQGP gsl gslcblas levmar lapack python3.10 libTMQGP)
+target_link_libraries(libTMQGP gsl gslcblas levmar lapack python3.10)
+target_link_libraries(DirectUse gsl gslcblas levmar lapack python3.10 libTMQGP)
 endif(UNIX)
 
 if (WIN32)
