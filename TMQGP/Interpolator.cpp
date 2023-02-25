@@ -2,7 +2,6 @@
 #include <iostream>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
-
 using namespace std;
 
 
@@ -16,7 +15,7 @@ Interpolator::Interpolator(double * x, int dimX, double * y, int dimY, string ki
 	if (dimX != dimY) {
 		throw;
 	}
-
+	this->kind = kind;
 	if (methods.find(kind) != methods.end()) {
 		interp = gsl_spline_alloc(methods[kind], dimX);
 		accel = gsl_interp_accel_alloc();
@@ -25,6 +24,15 @@ Interpolator::Interpolator(double * x, int dimX, double * y, int dimY, string ki
 	else {
 		throw;
 	}
+
+	this->x.clear();
+	this->data.clear();
+
+	for (int i = 0; i < dimX; i++){
+		this->x.push_back(x[i]);
+		this->data.push_back(y[i]);
+	}
+
 }
 
 Interpolator::~Interpolator() {
@@ -45,6 +53,23 @@ Interpolator2D::Interpolator2D(double *x, int dimX, double *y, int dimY,
 	accX = gsl_interp_accel_alloc();
 	accY = gsl_interp_accel_alloc();
 	gsl_spline2d_init(interp, x, y, z2, dimX, dimY);
+
+	this->x.clear();
+	this->y.clear();
+	this->z.clear();
+
+	for (int i = 0; i < dimX; i++){
+		this->x.push_back(x[i]);
+	}
+
+	for (int i = 0; i < dimY; i++){
+		this->y.push_back(y[i]);
+	}
+
+	for (int i = 0; i < dimY*dimX; i++){
+		this->z.push_back(z2[i]);
+	}
+
 	debug = 0;
 }
 
