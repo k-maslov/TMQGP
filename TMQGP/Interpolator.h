@@ -5,6 +5,7 @@
 #include "gsl/gsl_spline2d.h"
 #include <map>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -20,10 +21,16 @@ public:
 	gsl_interp_accel * accel;
 	map<string, const gsl_interp_type *> methods;
 
+	vector<double> x;
+	vector<double> data;
+	string kind;
+
 	double operator()(double x);
 	double D(double x) {
 		return gsl_spline_eval_deriv(interp, x, accel);
 	}
+
+	// template <class Archive> void  serialize(Archive & archive);
 };
 
 class Interpolator2D{
@@ -35,6 +42,10 @@ class Interpolator2D{
 		gsl_interp_accel * accX;
 		gsl_interp_accel * accY;
 		bool debug;
+
+		vector<double> x;
+		vector<double> y;
+		vector<double> z;
 
 		double operator()(double x, double y);
 };

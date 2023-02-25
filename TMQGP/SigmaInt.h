@@ -99,6 +99,8 @@ double OmS_F(double T, Interpolator2D iImG, Interpolator2D iReG,
 
 std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
             double Lambda = 5);
+std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+            double Lambda = 5);
 // class Runner {
 //     public:
 //         Runner();

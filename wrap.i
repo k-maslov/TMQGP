@@ -5,6 +5,9 @@
 %include <std_unordered_map.i>
 %include <std_vector.i>
 
+%pythoncode %{
+    import numpy as np
+%}
 
 %{
 #define SWIG_FILE_WITH_INIT
@@ -66,3 +69,33 @@ typedef std::string String;
 %apply (complex<double>* ARGOUT_ARRAY1, int DIM1) {(complex<double> * out, int dimOut)};
 %include "TMQGP/SigmaInt.h"
 
+
+%extend Interpolator {
+%pythoncode {
+    def __getstate__(self):
+        x = list(self.x)
+        data = list(self.data)
+        return x, data, self.kind
+
+    def __setstate__(self, state):
+        x, data, kind = state
+        self.__init__(np.array(x), np.array(data), kind)
+}
+}
+
+%extend Interpolator2D {
+%pythoncode {
+    def __getstate__(self):
+        x = list(self.x)
+        y = list(self.y)
+        z = list(self.z)
+        return x, y, z
+
+    def __setstate__(self, state):
+        _x, _y, _z = state
+        x = np.array(x)
+        y = np.array(y)
+        z = np.array(z).reshape(len(y), len(x))
+        self.__init__(x, y, z)
+}
+}
