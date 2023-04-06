@@ -14,6 +14,11 @@ using namespace std::chrono;
 
 using namespace std;
 
+
+void test_vec_interp2d(){
+
+}
+
 int main(){
     // ifstream fImG2;
     FILE * fImG2 = fopen("ImG2.dat", "r");
@@ -52,7 +57,7 @@ int main(){
 
     // cout << T_solve(0.5, 0.5, 0.5, 0.2, iV, iOmK, iReG2, iImG2) << endl;
 
-    int N = 15000000;
+    int N = 150000;
     
 
     gsl_vector * qrange_test = gsl_vector_alloc(N);
@@ -64,43 +69,43 @@ int main(){
     double q;
     auto start = high_resolution_clock::now();
 
-    // for (int i = 0; i < N; i++){
-    //     q = qrange_test->data[i];
-    //     T_solve(0.5, q, q, 0.2, iV, iOmK, iReG2, iImG2);
-    // }
+    for (int i = 0; i < N; i++){
+        q = qrange_test->data[i];
+        T_solve(0.5, q, q, 0.2, iV, iOmK, iReG2, iImG2);
+    }
 
     auto stop = high_resolution_clock::now();
 
     auto duration = duration_cast<microseconds>(stop - start);
-    // cout << "time serial : " << duration.count() << endl;
+    // // cout << "time serial : " << duration.count() << endl;
 
-    // std::complex<double> * out = new complex<double> [N];
-    // std::complex<double> * out = new complex<double> [N];
-    double * out = new double[N];
+    // // std::complex<double> * out = new complex<double> [N];
+    // // std::complex<double> * out = new complex<double> [N];
+    // double * out = new double[N];
 
 
-    double * qrange_arr = new double[N];
+    // double * qrange_arr = new double[N];
 
-    for (int i = 0; i < N; i++){
-        qrange_arr[i] = gsl_vector_get(qrange_test, i);
-    }
+    // for (int i = 0; i < N; i++){
+    //     qrange_arr[i] = gsl_vector_get(qrange_test, i);
+    // }
 
-    int Nthr = 0;
+    // int Nthr = 0;
 
-    for (Nthr = 1; Nthr < 18; Nthr+=4)
-    {
-        start = high_resolution_clock::now();
-        auto start_omp = omp_get_wtime();
+    // for (Nthr = 1; Nthr < 18; Nthr+=4)
+    // {
+    //     start = high_resolution_clock::now();
+    //     auto start_omp = omp_get_wtime();
 
-    // get_T(0.5, 0.2, iV, iOmK, iReG2, iImG2, qrange_arr, N, out, N);
-        get_test_gsl_interp(Nthr, qrange_arr, N, out, N);
+    //     // get_T(0.5, 0.2, iV, iOmK, iReG2, iImG2, qrange_arr, N, out, N);
+    //     // get_test_gsl_interp(Nthr, qrange_arr, N, out, N);
 
-        stop = high_resolution_clock::now();
-        auto stop_omp = omp_get_wtime();
+    //     stop = high_resolution_clock::now();
+    //     auto stop_omp = omp_get_wtime();
 
     duration = duration_cast<microseconds>(stop - start);
-    cout << "time parallel N = " << Nthr << " : "<< duration.count() << "   " << stop_omp - start_omp << endl;
-    }
+    cout << "time = " << " " << duration.count() << endl;//<< "   " << stop_omp - start_omp << endl;
+    
 
 
 

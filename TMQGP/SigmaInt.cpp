@@ -7,13 +7,13 @@
 #include <math.h>
 #include <vector>
 
-double x_integrand(double x, double k, double E, double p, Interpolator2D iImT){
+double x_integrand(double x, double k, double E, double p, Interpolator2D & iImT){
     double k2 = k*k + p*p + 2*p*k*x;
     if (k2 < 0) return 0;
     return iImT(sqrt(k2), E);
 }
 
-double x_integral(double k, double E, double p, Interpolator2D iImT){
+double x_integral(double k, double E, double p, Interpolator2D & iImT){
     double res, err;
 
     funct i_func_x = [&](double x) -> double {return x_integrand(x, k, E, p, iImT);};
@@ -21,7 +21,7 @@ double x_integral(double k, double E, double p, Interpolator2D iImT){
     return res;
 }
 
-double k_integral(double E, double om, double p, Interpolator2D iImT, Interpolator2D iImG){
+double k_integral(double E, double om, double p, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     // gsl_set_error_handler(NULL);
     gsl_set_error_handler_off();
@@ -48,7 +48,7 @@ double n_b(double om, double T){
     return real(1./(exp(om/T) - 1 + std::complex<double>(0, 1e-8)));
 }
 
-double E_integral(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double E_integral(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     // gsl_set_error_handler(NULL);
     gsl_set_error_handler_off();
@@ -68,7 +68,7 @@ double E_integral(double om, double p, double T, Interpolator2D iImT, Interpolat
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-double x_integral_cm(double E, double om, double p, double k, Interpolator2D iImT, Interpolator2D iImG){
+double x_integral_cm(double E, double om, double p, double k, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
@@ -87,7 +87,7 @@ double x_integral_cm(double E, double om, double p, double k, Interpolator2D iIm
     return res;
 }
 
-double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D iImT, Interpolator2D iImG){
+double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
@@ -110,7 +110,7 @@ double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D 
     return res;
 }
 
-double k_integral_cm2(double omp, double om, double p, Interpolator2D iImT, Interpolator2D iImG){
+double k_integral_cm2(double omp, double om, double p, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     // gsl_set_error_handler(NULL);
     gsl_set_error_handler_off();
@@ -123,7 +123,7 @@ double k_integral_cm2(double omp, double om, double p, Interpolator2D iImT, Inte
     return res;
 }
 
-double k_integral_cm(double E, double om, double p, Interpolator2D iImT, Interpolator2D iImG){
+double k_integral_cm(double E, double om, double p, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     // gsl_set_error_handler(NULL);
     gsl_set_error_handler_off();
@@ -136,7 +136,7 @@ double k_integral_cm(double E, double om, double p, Interpolator2D iImT, Interpo
     return res;
 }
 
-double E_integral_cm(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double E_integral_cm(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     // gsl_set_error_handler(NULL);
     gsl_set_error_handler_off();
@@ -156,7 +156,7 @@ double E_integral_cm(double om, double p, double T, Interpolator2D iImT, Interpo
 
 
 
-double sigma_bb(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double sigma_bb(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double e) -> double {
@@ -286,7 +286,7 @@ void get_test_gsl_interp(int N, double * p, int dimP, double * out, int dimOut){
     }
 }
 
-double sigma_bb2(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double sigma_bb2(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2, res3, err3;
     res2 = 0;
     gsl_set_error_handler_off();
@@ -333,7 +333,7 @@ double sigma_bb2(double om, double p, double T, Interpolator2D iImT, Interpolato
     return res + res2 + res3;
 }
 
-double sigma_bb3(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double sigma_bb3(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2, res3, err3;
     res2 = 0;
     gsl_set_error_handler_off();
@@ -361,7 +361,7 @@ double sigma_bb3(double om, double p, double T, Interpolator2D iImT, Interpolato
 }
 
 
-double sigma_bf(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double sigma_bf(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     if (om < 0) return 0;
     gsl_set_error_handler_off();
@@ -374,7 +374,7 @@ double sigma_bf(double om, double p, double T, Interpolator2D iImT, Interpolator
     return res;
 }
 
-double sigma_fb(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double sigma_fb(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double e) -> double {
@@ -395,7 +395,7 @@ double sigma_fb(double om, double p, double T, Interpolator2D iImT, Interpolator
     return res;
 }
 
-double sigma_ff(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double sigma_ff(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double e) -> double {
@@ -407,11 +407,11 @@ double sigma_ff(double om, double p, double T, Interpolator2D iImT, Interpolator
     return res;
 }
 
-double func_E_int_first(double e, double om, double p, double T, double k, Interpolator2D iImT, Interpolator2D iImG){
+double func_E_int_first(double e, double om, double p, double T, double k, Interpolator2D & iImT, Interpolator2D & iImG){
     return x_integral_cm(e, om, p, k, iImT, iImG) * (n_f(e - om, T) + n_b(e, T)) * iImG(k, e - om);
 }
 
-double E_int_first(double om, double p, double T, double k, Interpolator2D iImT, Interpolator2D iImG){
+double E_int_first(double om, double p, double T, double k, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double e) -> double {
@@ -423,7 +423,7 @@ double E_int_first(double om, double p, double T, double k, Interpolator2D iImT,
     return res;
 }
 
-double Res_Kint(double om, double p, double T, Interpolator2D iImT, Interpolator2D iImG){
+double Res_Kint(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
         double res, err;
     // gsl_set_error_handler(NULL);
     gsl_set_error_handler_off();
@@ -436,7 +436,7 @@ double Res_Kint(double om, double p, double T, Interpolator2D iImT, Interpolator
     return res;
 }
 
-void get_E_int(double om, double T, Interpolator2D iImT, Interpolator2D iImG, double * p, int dimP, double * out, int dimOut)
+void get_E_int(double om, double T, Interpolator2D & iImT, Interpolator2D & iImG, double * p, int dimP, double * out, int dimOut)
 {
     omp_set_dynamic(0);
     omp_set_num_threads(16);
@@ -451,7 +451,7 @@ void get_E_int(double om, double T, Interpolator2D iImT, Interpolator2D iImG, do
     }
 }
 
-std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda){
     double res1, res1_l, res1_r, res2, err;
 
@@ -472,7 +472,7 @@ std::complex<double> T_solve(double E, double q, double q1, double T, Interpolat
     return (-iVK(q) * iVK(q1) / (1.0 - res));
 }
 
-std::complex<double> T_solve_test(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+std::complex<double> T_solve_test(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             IntGSL<funct> integ_T, double Lambda){
     double res1, res1_l, res1_r, res2, err;
 
@@ -493,7 +493,7 @@ std::complex<double> T_solve_test(double E, double q, double q1, double T, Inter
     return (-iVK(q) * iVK(q1) / (1.0 - res));
 }
 
-std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda){
     double res1, res1_l, res1_r, res2, err;
 
@@ -516,7 +516,7 @@ std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpo
     return (-iVK(q) * iVK(q1) / (1.0 - res));
 }
 
-std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda){
     double res1, res1_l, res1_r, res2, err;
 
@@ -537,7 +537,7 @@ std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpo
     return (-iVK(q) * iVK(q1) / (1.0 - res));
 }
 
-void get_T(double E, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, double * p, int dimP, 
+void get_T(double E, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, double * p, int dimP, 
             // std::complex<double> *out, int dimOut){//, double * out2, int dimOut2){
                 // double *out, int dimOut){
                 std::complex<double> *out, int dimOut){
@@ -582,7 +582,7 @@ void get_T(double E, double T, Interpolator iVK, Interpolator iOmK, Interpolator
 }
 
 
-double T_solveRe(double E, double q, double q1, double T, Interpolator iVK, Interpolator iOmK, Interpolator2D iReGqq, Interpolator2D iImGqq, 
+double T_solveRe(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda){
     double res1, res1_l, res1_r, res2, err;
 
@@ -605,7 +605,7 @@ double T_solveRe(double E, double q, double q1, double T, Interpolator iVK, Inte
     return res1;
 }
 
-double ReSigmaKK_2D(double E, double q, Interpolator2D iImS){
+double ReSigmaKK_2D(double E, double q, Interpolator2D & iImS){
     gsl_set_error_handler_off();
     double res, err;
 
@@ -617,7 +617,7 @@ double ReSigmaKK_2D(double E, double q, Interpolator2D iImS){
     return res;
 }
 
-double ReSigmaKK(double E,Interpolator iImS){
+double ReSigmaKK(double E,Interpolator & iImS){
     gsl_set_error_handler_off();
     double res, err;
 
@@ -630,7 +630,7 @@ double ReSigmaKK(double E,Interpolator iImS){
 }
 // double k_integral()
 
-double delta(double om, double q, Interpolator2D iImG, Interpolator2D iReG){
+double delta(double om, double q, Interpolator2D & iImG, Interpolator2D & iReG){
     double im = iImG(q, om);
     double re = iReG(q, om);
 
@@ -641,7 +641,7 @@ double delta(double om, double q, Interpolator2D iImG, Interpolator2D iReG){
     return res;
 }
 
-double OmQ_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG){
+double OmQ_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG){
     funct func = [&] (double om) -> double{
         return n_f(om, T) * delta(om, q, iImG, iReG) / M_PI;
     };
@@ -652,7 +652,7 @@ double OmQ_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG
     return res;
 }
 
-double OmQ_F(double T, Interpolator2D iImG, Interpolator2D iReG){
+double OmQ_F(double T, Interpolator2D & iImG, Interpolator2D & iReG){
     funct func = [&] (double q) -> double{
         return q*q /2/M_PI/M_PI * OmQ_F_om_int(q, T, iImG, iReG);
     };
@@ -662,7 +662,7 @@ double OmQ_F(double T, Interpolator2D iImG, Interpolator2D iReG){
     return res;
 }
 
-double OmQ_B_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG){
+double OmQ_B_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG){
     funct func = [&] (double om) -> double{
         return n_b(om, T) * delta(om, q, iImG, iReG) / M_PI;
     };
@@ -672,7 +672,7 @@ double OmQ_B_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG
     return res;
 }
 
-double OmQ_B(double T, Interpolator2D iImG, Interpolator2D iReG){
+double OmQ_B(double T, Interpolator2D & iImG, Interpolator2D & iReG){
     funct func = [&] (double q) -> double{
         return q*q /2/M_PI/M_PI * OmQ_B_om_int(q, T, iImG, iReG);
     };
@@ -682,8 +682,8 @@ double OmQ_B(double T, Interpolator2D iImG, Interpolator2D iReG){
     return res;
 }
 
-double OmS_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG,
-                                        Interpolator2D iImS, Interpolator2D iReS){
+double OmS_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
     funct func = [&] (double om) -> double{
         return n_f(om, T) * (iImG(q, om) * iReS(q, om) + iReG(q, om) * iImS(q, om)) / M_PI;
     };
@@ -693,8 +693,8 @@ double OmS_F_om_int(double q, double T, Interpolator2D iImG, Interpolator2D iReG
     return res;
 }
 
-double OmS_F(double T, Interpolator2D iImG, Interpolator2D iReG,
-                                        Interpolator2D iImS, Interpolator2D iReS){
+double OmS_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
     funct func = [&] (double q) -> double{
         return q*q /2/M_PI/M_PI * OmS_F_om_int(q, T, iImG, iReG, iImS, iReS);
     };
