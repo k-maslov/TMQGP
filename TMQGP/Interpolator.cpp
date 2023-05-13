@@ -95,3 +95,8 @@ double Interpolator2D::operator()(double x, double y){
 	}
 	return res;
 }
+
+// InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ2, int dimZ1, int dimZ2, double *ImZ2, int dimZ3, int dimZ4)
+// {
+
+// }

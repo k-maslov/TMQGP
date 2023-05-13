@@ -53,7 +53,8 @@ void get_T(double E, double T, Interpolator & iVK, Interpolator & iOmK, Interpol
             std::complex<double> *out, int dimOut);
 std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5);
-
+std::complex<double> T_solve_den(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
+            double Lambda = 5);
 std::complex<double> T_solve_test(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             IntGSL<funct> integ_T, double Lambda = 5);
 

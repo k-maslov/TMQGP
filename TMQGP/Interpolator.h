@@ -50,7 +50,16 @@ class Interpolator2D{
 		double operator()(double x, double y);
 };
 
+// class InterDenom2D{
+// 	public:
+// 		InterDenom2D(){};
+// 		InterDenom2D(double *x, int dimX, double *y, int dimY, 
+// 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4);
 
+// 		double real(double x, double y);
+// 		double imag(double x, double y);
+// 		complex<double> operator()(double x, double y);
+// };
 // ########## Write the integrations here temporarily
 
 

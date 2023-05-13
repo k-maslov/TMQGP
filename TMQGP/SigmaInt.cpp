@@ -703,3 +703,36 @@ double OmS_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
     integ_k.integrate(&func, 0, 5, res, err);
     return res;
 }
+
+
+///////// Trying interpolating the denominator of quantites of interest
+
+
+std::complex<double> T_solve_den(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, 
+                    Interpolator2D & iReGqq, 
+                    Interpolator2D & iImGqq, 
+            double Lambda){
+
+    double res1, res1_l, res1_r, res2, err;
+
+    gsl_set_error_handler_off();
+    funct i_func_re = [&](double k) -> double {
+        double re = iReGqq(k, E);
+        double im = iImGqq(k, E);
+        return 2/M_PI * k*k * -iVK(k)*iVK(k) * (re / (re * re + im * im)); 
+    };
+
+    funct i_func_im = [&](double k) -> double {
+        double re = iReGqq(k, E);
+        double im = iImGqq(k, E);
+        return 2/M_PI * k*k * -iVK(k)*iVK(k) * (im / (re * re + im * im)); 
+    };
+
+    // IntGSL<std::function<double(double)>> integ;
+
+    integ_T.integrate(&i_func_re, 1e-3, Lambda, res1, err);
+    integ_T.integrate(&i_func_im, 1e-3, Lambda, res2, err);
+    std::complex<double> res(res1, res2);
+    return (-iVK(q) * iVK(q1) / (1.0 - res));
+}
+
