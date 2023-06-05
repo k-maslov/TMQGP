@@ -112,4 +112,12 @@ std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpo
 //         Interpolator2D & iReGqq;
 // };
 
+double test_integration(double a);
+
+double k_integral_QQ(double E, double om, double p, Interpolator2D & iImG);
+double E_integral_QQ(double om, double p, double T, Interpolator2D & iImG);
+
+double k_integral_QQ_func(double k, double E, double om, double p, Interpolator2D & iImG);
+
+
 #endif

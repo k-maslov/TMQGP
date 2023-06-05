@@ -30,8 +30,12 @@ file (GLOB_RECURSE libTMQGP_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/TMQGP/*.h
 )
 
+file (GLOB_RECURSE libTMQGP_HEADERS
+${CMAKE_CURRENT_SOURCE_DIR}/TMQGP/*.h
+)
+
 if (UNIX)
-include_directories("/usr/include/levmar")
+# include_directories("/usr/include/levmar")
 include_directories("/usr/include/python3.10")
 include_directories("/usr/lib/python3.10/site-packages/numpy/core/include")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/TMQGP)
@@ -106,9 +110,9 @@ add_dependencies(DirectUse libTMQGP)
 #)
 
 if (UNIX)
-target_link_libraries(TMQGP gsl gslcblas levmar lapack python3.10 libTMQGP)
-target_link_libraries(libTMQGP gsl gslcblas levmar lapack python3.10)
-target_link_libraries(DirectUse gsl gslcblas levmar lapack python3.10 libTMQGP)
+target_link_libraries(TMQGP gsl gslcblas lapack python3.10 libTMQGP)
+target_link_libraries(libTMQGP gsl gslcblas lapack python3.10)
+target_link_libraries(DirectUse gsl gslcblas lapack python3.10 libTMQGP)
 endif(UNIX)
 
 if (WIN32)
@@ -136,6 +140,7 @@ OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/wrap.cpp
 	#message(WARNING "Swig_exec=${SWIG_EXEC}")
 COMMAND ${SWIG_EXEC} -DSWIG_PYTHON_LEGACY_BOOL -I${CMAKE_CURRENT_SOURCE_DIR}/EosStudio -c++ -python -o ${CMAKE_CURRENT_SOURCE_DIR}/wrap.cpp -outdir ${CMAKE_CURRENT_SOURCE_DIR}/lib/ ${CMAKE_CURRENT_SOURCE_DIR}/wrap.i
 DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/wrap.i
+DEPENDS ${libTMQGP_HEADERS}
 )
 
 #COMMAND ${SWIG_EXEC} -DSWIG_PYTHON_LEGACY_BOOL -I${GOVNODIR} -I${CMAKE_CURRENT_SOURCE_DIR}/EosStudio -c++ -python -o ${CMAKE_CURRENT_SOURCE_DIR}/wrap.cpp 

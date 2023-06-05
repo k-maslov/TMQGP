@@ -159,6 +159,7 @@ double E_integral_cm(double om, double p, double T, Interpolator2D & iImT, Inter
 double sigma_bb(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2;
     gsl_set_error_handler_off();
+
     funct i_func_e = [&](double e) -> double {
         double res = k_integral_cm(e, om, p, iImT, iImG) * (n_b(e - om, T) - n_b(e, T));
         return res;
@@ -736,3 +737,54 @@ std::complex<double> T_solve_den(double E, double q, double q1, double T, Interp
     return (-iVK(q) * iVK(q1) / (1.0 - res));
 }
 
+
+double test_integration(double a){
+// 1. Define a lambda of the function to be integrated:
+    funct i_func = [&] (double x){
+        return 1 / (1 + x*x);
+    };
+
+// 2. Create the integrator
+    Int_gsl_adaptive integ;
+
+    double res, err;
+    integ.integrate(&i_func, -a, a, res, err);
+
+    return res;
+}
+
+
+double k_integral_QQ_func(double k, double E, double om, double p, Interpolator2D & iImG){
+    return k*k*iImG(k, om) *  iImG(k, E - om);
+}
+
+double k_integral_QQ(double E, double om, double p, Interpolator2D & iImG){
+    double res, err;
+    // gsl_set_error_handler(NULL);
+    gsl_set_error_handler_off();
+
+    // printf("Hello!!!\n");
+    funct i_func_k = [&](double k) -> double {
+        return k_integral_QQ_func(k, E, om, p, iImG);
+    };
+    integ_k.integrate(&i_func_k, 0, 5, res, err);
+    return res;
+}
+
+double E_integral_QQ(double om, double p, double T, Interpolator2D & iImG){
+    double res, err;
+    // gsl_set_error_handler(NULL);
+    gsl_set_error_handler_off();
+    // printf("Hello!!!\n");
+    funct i_func_e = [&](double e) -> double {
+        //std::cerr << "Hello  " << k << std:;
+        double res = k_integral_QQ(e, om, p, iImG) * (tanh((e-om)/(2*T)) + tanh(e/2/T));
+        //std::cerr << "res  " << res << std::endl;
+        // printf("%.3e \n", res);
+        // printf('')
+        return res;
+    };
+
+    integ_Om.integrate(&i_func_e, -5, 5, res, err);
+    return res;
+}
