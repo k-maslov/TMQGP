@@ -36,8 +36,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/TMQGP/*.h
 
 if (UNIX)
 # include_directories("/usr/include/levmar")
-include_directories("/usr/include/python3.10")
-include_directories("/usr/lib/python3.10/site-packages/numpy/core/include")
+include_directories("/usr/include/python3.11")
+include_directories("/usr/lib/python3.11/site-packages/numpy/core/include")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/TMQGP)
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../eosstudio)
 
@@ -110,9 +110,9 @@ add_dependencies(DirectUse libTMQGP)
 #)
 
 if (UNIX)
-target_link_libraries(TMQGP gsl gslcblas lapack python3.10 libTMQGP)
-target_link_libraries(libTMQGP gsl gslcblas lapack python3.10)
-target_link_libraries(DirectUse gsl gslcblas lapack python3.10 libTMQGP)
+target_link_libraries(TMQGP gsl gslcblas lapack python3.11 libTMQGP)
+target_link_libraries(libTMQGP gsl gslcblas lapack python3.11)
+target_link_libraries(DirectUse gsl gslcblas lapack python3.11 libTMQGP)
 endif(UNIX)
 
 if (WIN32)

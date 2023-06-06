@@ -5,3 +5,4 @@ wrap.cpp
 *.dat
 bin/
 .vscode/
+*-checkpoint.ipynb

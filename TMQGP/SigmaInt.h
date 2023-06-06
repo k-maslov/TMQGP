@@ -52,7 +52,7 @@ void get_T(double E, double T, Interpolator & iVK, Interpolator & iOmK, Interpol
             // double *out, int dimOut);
             std::complex<double> *out, int dimOut);
 std::complex<double> T_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
-            double Lambda = 5);
+            double Lambda = 5, int sign=1);
 std::complex<double> T_solve_den(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5);
 std::complex<double> T_solve_test(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
@@ -99,9 +99,9 @@ double OmS_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
                                         Interpolator2D & iImS, Interpolator2D & iReS);
 
 std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
-            double Lambda = 5);
+            double Lambda = 5, int sign=1);
 std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
-            double Lambda = 5);
+            double Lambda = 5, int sign=1);
 // class Runner {
 //     public:
 //         Runner();
@@ -116,7 +116,6 @@ double test_integration(double a);
 
 double k_integral_QQ(double E, double om, double p, Interpolator2D & iImG);
 double E_integral_QQ(double om, double p, double T, Interpolator2D & iImG);
-
 double k_integral_QQ_func(double k, double E, double om, double p, Interpolator2D & iImG);
 
 
