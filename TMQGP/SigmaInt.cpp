@@ -504,11 +504,13 @@ std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpo
     funct i_func_re = [&](double k) -> double {
         double omk = iOmK(k); 
         return 2/M_PI * k*k * omk*omk * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
+        // return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
     };
 
     funct i_func_im = [&](double k) -> double {
         double omk = iOmK(k); 
         return 2/M_PI * k*k * omk*omk* -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
+        // return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
     };
 
     // IntGSL<std::function<double(double)>> integ;

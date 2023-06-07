@@ -2,6 +2,9 @@ import numpy as np
 from scipy import signal
 import TMQGP as tm
 import tqdm.notebook as tqdm
+from syntax_sugar import pipe, END
+
+from syntax_sugar import thread_syntax as t, process_syntax as p
 
 class IterController:
     def __init__(self) -> None:
@@ -193,10 +196,11 @@ class Particle:
         return np.sqrt(self.m**2 + q**2)
         
     def G0(self, E, q):
-        if self.propagator == 'Th':
+        # if self.propagator == 'Th':
+        if self.stat == 'f':
             return 1 / (E - self.om0(q) + 1j*self.eps)
-        elif self.propagator == 'BBS':
-        # if self.stat == 'b':
+        # elif self.propagator == 'BBS':
+        elif self.stat == 'b':
             return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps * E)
         else:
             raise
@@ -207,7 +211,8 @@ class Particle:
 
 class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
-                 Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=3):
+                 Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=3, 
+                 do_rel=1, parallel=-1):
         self.p_i = p_i
         self.p_j = p_j
         
@@ -247,18 +252,20 @@ class Channel:
         self.Fa = Fa
         self.G = G
         self.L = L
-        self.iV = tm.Interpolator(self.qrange, self.v(self.qrange), 'linear')
+        self.parallel = parallel
+        self.iV = tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=do_rel), 'linear')
         self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
         self.set_G2()
         
-    def v(self, q):
+    def v(self, q, do_rel=1):
         mult = 1 / (1 + self.screen*self.T**2)
 
         ### Relativistic correction to the vertex: R_S(q, q') from Liu&Rapp
+        rel_factor = 1
+        if do_rel:
+            rel_factor = np.sqrt(self.p_i.m * self.p_j.m / self.p_i.om0(q) / self.p_j.om0(q))
 
-        # rel_factor = sqrt(self.p_i.m * self.p_j.m / self.p_i.om0(q))
-
-        return np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
+        return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
 
     
     
@@ -337,12 +344,22 @@ class Channel:
         self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
         
         
+    def get_S_q(self, q):
+        res = pipe(self.erange) | p[lambda z: self.func(z, q, self.T, self.iImT,
+                                             self.p_j.iImG)]*(self.parallel//1) | END
+        return np.array(res)
         
     def populate_S(self):
         # print(self.func(0, 0, self.T, self.iImT, self.p_j.R))
-        ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in self.qrange]
-        for e in tqdm.tqdm(self.erange)])
-        self.ImS = ress_cm
+        if self.parallel < 2:
+            ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in self.qrange]
+                for e in tqdm.tqdm(self.erange)])
+            self.ImS = ress_cm
+        else:
+            ress_cm = np.array([self.get_S_q(q) for q in tqdm.tqdm(self.qrange)])
+            self.ImS = ress_cm.transpose()
+
+        
 
         ReSigmas = []
 
@@ -353,3 +370,22 @@ class Channel:
 
         self.ReS = np.array(ReSigmas).transpose()
 
+def get_S_q(ch, q):
+    res = pipe(ch.erange) | p[lambda z: ch.func(z, q, ch.T, ch.iImT, ch.p_j.iImG)]*(ch.parallel//1) | END
+    return res
+
+
+# TODO: Very goddamn dirty
+def set_S_q(ch):
+    ress_cm = np.array([get_S_q(ch, q) for q in tqdm.tqdm(ch.qrange)])
+
+    ch.ImS = ress_cm
+
+    ReSigmas = []
+
+    for res in tqdm.tqdm(ress_cm.transpose()):
+        iImSigma = tm.Interpolator(ch.erange, np.ascontiguousarray(res), 'cubic')
+        ReSigma = [tm.ReSigmaKK(e, iImSigma) for e in ch.erange]
+        ReSigmas += [ReSigma]
+
+    ch.ReS = np.array(ReSigmas).transpose()

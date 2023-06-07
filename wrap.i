@@ -93,9 +93,9 @@ typedef std::string String;
 
     def __setstate__(self, state):
         _x, _y, _z = state
-        x = np.array(x)
-        y = np.array(y)
-        z = np.array(z).reshape(len(y), len(x))
+        x = np.array(_x)
+        y = np.array(_y)
+        z = np.array(_z).reshape(len(y), len(x))
         self.__init__(x, y, z)
 }
 }
