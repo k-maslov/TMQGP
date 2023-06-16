@@ -41,6 +41,9 @@ double k_integral(double E, double om, double p, Interpolator2D & iImT, Interpol
 }
 
 double n_f(double om, double T){
+    if (om < 0){
+        return - n_f(-om, T);
+    }
     return 1/(exp(om/T) + 1);
 }
 
@@ -371,7 +374,7 @@ double sigma_bf(double om, double p, double T, Interpolator2D & iImT, Interpolat
         return res;
     };
 
-    integ_E.integrate(&i_func_e, 0, 5, res, err);
+    integ_E.integrate(&i_func_e, -5, 5, res, err);
     return res;
 }
 
@@ -383,17 +386,19 @@ double sigma_fb(double om, double p, double T, Interpolator2D & iImT, Interpolat
         return res;
     };
 
+
+    double eps = 1e-3;
     if (om > 0){
-        // integ_E.integrate(&i_func_e, 0, om-eps, res, err);
+        integ_E.integrate(&i_func_e, 0, om-eps, res2, err);
         integ_E.integrate(&i_func_e, om, 10, res, err2);
-        res2 = 0;
+        // res2 = 0;
     }
     else{
         integ_E.integrate(&i_func_e, 0, 10, res, err);
         res2 = 0;
     }
     
-    return res;
+    return res + res2;
 }
 
 double sigma_ff(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){

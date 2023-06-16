@@ -102,6 +102,10 @@ std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpo
             double Lambda = 5, int sign=1);
 std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5, int sign=1);
+
+
+double n_f(double om, double T);
+double n_b(double om, double T);
 // class Runner {
 //     public:
 //         Runner();

@@ -158,7 +158,7 @@ class Runner:
 
 class Particle:
     def __init__(self, m, qrange, erange, R=None, stat='f', eps=5e-2, d=6, 
-            propagator='Th', Gtab=None):
+            propagator=1, Gtab=None):
         self.m = m
         self.eps = eps
         self.R = None
@@ -198,10 +198,15 @@ class Particle:
     def G0(self, E, q):
         # if self.propagator == 'Th':
         if self.stat == 'f':
-            return 1 / (E - self.om0(q) + 1j*self.eps)
+            # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
+            return 1 / (E - self.om0(q) + 1j*self.eps)#*(E/2)**2)
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
-            return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps * E)
+            if self.propagator == 1:
+                # return 1 / (E - self.om0(q) + 1j*self.eps*E)
+                return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
+            elif self.propagator == 2:
+                return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps*np.sign(E))
         else:
             raise
 
@@ -211,7 +216,7 @@ class Particle:
 
 class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
-                 Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=3, 
+                 Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1):
         self.p_i = p_i
         self.p_j = p_j
@@ -273,7 +278,7 @@ class Channel:
         return 1/(np.exp(e/T) + 1)
 
     def nb(self, e, T):
-        res = np.real(1/(np.exp((e + 1e-13j)/T) - 1))
+        res = np.real(1/(np.exp((e + 1e-15j)/T) - 1))
         # res[e == 0] = 10
         return res
 
