@@ -5,7 +5,6 @@
 #include "Interpolator.h"
 #include "IntGSL.h"
 #include <complex>
-
 // Python code:
 // def x_integrand(E, p, k, x):
 //     k2 = k**2 + p**2 + 2*k*p*x

@@ -7,6 +7,7 @@
 #include <math.h>
 #include <vector>
 
+
 double x_integrand(double x, double k, double E, double p, Interpolator2D & iImT){
     double k2 = k*k + p*p + 2*p*k*x;
     if (k2 < 0) return 0;
@@ -788,3 +789,4 @@ double E_integral_QQ(double om, double p, double T, Interpolator2D & iImG){
     integ_Om.integrate(&i_func_e, -5, 5, res, err);
     return res;
 }
+
