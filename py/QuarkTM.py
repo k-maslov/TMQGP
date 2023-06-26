@@ -200,7 +200,7 @@ class Particle:
         # if self.propagator == 'Th':
         if self.stat == 'f':
             # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
-            return 1 / (E - self.om0(q) + 1j*self.eps)#*(E/2)**2)
+            return 1 / (E - self.om0(q) + 1j*self.eps*(E/2)**2)
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
             if self.propagator == 1:

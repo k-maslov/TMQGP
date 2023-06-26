@@ -41,9 +41,9 @@ double k_integral(double E, double om, double p, Interpolator2D & iImT, Interpol
 }
 
 double n_f(double om, double T){
-    if (om < 0){
-        return - n_f(-om, T);
-    }
+    // if (om < 0){
+    //     return - n_f(-om, T);
+    // }
     return 1/(exp(om/T) + 1);
 }
 
@@ -367,41 +367,54 @@ double sigma_bb3(double om, double p, double T, Interpolator2D & iImT, Interpola
     return res;
 }
 
+double sigma_integrand_bf(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG){
+    double res = k_integral_cm2(omp, om, p, iImT, iImG) * (n_f(omp, T) - n_f(omp + om, T));
+    return res;
+}
+
 
 double sigma_bf(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     if (om < 0) return 0;
     gsl_set_error_handler_off();
-    funct i_func_e = [&](double e) -> double {
-        double res = k_integral_cm(e, om, p, iImT, iImG) * (n_f(e - om, T) - n_f(e, T));
-        return res;
+    funct i_func_e = [&](double omp) -> double {
+        return sigma_integrand_bf(omp, om, p, T, iImT, iImG);
     };
 
     integ_E.integrate(&i_func_e, -5, 5, res, err);
     return res;
 }
 
+double sigma_integrand_fb(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG){
+    double res = k_integral_cm2(omp, om, p, iImT, iImG) * (n_b(omp, T) + n_f(omp + om, T));
+    return res;
+}
+
 double sigma_fb(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2;
     gsl_set_error_handler_off();
-    funct i_func_e = [&](double e) -> double {
-        double res = k_integral_cm(e, om, p, iImT, iImG) * (n_b(e - om, T) + n_f(e, T));
-        return res;
+    funct i_func_e = [&](double omp) -> double {
+        return sigma_integrand_fb(omp, om, p, T, iImT, iImG);
     };
 
 
-    double eps = 1e-3;
-    if (om > 0){
-        integ_E.integrate(&i_func_e, 0, om-eps, res2, err);
-        integ_E.integrate(&i_func_e, om, 10, res, err2);
-        // res2 = 0;
-    }
-    else{
-        integ_E.integrate(&i_func_e, 0, 10, res, err);
-        res2 = 0;
-    }
+    // double eps = 1e-3;
+    // if (om > 0){
+    //     integ_E.integrate(&i_func_e, 0, om-eps, res2, err);
+    //     integ_E.integrate(&i_func_e, om, 10, res, err2);
+    //     // res2 = 0;
+    // }
+    // else{
+    //     integ_E.integrate(&i_func_e, 0, 10, res, err);
+    //     res2 = 0;
+    // }
     
-    return res + res2;
+    // return res + res2;
+
+    integ_E.integrate(&i_func_e, -5, 5, res, err);
+    return res;
 }
 
 double sigma_ff(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){

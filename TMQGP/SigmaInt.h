@@ -125,6 +125,12 @@ double k_integral_QQ_func(double k, double E, double om, double p, Interpolator2
 double sigma_integrand_bb(double omp, double om, double p, double T, Interpolator2D & iImT, 
                         Interpolator2D & iImG);
 
+double sigma_integrand_bf(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG);
+
+double sigma_integrand_fb(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG);
+
 ////////////////////////// Phi-functional stuff ////////////////////////////////
 
 std::complex<double> x_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
