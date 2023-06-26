@@ -157,28 +157,31 @@ double E_integral_cm(double om, double p, double T, Interpolator2D & iImT, Inter
     return res;
 }
 
-
+double sigma_integrand_bb(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG){
+    double res = k_integral_cm2(omp, om, p, iImT, iImG) * (n_b(omp, T) - n_b(omp + om, T));
+    return res;
+}
 
 double sigma_bb(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err, res2, err2;
     gsl_set_error_handler_off();
 
     funct i_func_e = [&](double e) -> double {
-        double res = k_integral_cm(e, om, p, iImT, iImG) * (n_b(e - om, T) - n_b(e, T));
-        return res;
+        return sigma_integrand_bb(e, om, p, T, iImT, iImG);
     };
 
     double eps = 1e-2;
-    if (om > 0){
+    // if (om > 0){
         // integ_E.integrate(&i_func_e, 0, om-eps, res, err);
-        integ_E.integrate(&i_func_e, om, 5, res, err2);
+        integ_E.integrate(&i_func_e, -5, 5, res, err2);
         res2 = 0;
-    }
-    else{
-        return 0;
-        // integ_E.integrate(&i_func_e, 0, 10, res, err);
-        // res2 = 0;
-    }
+    // }
+    // else{
+    //     return 0;
+    //     // integ_E.integrate(&i_func_e, 0, 10, res, err);
+    //     // res2 = 0;
+    // }
     // integ_E.integrate(&i_func_e, om, 10, res, err);
     
 
@@ -358,10 +361,10 @@ double sigma_bb3(double om, double p, double T, Interpolator2D & iImT, Interpola
         l2 = 0;
     }
 
-    integ_E.integrate(&i_func_e, 0, om - eps, res, err2);
-    integ_E.integrate(&i_func_e, om + eps, 5, res2, err2);
+    integ_E.integrate(&i_func_e, -5, 5, res, err2);
+    // integ_E.integrate(&i_func_e, om + eps, 5, res2, err2);
     // integ_E.integrate(&i_func_e, l2 + eps, 5, res3, err2);
-    return res + res2;
+    return res;
 }
 
 
@@ -480,6 +483,29 @@ std::complex<double> T_solve(double E, double q, double q1, double T, Interpolat
     return (-sign*iVK(q) * iVK(q1) / (1.0 - res));
 }
 
+std::complex<double> x_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
+            double Lambda, int sign){
+    double res1, res1_l, res1_r, res2, err;
+
+    gsl_set_error_handler_off();
+    funct i_func_re = [&](double k) -> double {
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E); 
+    };
+
+    funct i_func_im = [&](double k) -> double {
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E); 
+    };
+
+    // IntGSL<std::function<double(double)>> integ;
+
+    integ_T.integrate(&i_func_re, 1e-3, Lambda, res1, err);
+    integ_T.integrate(&i_func_im, 1e-3, Lambda, res2, err);
+
+    // cout << res1 << "  " << res2 << endl;
+    std::complex<double> res(res1, res2);
+    return res;
+}
+
 std::complex<double> T_solve_test(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             IntGSL<funct> integ_T, double Lambda){
     double res1, res1_l, res1_r, res2, err;
@@ -508,14 +534,14 @@ std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpo
     gsl_set_error_handler_off();
     funct i_func_re = [&](double k) -> double {
         double omk = iOmK(k); 
-        return 2/M_PI * k*k * omk*omk * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
-        // return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
+        // return 2/M_PI * k*k * omk*omk * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
+        return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
     };
 
     funct i_func_im = [&](double k) -> double {
         double omk = iOmK(k); 
-        return 2/M_PI * k*k * omk*omk* -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
-        // return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
+        // return 2/M_PI * k*k * omk*omk* -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
+        return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
     };
 
     // IntGSL<std::function<double(double)>> integ;

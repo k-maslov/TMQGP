@@ -158,7 +158,7 @@ class Runner:
 
 class Particle:
     def __init__(self, m, qrange, erange, R=None, stat='f', eps=5e-2, d=6, 
-            propagator=1, Gtab=None):
+            propagator=3, Gtab=None):
         self.m = m
         self.eps = eps
         self.R = None
@@ -189,7 +189,8 @@ class Particle:
         if Rtab.shape[0] != len(self.erange) or Rtab.shape[1] != len(self.qrange):
             raise
         self.Rtab = Rtab
-        self.R = tm.Interpolator2D(self.qrange, self.erange, Rtab)
+        self.R = tm.Interpolator2D(self.qrange, self.erange, 
+        np.ascontiguousarray(Rtab))
 
         
     def om0(self, q):
@@ -207,6 +208,11 @@ class Particle:
                 return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
             elif self.propagator == 2:
                 return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps*np.sign(E))
+            elif self.propagator == 3:
+                res = 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3)) * (E>0)
+                res += -1 / (-E - self.om0(q) + 1j*self.eps*(np.tanh(-E/0.5)**3)) * (E<0)
+                return res  
+                    
         else:
             raise
 
@@ -224,7 +230,7 @@ class Channel:
         
         if p_i.stat == 'b' and p_j.stat == 'b':
             if calc == 1:
-                self.func = tm.sigma_bb3
+                self.func = tm.sigma_bb
             elif calc == 2:
                 self.func = tm.sigma_bb2
             elif calc == 3:
