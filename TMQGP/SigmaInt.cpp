@@ -376,7 +376,7 @@ double sigma_integrand_bf(double omp, double om, double p, double T, Interpolato
 
 double sigma_bf(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
-    if (om < 0) return 0;
+    // if (om < 0) return 0;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double omp) -> double {
         return sigma_integrand_bf(omp, om, p, T, iImT, iImG);

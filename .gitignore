@@ -7,3 +7,5 @@ bin/
 .vscode/
 *-checkpoint.ipynb
 py/__pycache__/QuarkTM.cpython-311.pyc
+*.pdf
+*.png

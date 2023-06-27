@@ -200,7 +200,7 @@ class Particle:
         # if self.propagator == 'Th':
         if self.stat == 'f':
             # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
-            return 1 / (E - self.om0(q) + 1j*self.eps*(E/2)**2)
+            return 1 / (E - self.om0(q) + 1j*self.eps*(E))
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
             if self.propagator == 1:
@@ -368,9 +368,28 @@ class Channel:
             self.ImS = ress_cm
         else:
             ress_cm = np.array([self.get_S_q(q) for q in tqdm.tqdm(self.qrange)])
+            
             self.ImS = ress_cm.transpose()
 
+        # Antisymmetrize the BF case 
+
+        if self.p_i.stat == 'b' and self.p_j.stat == 'f':
+            ress_new = []
+            for res in ress_cm.transpose():
+                iImSigma = tm.Interpolator(self.erange, np.ascontiguousarray(res), 'cubic')
+                ImS_new = []
+                for e in self.erange:
+                    if e < 0:
+                        ImS_new += [-iImSigma(-e)]
+                    else:
+                        ImS_new += [iImSigma(e)]
+                ress_new += [ImS_new]
+            
+            ress_cm = np.array(ress_new).transpose()
+            self.ImS = ress_cm
+
         
+        # Calculate the real part
 
         ReSigmas = []
 
