@@ -29,12 +29,21 @@ double full_int(double omega, double m, double eps);
 //
 //
 // THERMAL CALCULATIONS FUNCTIONS
-double Fint_integrand(double omega,double omega_1, double p, double p_1, double T, double m, double eps);
-
-double FInt_no_inter_t(double omega, double p, double T, double m, double eps);
-
-double full_int_t(double omega, double T, double m, double eps);
 
 double FInt_t(double omega, double p, double T, Interpolator2D & ImG);
 
+
+double F_p(double omega,double q,double T,double m,double eps, double lambda = 0.651);
+
+double F_s(double omega,double q,double T,double m,double eps, double lambda = 0.651);
+
+//double Fp_real(double omega, double q, double T, double m , double eps);
+
+double Re_sig(double omega,double lambda4, Interpolator & iImS);
+//double full_integrand_t(double p0, double omega, double p, double T, double m, double eps);
+
+
+//double imag_pi_inter(double omega, double T, double lambda4, Interpolator2D & ImG, Interpolator2D & ImG1 );
+
+double imag_pi_inter1(double omega,double T,double m, double lambda, Interpolator2D & ImG, Interpolator2D & ImG1, Interpolator2D & ImG2);
 #endif

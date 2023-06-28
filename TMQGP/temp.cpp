@@ -59,29 +59,24 @@ double Integrand(double omega, double p0, double p, double m, double eps){
 }
 
 
-
-
-
 double full_int_using_interpo(double omega, double m, Interpolator2D & ImG){
     Int_gsl_adaptive inte_p0;
     double resu_p0, erro_p0;
-    gsl_set_error_handler_off();
+    //gsl_set_error_handler_off();
     funct p0_lambda = [&] (double p){
         funct p_lambda = [&] (double p0){
             return imag(-12 * ImG(p, p0 + omega/2) * ImG(p, p0 - omega/2)* p*p * complex<double> (0,1)); //* (p*p - p0*p0 +(omega*omega/4) +m*m)*(tanh((p0-omega)/2)/2*T + tanh((p0+omega)/2*T))/ (4*3.14*3.14*3.14));
         };
         Int_gsl_adaptive inte_p;
         double resu_p, erro_p;
-        inte_p.integrate(&p_lambda, -1.641, 1.641, resu_p, erro_p); // limit = 1.641 for m= 0.5
+        inte_p.integrate(&p_lambda, 0, 0.695, resu_p, erro_p); // limit = 1.641 for m= 0.5
         return resu_p;
 
     };
-    inte_p0.integrate(&p0_lambda, 0, 0.695, resu_p0, erro_p0);
+    inte_p0.integrate(&p0_lambda, -1.641, 1.641, resu_p0, erro_p0);
     return resu_p0;
 
 }
-
-
 
 double p_integral(double omega, double p0, double m, double eps){
     funct i_lambda_p = [&] (double p){
@@ -132,44 +127,6 @@ double FInt_no_inter(double omega, double p, double m, double eps){
  // / / // /// // 
  // THERMAL CALCULATIONS FUNCTIONS:
 
-
-double Fint_integrand(double omega,double omega_1, double p, double p_1, double T, double m, double eps){
-    double sign_o = (omega - omega_1 >= 0) ? 1.0 : -1.0;
-    double sign_o1 = (omega_1 >= 0) ? 1.0 : -1.0;
-         
-    return imag((tanh((omega-omega_1)/(2*T)) + tanh(omega_1/(2*T)))/(16*3.14*3.14*3.14*3.14*((omega -omega_1)*(omega -omega_1) - (p - p_1)*(p - p_1)- m*m + complex<double> (0,1)*eps*sign_o) * ((omega_1 * omega_1) - (p_1 * p_1) - m*m + complex<double> (0,1)*eps*sign_o1)));
-}
-
-
-double FInt_no_inter_t(double omega, double p, double T, double m, double eps){
-
-    gsl_set_error_handler_off();
-
-    Int_gsl_adaptive integ_a_t;
-    Int_gsl_adaptive integ_b_t;
- 
-
-    funct h_lambda_p1_t = [&] (double p_1){
-        funct h_lambda_x_t = [&] (double omega_1){
-          
-            double sign_o = (omega - omega_1 >= 0) ? 1.0 : -1.0;
-            double sign_o1 = (omega_1 >= 0) ? 1.0 : -1.0;
-         
-            return imag(p_1 * p_1 *(tanh((omega-omega_1)/(2*T)) + tanh(omega_1/(2*T)))/(4*3.14*3.14*3.14*((omega -omega_1)*(omega -omega_1) - (p - p_1)*(p - p_1)- m*m + complex<double> (0,1)*eps*sign_o) * ((omega_1 * omega_1) - (p_1 * p_1) - m*m + complex<double> (0,1)*eps*sign_o1)));
-            //return (tanh((omega-omega_1)/(2*T)) + tanh(omega_1/(2*T)))/(((omega -omega_1)*(omega -omega_1) - (p - p_1)*(p - p_1)- m*m + complex<double> (0,1)*eps) * ((omega_1 * omega_1) - (p_1 * p_1) - m*m + complex<double> (0,1)*eps))); 
-        };
-        double res_a, err_a;
-        integ_b_t.integrate(&h_lambda_x_t,-1.641, 1.641, res_a, err_a);
-        return res_a;
-
-    };
-    gsl_set_error_handler_off();
-    
-    double res_c, err_c;
-    integ_a_t.integrate(&h_lambda_p1_t, 0, 0.695, res_c, err_c);
-    return res_c;
-}
-
 double FInt_t(double omega, double p, double T, Interpolator2D & ImG){
 
     gsl_set_error_handler_off();
@@ -194,38 +151,12 @@ double FInt_t(double omega, double p, double T, Interpolator2D & ImG){
     integ_1_t.integrate(&i_lambda_p1_t, 0, 0.695, res_p1, err_p1);
     return res_p1;
     }
-
-
-double full_int_t(double omega, double T, double m, double eps){
-    Int_gsl_adaptive inte_t;
-    double resu_t, erro_t;
-    gsl_set_error_handler_off();
-    funct h_lambda_t = [&] (double p){
-        funct h_lambda1_t = [&] (double p0){
-            double sign_p0 = (p0 + omega >= 0) ? 1.0 : -1.0;
-            double sign_p0_omega = (p0 - omega >= 0) ? 1.0 : -1.0;
-//            return  imag(-4*3*p*p* complex<double> (0,1)*(p*p - p0*p0 +(omega*omega/4) +m*m)/(4*3.14*3.14*3.14*(p0*p0 - p0*omega + omega*omega/4 - p*p - m*m + complex<double> (0,1)*eps)*(p0*p0 + p0*omega + omega*omega/4 - p*p - m*m + complex<double> (0,1)*eps)));
-  //          };        
-//           return imag(-4*3*p*p* complex<double> (0,1)*(p*p - p0*p0 +(omega*omega/4) +m*m)/(4*3.14*3.14*3.14*(( (p0-omega/2.0)*(p0-omega/2.0) - p*p - m*m) + complex<double> (0,1)*eps)*((p0+(omega/2))*(p0+(omega/2)) - p*p - m*m + complex<double> (0,1)*eps)));
-//        };
-//        IntGSL<funct> inte2;
-        return  imag(-4*2*3*p*p* complex<double> (0,1)*(p*p - p0*p0 +(omega*omega/4) +m*m)*(tanh((p0-(omega/2))/2/T) + tanh((p0+omega/2)/2/T))/(4*M_PI*M_PI*M_PI*(p0*p0 - p0*omega + omega*omega/4 - p*p - m*m + complex<double> (0,1)*eps*sign_p0_omega)*(p0*p0 + p0*omega + omega*omega/4 - p*p - m*m + complex<double> (0,1)*eps*sign_p0)));
-        };
-        Int_gsl_adaptive inte2_t;
-        double resu1_t, erro1_t;
-        inte2_t.integrate(&h_lambda1_t, -1.641, 1.641, resu1_t, erro1_t); // limit = 1.641 for m= 0.5
-        return resu1_t;
-    };
-    inte_t.integrate(&h_lambda_t, 0, 0.695, resu_t, erro_t);
-    return resu_t;
-}
-// Plot integrand as a function of p0 for several omegas, below 1, around 1 and above 1. 
-
-
-
-
+//
+//
 // Plotting the integral 6.31 from Hatsuda 
-double Pi_alpha(double p0, double omega,double p,double q,double T,double m,double eps){
+
+
+double F_p(double omega,double q,double T,double m,double eps, double lambda){
     Int_gsl_adaptive int_t;
     double resu_t, erro_t;
     gsl_set_error_handler_off();
@@ -234,15 +165,123 @@ double Pi_alpha(double p0, double omega,double p,double q,double T,double m,doub
             int N_c = 3;
             double sign_p01 = (p0 + omega >= 0) ? 1.0 : -1.0;
             double sign_p02 = (p0 - omega >= 0) ? 1.0 : -1.0;
-            complex<double> coeff1 = p * p * tanh(p0/2/T);
-            complex<double> green1 = (p0 + omega)*(p0 + omega) - (p+q)*(p+q) - m*m + complex<double>(0,1) *eps ; 
-            complex<double> green2 = p0*p0 - p*p - m*m + complex<double>(0,1) * eps;
-            complex<double> green3 = (p0 - omega)*(p0 - omega) - (p - q)*(p - q) - m*m + complex<double>(0,1) *eps;
+            double sign_p03 = (p0  >= 0) ? 1.0 : -1.0;
+            complex<double> coeff1 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m - p0*p0 + p*p - p0*omega)/8/M_PI/M_PI/M_PI ;
+            complex<double> coeff2 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m - p0*p0 + p*p + p0*omega)/8/M_PI/M_PI/M_PI ; //10.08 * 10.08 *
+            complex<double> green1 = complex<double>(1,0)/((p0 + omega)*(p0 + omega) - (p+q)*(p+q) - m*m + complex<double>(0,1) *eps* sign_p01) ; 
+            complex<double> green2 = complex<double>(1,0)/(p0*p0 - p*p - m*m + complex<double>(0,1) * eps * sign_p03);
+            complex<double> green3 = complex<double>(1,0)/((p0 - omega)*(p0 - omega) - (p - q)*(p - q) - m*m - complex<double>(0,1) *eps * sign_p02);
 
-            return N_c 
-        }
-    }
+           // return real(coeff1 * green1 * imag(green2) + coeff2*imag(green2) * green3);
+            return imag(coeff1 * green1 * imag(green2) + coeff2*imag(green2) * green3);
+        };
+        Int_gsl_adaptive inte2_t;
+        double result, error;
+        inte2_t.integrate(&h_lambda1_t, -sqrt(4 * (lambda*lambda + m*m)),sqrt(4 * (lambda*lambda + m*m)) , result, error); // limit = 1.641 for m= 0.5
+        return result;
+    };
+    int_t.integrate(&h_lambda_t, 0, lambda, resu_t, erro_t);
+    return resu_t;
+}
+// Change lambda value, m and use them as argument, put integration
+// Do the same for sigma
 
+double F_s(double omega,double q,double T,double m,double eps, double lambda){
+    Int_gsl_adaptive int_t;
+    double resu_t, erro_t;
+    gsl_set_error_handler_off();
+    funct h_lambda_t = [&] (double p){
+        funct h_lambda1_t = [&] (double p0){
+            double sign_p01 = (p0 + omega >= 0) ? 1.0 : -1.0;
+            double sign_p02 = (p0 - omega >= 0) ? 1.0 : -1.0;
+            double sign_p03 = (p0  >= 0) ? 1.0 : -1.0;
+            complex<double> coeff1 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m + p0*p0 - p*p + p0*omega)/8/M_PI/M_PI/M_PI ;
+            complex<double> coeff2 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m + p0*p0 - p*p - p0*omega)/8/M_PI/M_PI/M_PI ; //10.08 * 10.08 *
+            complex<double> green1 = complex<double>(1,0)/((p0 + omega)*(p0 + omega) - (p)*(p) - m*m + complex<double>(0,1) *eps* sign_p01) ; 
+            complex<double> green2 = complex<double>(1,0)/(p0*p0 - p*p - m*m + complex<double>(0,1) * eps * sign_p03);
+            complex<double> green3 = complex<double>(1,0)/((p0 - omega)*(p0 - omega) - (p)*(p) - m*m - complex<double>(0,1) *eps * sign_p02);
+
+            //return real(coeff1*(real(green1) * imag(green2) + imag(green2) * real(green3))); 
+            return imag(coeff1 * green1 * imag(green2) + coeff2*imag(green2) * green3);
+        };
+        Int_gsl_adaptive inte2_t;
+        double result, error;
+        inte2_t.integrate(&h_lambda1_t, -sqrt(4 * (lambda*lambda + m*m)),sqrt(4 * (lambda*lambda + m*m)) , result, error); // limit = 1.641 for m= 0.5
+        return result;
+    };
+    int_t.integrate(&h_lambda_t, 0, lambda, resu_t, erro_t);
+    return resu_t;
+}
+// double Fp_real(double omega, double q, double T, double m , double eps){
+//     gsl_set_error_handler_off();
+//     double res, err;
+
+//     funct i_func = [&] (double omega1) -> double{
+        
+//     };
+
+//     inter cauchy.integrate(&i_func, -3, 3, omega, res, err );
+//     return res;
+// }
+double Re_sig(double omega, double lambda4,Interpolator & iImS){
+   // gsl_set_error_handler_off();
+    double res, err;
+
+    funct i_func = [&] (double omega1) -> double{
+        return iImS(omega1) / M_PI;
+    };
+    Int_gsl_cauchy inte_c;
+    inte_c.integrate(&i_func, -lambda4 , lambda4, omega, res, err);
+    
+    return res;
 }
 
+//
+//
+// HATSUDA CALCULATIONS USING INTERPOLATOR
+//
+//
+// double imag_pi_inter(double omega, double T, double lambda4,double m,  Interpolator2D & ImG, Interpolator2D & ImG1 ){
+//     double res, err;
+//     gsl_set_error_handler_off();
+//     Int_gsl_adaptive integ_0; 
+//     funct i_func_p0 = [&] (double p0) -> double {
+//         funct i_func_p = [&] (double p) -> double{
+//             complex<double> coeff1 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m + p0*p0 - p*p + p0*omega)/8/M_PI/M_PI/M_PI ;
+//             complex<double> coeff2 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m + p0*p0 - p*p - p0*omega)/8/M_PI/M_PI/M_PI ;
 
+//             return imag(coeff1 * ImG(p, p0 + omega) * imag(ImG(p, p0)) + coeff2 * ImG(p , p0) * imag(ImG1(p, p0 - omega)));
+            
+//         };
+//         double res1, err1;
+//         gsl_set_error_handler_off();
+//         Int_gsl_adaptive integ_j;
+//         integ_j.integrate(&i_func_p, 0, lambda4, res1, err1); 
+//         return res1;   
+
+//     }
+//     integ_0.integrate(&i_func_p0, 0, lambda4, res1, err1); 
+//     return res;
+    
+// }
+
+double imag_pi_inter1(double omega,double T,double m, double lambda, Interpolator2D & ImG, Interpolator2D & ImG1, Interpolator2D & ImG2){
+    Int_gsl_adaptive int_t;
+    double resu_t, erro_t;
+    gsl_set_error_handler_off();
+    funct h_lambda_t = [&] (double p0){
+        funct h_lambda1_t = [&] (double p){
+
+            complex<double> coeff1 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m - p0*p0 + p*p - p0*omega)/8/M_PI/M_PI/M_PI ;
+            complex<double> coeff2 = 4 * 4 * 3 * p * p * tanh(p0/2/T) *  (m*m - p0*p0 + p*p + p0*omega)/8/M_PI/M_PI/M_PI ;
+            //return ImG(p,p0) * ImG(p, p0+omega);
+            return imag(coeff1 * ImG(p, p0 + omega) * imag(ImG2(p, p0))); // + coeff2 * ImG2(p , p0) * imag(ImG1(p, p0 - omega)));
+        };
+        Int_gsl_adaptive inte2_t;
+        double result, error;
+        inte2_t.integrate(&h_lambda1_t, 0 , lambda , result, error); // limit = 1.641 for m= 0.5
+        return result;
+    };
+    int_t.integrate(&h_lambda_t, -sqrt(4 * (lambda*lambda + m*m)), sqrt(4 * (lambda*lambda + m*m)), resu_t, erro_t);
+    return resu_t;
+}
