@@ -31,6 +31,7 @@ IntGSL<std::function<double(double)>> integ_k;
 IntGSL<std::function<double(double)>> integ_E;
 
 Int_gsl_adaptive integ_Om;
+Int_gsl_adaptive integ_Om2;
 IntGSL<std::function<double(double)>> integ_T;
 // Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
 Int_gsl_cauchy inter_cauchy;
@@ -98,10 +99,23 @@ double OmS_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & 
 double OmS_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
                                         Interpolator2D & iImS, Interpolator2D & iReS);
 
+double OmS_B_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+
+double OmS_B(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+
 std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5, int sign=1);
 std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5, int sign=1);
+
+double OmS2_F_om_int2(double omp, double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+double OmS2_F_om_int1(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+double OmS2_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
 
 
 double n_f(double om, double T);

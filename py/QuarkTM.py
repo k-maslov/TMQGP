@@ -223,11 +223,13 @@ class Particle:
 class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
                  Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
-                 do_rel=1, parallel=-1):
+                 do_rel=1, parallel=-1,
+                 test_potential=0):
         self.p_i = p_i
         self.p_j = p_j
         
-        
+        self.test_potential = test_potential
+
         if p_i.stat == 'b' and p_j.stat == 'b':
             if calc == 1:
                 self.func = tm.sigma_bb
@@ -270,7 +272,7 @@ class Channel:
         
     def v(self, q, do_rel=1):
         mult = 1 / (1 + self.screen*self.T**2)
-
+        
         ### Relativistic correction to the vertex: R_S(q, q') from Liu&Rapp
         rel_factor = 1
         if do_rel:
@@ -343,7 +345,7 @@ class Channel:
     def G20(self, E, k):
         return 1/2/(E/2 - self.p_i.om0(k) + 1j*self.p_i.eps)
     
-    def populate_T(self):
+    def populate_T_old(self):
         # if self.p_i.stat == 'b' and self.p_j.stat == 'b':
         self.TM = np.array([[self.Tfunc(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
             int(np.sign(self.G))) for k in self.qrange]
@@ -354,6 +356,19 @@ class Channel:
 
         self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
         
+    def populate_T(self):
+        # if self.p_i.stat == 'b' and self.p_j.stat == 'b':
+        self.X = np.array([[tm.x_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
+            int(np.sign(self.G))) for k in self.qrange]
+            for E in tqdm.tqdm(self.erange)])
+        # else:
+        #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
+        #         for E in tqdm.tqdm(self.erange)])
+
+        v1v2 = self.v(self.qrange)**2
+        self.TM = - v1v2 / (1 - self.X)
+
+        self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
         
     def get_S_q(self, q):
         res = pipe(self.erange) | p[lambda z: self.func(z, q, self.T, self.iImT,

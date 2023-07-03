@@ -753,6 +753,61 @@ double OmS_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
     return res;
 }
 
+double OmS2_F_om_int2(double omp, double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    funct func = [&] (double om) -> double{
+        return real(1./(omp - om + std::complex<double>(0, 1)*1e-3))*(n_f(om, T) - n_f(omp, T)) * (iImG(q, om) * iImS(q, omp)) / M_PI;
+    };
+
+    double res, err;
+    integ_Om2.integrate(&func, 0, 5, res, err);
+    return res;
+}
+
+double OmS2_F_om_int1(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    funct func = [&] (double omp) -> double{
+        return OmS2_F_om_int2(omp, q, T, iImG, iReG, iImS, iReS) / M_PI;
+    };
+
+    double res, err;
+    integ_Om.integrate(&func, 0, 5, res, err);
+    return res;
+}
+
+double OmS2_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    funct func = [&] (double q) -> double{
+        return q*q /2/M_PI/M_PI * OmS2_F_om_int1(q, T, iImG, iReG, iImS, iReS);
+    };
+
+    double res, err;
+    integ_k.integrate(&func, 0, 5, res, err);
+    return res;
+}
+
+double OmS_B_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    funct func = [&] (double om) -> double{
+        return n_b(om, T) * (iImG(q, om) * iReS(q, om) + iReG(q, om) * iImS(q, om)) / M_PI;
+    };
+
+    double res, err;
+    integ_Om.integrate(&func, 0, 5, res, err);
+    return res;
+}
+
+double OmS_B(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    funct func = [&] (double q) -> double{
+        return q*q /2/M_PI/M_PI * OmS_B_om_int(q, T, iImG, iReG, iImS, iReS);
+    };
+
+    double res, err;
+    integ_k.integrate(&func, 0, 5, res, err);
+    return res;
+}
+
 
 ///////// Trying interpolating the denominator of quantites of interest
 
