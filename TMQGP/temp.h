@@ -6,6 +6,11 @@
 #include "IntGSL.h"
 #include <complex>
 
+
+
+IntGSL<std::function<double(double)>> integ_kt;
+IntGSL<std::function<double(double)>> integ_Et;
+
 // VACUUM CALCULATIONS FUNCTIONS
 
 double p0_integral(double omega, double p, double m, double eps);
@@ -39,11 +44,10 @@ double F_s(double omega,double q,double T,double m,double eps, double lambda = 0
 
 //double Fp_real(double omega, double q, double T, double m , double eps);
 
-double Re_sig(double omega,double lambda4, Interpolator & iImS);
+double Re_meson(double omega,double lambda4, Interpolator & iImS);
 //double full_integrand_t(double p0, double omega, double p, double T, double m, double eps);
 
 
-//double imag_pi_inter(double omega, double T, double lambda4, Interpolator2D & ImG, Interpolator2D & ImG1 );
 
-double imag_pi_inter1(double omega,double T,double m, double lambda, Interpolator2D & ImG, Interpolator2D & ImG1, Interpolator2D & ImG2);
+double imag_pi_inter1( double omega,double T,double m, double lambda, Interpolator2D & ImG);
 #endif
