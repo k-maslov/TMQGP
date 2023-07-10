@@ -256,6 +256,9 @@ class Channel:
         else:
             raise
             
+
+        if self.test_potential:
+            self.Tfunc = tm.T_solve_explicit
         self.ds = ds
         self.da = da
         self.erange = p_i.erange ### TODO: dirty
@@ -272,7 +275,7 @@ class Channel:
         
     def v(self, q, do_rel=1):
         mult = 1 / (1 + self.screen*self.T**2)
-        
+
         ### Relativistic correction to the vertex: R_S(q, q') from Liu&Rapp
         rel_factor = 1
         if do_rel:
@@ -358,15 +361,26 @@ class Channel:
         
     def populate_T(self):
         # if self.p_i.stat == 'b' and self.p_j.stat == 'b':
-        self.X = np.array([[tm.x_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
-            int(np.sign(self.G))) for k in self.qrange]
-            for E in tqdm.tqdm(self.erange)])
+
+        if not self.test_potential:
+            self.X = np.array([[tm.x_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
+                int(np.sign(self.G))) for k in self.qrange]
+                for E in tqdm.tqdm(self.erange)])
         # else:
         #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
         #         for E in tqdm.tqdm(self.erange)])
+            v1v2 = np.sign(self.G)*self.v(self.qrange)**2
+            self.TM = - v1v2 / (1 - self.X)
 
-        v1v2 = self.v(self.qrange)**2
-        self.TM = - v1v2 / (1 - self.X)
+        else:
+            print('XXXX')
+            self.X = np.array([[tm.J_solve_explicit(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
+                int(np.sign(self.G))) for k in self.qrange]
+                for E in tqdm.tqdm(self.erange)])
+
+            v1v2 = self.v(self.qrange)**2 * np.sign(self.G)
+            self.TM = - v1v2 / (np.array([self.erange**2 for q in self.qrange]).transpose() - 0.7**2 - self.X)
+
 
         self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
         

@@ -496,6 +496,56 @@ std::complex<double> T_solve(double E, double q, double q1, double T, Interpolat
     return (-sign*iVK(q) * iVK(q1) / (1.0 - res));
 }
 
+
+std::complex<double> T_solve_explicit(
+    double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
+            double Lambda, int sign){
+    double res1, res1_l, res1_r, res2, err;
+
+    gsl_set_error_handler_off();
+    funct i_func_re = [&](double k) -> double {
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E); 
+    };
+
+    funct i_func_im = [&](double k) -> double {
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E);
+    };
+
+    // IntGSL<std::function<double(double)>> integ;
+
+    integ_T.integrate(&i_func_re, 1e-3, Lambda, res1, err);
+    integ_T.integrate(&i_func_im, 1e-3, Lambda, res2, err);
+
+    // cout << res1 << "  " << res2 << endl;
+    std::complex<double> res(res1, res2);
+    return (-sign*iVK(q) * iVK(q1) / ((E*E - pow(0.7, 2)) - res));
+}
+
+std::complex<double> J_solve_explicit(
+    double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
+            double Lambda, int sign){
+    double res1, res1_l, res1_r, res2, err;
+
+    gsl_set_error_handler_off();
+    funct i_func_re = [&](double k) -> double {
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E);
+    };
+
+    funct i_func_im = [&](double k) -> double {
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E);
+    };
+
+    // IntGSL<std::function<double(double)>> integ;
+
+    integ_T.integrate(&i_func_re, 1e-3, Lambda, res1, err);
+    integ_T.integrate(&i_func_im, 1e-3, Lambda, res2, err);
+
+    // cout << res1 << "  " << res2 << endl;
+    std::complex<double> res(res1, res2);
+    return res;
+}
+
+
 std::complex<double> x_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda, int sign){
     double res1, res1_l, res1_r, res2, err;
@@ -801,6 +851,29 @@ double OmS_B(double T, Interpolator2D & iImG, Interpolator2D & iReG,
                                         Interpolator2D & iImS, Interpolator2D & iReS){
     funct func = [&] (double q) -> double{
         return q*q /2/M_PI/M_PI * OmS_B_om_int(q, T, iImG, iReG, iImS, iReS);
+    };
+
+    double res, err;
+    integ_k.integrate(&func, 0, 5, res, err);
+    return res;
+}
+
+double OmS_B_qfirst_q_int(double om, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    
+    funct func = [&] (double q) -> double{
+        return q*q /2/M_PI/M_PI * (iImG(q, om) * iReS(q, om) + iReG(q, om) * iImS(q, om));
+    };
+
+    double res, err;
+    integ_Om.integrate(&func, -5, 5, res, err);
+    return res;
+}
+
+double OmS_B_qfirst(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS){
+    funct func = [&] (double om) -> double{
+        return n_b(om, T) * OmS_B_qfirst_q_int(om, T, iImG, iReG, iImS, iReS) / M_PI;
     };
 
     double res, err;
