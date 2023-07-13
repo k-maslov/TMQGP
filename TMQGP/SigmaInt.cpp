@@ -552,11 +552,11 @@ std::complex<double> x_solve(double E, double q, double q1, double T, Interpolat
 
     gsl_set_error_handler_off();
     funct i_func_re = [&](double k) -> double {
-        return 1/M_PI/2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E); 
+        return 2/M_PI* k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E); 
     };
 
     funct i_func_im = [&](double k) -> double {
-        return 1/M_PI/2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E); 
+        return 2/M_PI* k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E); 
     };
 
     // IntGSL<std::function<double(double)>> integ;
