@@ -247,7 +247,7 @@ class Channel:
             self.Tfunc = tm.T_solve_BF
             
         elif p_i.stat == 'f' and p_j.stat == 'f':
-            self.func = tm.sigma_ff
+            self.func = tm.sigma_ff_onshell
             self.Tfunc = tm.T_solve
 
         elif p_i.stat == 'f' and p_j.stat == 'b':
@@ -370,7 +370,7 @@ class Channel:
         #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
         #         for E in tqdm.tqdm(self.erange)])
             v1v2 = np.sign(self.G)*self.v(self.qrange)**2
-            self.TM = - v1v2 / (1 - self.X)
+            self.TM = - 4*np.pi*v1v2 / (1 - self.X)
 
         else:
             print('XXXX')
@@ -392,8 +392,15 @@ class Channel:
     def populate_S(self):
         # print(self.func(0, 0, self.T, self.iImT, self.p_j.R))
         if self.parallel < 2:
-            ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in self.qrange]
-                for e in tqdm.tqdm(self.erange)])
+            if self.func != tm.sigma_ff_onshell:
+                ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in self.qrange]
+                    for e in tqdm.tqdm(self.erange)])
+            else:
+                eps1 = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange))
+                eps2 = tm.Interpolator(self.qrange, self.p_j.om0(self.qrange))
+                ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R,
+                eps1, eps2) for q in self.qrange]
+                    for e in tqdm.tqdm(self.erange)])
             self.ImS = ress_cm
         else:
             ress_cm = np.array([self.get_S_q(q) for q in tqdm.tqdm(self.qrange)])

@@ -11,3 +11,5 @@ py/__pycache__/QuarkTM.cpython-311.pyc
 *.png
 *weights
 *.dat
+*.h5
+FromZhanduo/SelfE_single.h5

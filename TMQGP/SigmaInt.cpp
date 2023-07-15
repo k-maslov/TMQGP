@@ -77,8 +77,8 @@ double x_integral_cm(double E, double om, double p, double k, Interpolator2D & i
     funct i_func_x = [&](double x) -> double {
         double s = E*E - (p*p + k*k + 2*p*k*x);
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Test disabling the spacelike integration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if (s < 0)
-            return 0;
+        // if (s < 0)
+            // return 0;
         double m1sq = pow(E - om, 2) - k*k;
         double m2sq = pow(om, 2) - p*p;
         double k2 = 1/s * (pow(s - m1sq - m2sq, 2) / 4 - m1sq*m2sq);
@@ -90,7 +90,8 @@ double x_integral_cm(double E, double om, double p, double k, Interpolator2D & i
     return res;
 }
 
-double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D & iImT, Interpolator2D & iImG){
+double x_integral_cm2(double omp, double om, double p, double k, 
+        Interpolator2D & iImT, Interpolator2D & iImG, int debug){
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
@@ -101,6 +102,11 @@ double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D 
         double m1sq = pow(omp, 2) - k*k;
         double m2sq = pow(om, 2) - p*p;
         double k2 = 1/s * (pow(s - m1sq - m2sq, 2) / 4 - m1sq*m2sq);
+
+        if (debug){
+            printf("m1sq = %.2f, m2sq = %.2f, k2 = %.2f, s=%.2f", m1sq, m2sq, k2, s);
+        }
+        
         // if (om + omp < 0){
         //     return 0;
         // }
@@ -110,6 +116,65 @@ double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D 
         return res;
     };
     integ_x.integrate(&i_func_x, -1, 1, res, err);
+    return res;
+}
+
+double x_integral_cm_onshell(double omp, double om, double p, 
+            double k, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator eps1, Interpolator eps2, int debug){
+    double res, err;
+
+    funct i_func_x = [&](double x) -> double {
+        double s = pow(eps1(p) + eps2(k), 2.) - (p*p + k*k + 2*p*k*x);
+        double Ecm = (pow(omp + om, 2.) - (p*p + k*k + 2*p*k*x));
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Test disabling the spacelike integration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        if (Ecm < 0)
+            return 0;
+        Ecm = sqrt(Ecm);
+        double m1sq = pow(eps1(0), 2.);
+        double m2sq = pow(eps2(0), 2.);
+        double k2 = 1/s * (pow(s - m1sq - m2sq, 2) / 4 - m1sq*m2sq);
+        // if (om + omp < 0){
+        //     return 0;
+        // }
+        if (debug){
+            printf("m1sq = %.2f, m2sq = %.2f, k2 = %.2f, s=%.2f", m1sq, m2sq, k2, s);
+        }
+        if (k2 < 0) return 0;
+        double res = k*k * iImT(sqrt(k2), 
+                    ((om + omp > 0) - (om + omp < 0)) * Ecm)  / 4 / M_PI/ M_PI;
+        // double res = k*k * iImT(sqrt(k2), sqrt(s))  / 4 / M_PI/ M_PI;
+        return res;
+    };
+    integ_x.integrate(&i_func_x, -1, 1, res, err);
+    return res;
+}
+
+double k_integral_onshell(double omp, double om, double p, 
+Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2){
+    double res, err;
+    // gsl_set_error_handler(NULL);
+    gsl_set_error_handler_off();
+
+    // printf("Hello!!!\n");
+    funct i_func_k = [&](double k) -> double {
+        return x_integral_cm_onshell(omp, om, p, k, iImT, iImG, eps1, eps2) *  iImG(k, omp);
+    };
+    integ_k.integrate(&i_func_k, 0, 3, res, err);
+    return res;
+}
+
+double sigma_ff_onshell(double om, double p, double T, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2){
+    double res, err;
+    gsl_set_error_handler_off();
+    funct i_func_e = [&](double omp) -> double {
+        double res = k_integral_onshell(omp, om, p, iImT, iImG, eps1, eps2) *
+         (n_f(omp, T) + n_b(omp + om, T));
+        return res;
+    };
+
+    integ_E.integrate(&i_func_e, 0, 5, res, err);
     return res;
 }
 
@@ -420,12 +485,12 @@ double sigma_fb(double om, double p, double T, Interpolator2D & iImT, Interpolat
 double sigma_ff(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG){
     double res, err;
     gsl_set_error_handler_off();
-    funct i_func_e = [&](double e) -> double {
-        double res = k_integral_cm(e, om, p, iImT, iImG) * (n_f(e - om, T) + n_b(e, T));
+    funct i_func_e = [&](double omp) -> double {
+        double res = k_integral_cm2(omp, om, p, iImT, iImG) * (n_f(omp, T) + n_b(omp + om, T));
         return res;
     };
 
-    integ_E.integrate(&i_func_e, 0, 5, res, err);
+    integ_E.integrate(&i_func_e, -0, 5, res, err);
     return res;
 }
 
@@ -552,11 +617,11 @@ std::complex<double> x_solve(double E, double q, double q1, double T, Interpolat
 
     gsl_set_error_handler_off();
     funct i_func_re = [&](double k) -> double {
-        return 2/M_PI* k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E); 
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iReGqq(k, E); 
     };
 
     funct i_func_im = [&](double k) -> double {
-        return 2/M_PI* k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E); 
+        return 2/M_PI * k*k * -sign * iVK(k)*iVK(k) * iImGqq(k, E); 
     };
 
     // IntGSL<std::function<double(double)>> integ;
@@ -598,13 +663,13 @@ std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpo
     funct i_func_re = [&](double k) -> double {
         double omk = iOmK(k); 
         // return 2/M_PI * k*k * omk*omk * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
-        return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
+        return 1/2/M_PI/M_PI * k*k * -sign*iVK(k)*iVK(k) * iReGqq(k, E); 
     };
 
     funct i_func_im = [&](double k) -> double {
         double omk = iOmK(k); 
         // return 2/M_PI * k*k * omk*omk* -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
-        return 2/M_PI * k*k * -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
+        return 1/2/M_PI/M_PI * k*k * -sign*iVK(k)*iVK(k) * iImGqq(k, E); 
     };
 
     // IntGSL<std::function<double(double)>> integ;
@@ -747,7 +812,7 @@ double OmQ_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & 
     gsl_set_error_handler_off();
 
     double res, err;
-    integ_Om.integrate(&func, 0, 5, res, err);
+    integ_Om.integrate(&func, -5, 5, res, err);
     return res;
 }
 
@@ -767,7 +832,7 @@ double OmQ_B_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & 
     };
 
     double res, err;
-    integ_Om.integrate(&func, 0, 5, res, err);
+    integ_Om.integrate(&func, -5, 5, res, err);
     return res;
 }
 
@@ -788,7 +853,7 @@ double OmS_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & 
     };
 
     double res, err;
-    integ_Om.integrate(&func, 0, 5, res, err);
+    integ_Om.integrate(&func, -5, 5, res, err);
     return res;
 }
 
@@ -843,7 +908,7 @@ double OmS_B_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & 
     };
 
     double res, err;
-    integ_Om.integrate(&func, 0, 5, res, err);
+    integ_Om.integrate(&func, -5, 5, res, err);
     return res;
 }
 

@@ -80,8 +80,10 @@ void get_test_gsl_interp(int N, double * p, int dimP, double * out, int dimOut);
 double sigma_bb2(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG);
 double sigma_bb3(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG);
 
-double k_integral_cm2(double omp, double om, double p, Interpolator2D & iImT, Interpolator2D & iImG);
-double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D & iImT, Interpolator2D & iImG);
+double k_integral_cm2(double omp, double om, double p, Interpolator2D & iImT, 
+    Interpolator2D & iImG);
+double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D & iImT, 
+Interpolator2D & iImG, int debug=0);
 
 
 void get_test(double * p, int dimP, double * out, int dimOut);
@@ -162,5 +164,18 @@ double sigma_integrand_fb(double omp, double om, double p, double T, Interpolato
 
 std::complex<double> x_solve(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda, int sign);
+
+
+//////////////////////////// On-shell integrals ////////////////////////////////
+
+double sigma_ff_onshell(double om, double p, double T, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2);
+
+double k_integral_onshell(double omp, double om, double p, 
+Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2);
+
+double x_integral_cm_onshell(double omp, double om, double p, 
+            double k, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator eps1, Interpolator eps2, int debug=0);
 
 #endif
