@@ -170,7 +170,7 @@ class Particle:
         self.d = d
         if Gtab is not None:
             self.Gtab = Gtab
-            self.set_R(-2*np.imag(Gtab))
+            self.set_R(-np.imag(Gtab) / np.pi)
             self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(Gtab)))
             self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(Gtab)))
         else:
@@ -180,7 +180,7 @@ class Particle:
                                 for _e in self.erange])
                 self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(self.Gtab)))
                 self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Gtab)))
-                arrR0 = - 2 * np.imag(self.Gtab)
+                arrR0 = - np.imag(self.Gtab) / np.pi
                 self.set_R(arrR0)
             else:
                 self.set_R(R)
@@ -299,7 +299,7 @@ class Channel:
 
 
         self.ImG2 = -np.array([
-            signal.convolve(r1, r2, mode='same') * de / 4 / np.pi
+            signal.convolve(r1, r2, mode='same') * de * pi
             for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
         ]).transpose()
         
@@ -319,13 +319,13 @@ class Channel:
         
         self.ImG2 += np.array([
             signal.convolve(r1*cf1(self.erange, self.T), r2, 
-                            mode='same')* de / 4 / np.pi 
+                            mode='same')* de * np.pi
             for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
         ]).transpose()
         
         self.ImG2 += np.array([
             signal.convolve(r1, r2*cf2(self.erange, self.T), 
-                            mode='same')* de / 4 / np.pi
+                            mode='same')* de * np.pi
             for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
         ]).transpose()
         
@@ -437,7 +437,7 @@ class Channel:
         self.ReS = np.array(ReSigmas).transpose()
 
 def get_S_q(ch, q):
-    res = pipe(ch.erange) | p[lambda z: ch.func(z, q, ch.T, ch.iImT, ch.p_j.iImG)]*(ch.parallel//1) | END
+    res = pipe(ch.erange) | p[lambda z: ch.func(z, q, ch.T, ch.iImT, ch.p_j.R)]*(ch.parallel//1) | END
     return res
 
 
