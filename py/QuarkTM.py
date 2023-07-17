@@ -299,7 +299,7 @@ class Channel:
 
 
         self.ImG2 = -np.array([
-            signal.convolve(r1, r2, mode='same') * de * pi
+            signal.convolve(r1, r2, mode='same') * de * np.pi
             for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
         ]).transpose()
         

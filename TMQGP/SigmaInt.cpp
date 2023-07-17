@@ -29,7 +29,7 @@ double k_integral(double E, double om, double p, Interpolator2D & iImT, Interpol
     // printf("Hello!!!\n");
     funct i_func_k = [&](double k) -> double {
         //std::cerr << "Hello  " << k << std::endl;
-        double res = k*k * x_integral(k, E, p, iImT) * iImG(k, E - om);
+        double res = k*k * x_integral(k, E, p, iImT) * iImG(k, E - om) /4/M_PI/M_PI;
         //std::cerr << "res  " << res << std::endl;
         // printf("%.3e \n", res);
         // printf('')
@@ -58,7 +58,7 @@ double E_integral(double om, double p, double T, Interpolator2D & iImT, Interpol
     // printf("Hello!!!\n");
     funct i_func_e = [&](double e) -> double {
         //std::cerr << "Hello  " << k << std::endl;
-        double res = k_integral(e, om, p, iImT, iImG) * (n_f(e - om, T) + 0*n_b(e, T)) / M_PI / 2; // 1/2 from omega' integration
+        double res = k_integral(e, om, p, iImT, iImG) * (n_f(e - om, T) + n_b(e, T)) / M_PI / 2; // 1/2 from omega' integration
         //std::cerr << "res  " << res << std::endl;
         // printf("%.3e \n", res);
         // printf('')
@@ -141,8 +141,11 @@ double x_integral_cm_onshell(double omp, double om, double p,
             printf("m1sq = %.2f, m2sq = %.2f, k2 = %.2f, s=%.2f", m1sq, m2sq, k2, s);
         }
         if (k2 < 0) return 0;
-        double res = k*k * iImT(sqrt(k2), 
-                    ((om + omp > 0) - (om + omp < 0)) * Ecm)  / 4 / M_PI/ M_PI;
+
+        double res = k*k * iImT(sqrt(k2), Ecm) / 4 / M_PI/ M_PI;
+        // double res = k*k * iImT(sqrt(k2), 
+        //             ((om + omp > 0) - (om + omp < 0)) * Ecm)  / 4 / M_PI/ M_PI;
+
         // double res = k*k * iImT(sqrt(k2), sqrt(s))  / 4 / M_PI/ M_PI;
         return res;
     };
@@ -174,7 +177,7 @@ double sigma_ff_onshell(double om, double p, double T,
         return res;
     };
 
-    integ_E.integrate(&i_func_e, 0, 5, res, err);
+    integ_E.integrate(&i_func_e, -0.4, 4, res, err);
     return res;
 }
 
