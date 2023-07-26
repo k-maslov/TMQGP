@@ -50,4 +50,27 @@ double Re_meson(double omega,double lambda4, Interpolator & iImS);
 
 
 double imag_pi_inter1( double omega,double T,double m, double lambda, Interpolator2D & ImG);
+//
+//
+// KITAZAWA 2014 CALCULATION
+double Sigma_re_plus1(double p0, double T, double mf, double mb, Interpolator2D & ImG);
+
+double Sigma_re_minus1(double p0, double T, double mf, double mb, Interpolator2D & ImG);
+
+// QUARK LOOPS
+complex<double> G0(double p0, double p, double m, double eps);
+
+complex<double> Gv(double p0, double p, double m, double eps);
+
+complex<double> Gm(double p0, double p, double m, double eps);
+
+double Impi(double p, double omega, double T, double m, double eps);
+
+double Impi_int(double omega, double T, double m, double eps);
+
+// Harada Nemoto
+
+double Impi2(double p, double q, double omega, double T, double m, double eps);
+
+double Impi_int2(double q , double omega, double T, double m, double eps);
 #endif
