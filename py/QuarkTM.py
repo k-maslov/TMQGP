@@ -199,12 +199,12 @@ class Particle:
     def G0(self, E, q):
         # if self.propagator == 'Th':
         if self.stat == 'f':
-            # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
-            return 1 / (E - self.om0(q) + 1j*self.eps*(E))
+            return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
+            # return 1 / (E - self.om0(q) + 1j*self.eps)
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
             if self.propagator == 1:
-                # return 1 / (E - self.om0(q) + 1j*self.eps*E)
+                # return 1 / (E - self.om0(q) + 1j*self.eps)
                 return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
             elif self.propagator == 2:
                 return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps*np.sign(E))
@@ -389,17 +389,20 @@ class Channel:
                                              self.p_j.iImG)]*(self.parallel//1) | END
         return np.array(res)
         
-    def populate_S(self):
+    def populate_S(self, only0=False):
         # print(self.func(0, 0, self.T, self.iImT, self.p_j.R))
+        qr = self.qrange
+        if only0:
+            qr = [0]
         if self.parallel < 2:
             if self.func != tm.sigma_ff_onshell:
-                ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in self.qrange]
+                ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in qr]
                     for e in tqdm.tqdm(self.erange)])
             else:
-                eps1 = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange))
-                eps2 = tm.Interpolator(self.qrange, self.p_j.om0(self.qrange))
+                eps1 = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
+                eps2 = tm.Interpolator(self.qrange, self.p_j.om0(self.qrange), 'linear')
                 ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R,
-                eps1, eps2) for q in self.qrange]
+                eps1, eps2) for q in qr]
                     for e in tqdm.tqdm(self.erange)])
             self.ImS = ress_cm
         else:

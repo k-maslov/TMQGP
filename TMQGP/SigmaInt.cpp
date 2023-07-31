@@ -142,9 +142,9 @@ double x_integral_cm_onshell(double omp, double om, double p,
         }
         if (k2 < 0) return 0;
 
-        double res = k*k * iImT(sqrt(k2), Ecm) / 4 / M_PI/ M_PI;
-        // double res = k*k * iImT(sqrt(k2), 
-        //             ((om + omp > 0) - (om + omp < 0)) * Ecm)  / 4 / M_PI/ M_PI;
+        // double res = k*k * iImT(sqrt(k2), Ecm) / 4 / M_PI/ M_PI;
+        double res = k*k * iImT(sqrt(k2), 
+                    ((om + omp > 0) - (om + omp < 0)) * Ecm)  / 4 / M_PI/ M_PI;
 
         // double res = k*k * iImT(sqrt(k2), sqrt(s))  / 4 / M_PI/ M_PI;
         return res;
@@ -178,6 +178,20 @@ double sigma_ff_onshell(double om, double p, double T,
     };
 
     integ_E.integrate(&i_func_e, -0.4, 4, res, err);
+    return res;
+}
+
+double sigma_bb_onshell(double om, double p, double T, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2){
+    double res, err;
+    gsl_set_error_handler_off();
+    funct i_func_e = [&](double omp) -> double {
+        double res = k_integral_onshell(omp, om, p, iImT, iImG, eps1, eps2) *
+         (n_b(omp, T) - n_b(omp + om, T));
+        return res;
+    };
+
+    integ_E.integrate(&i_func_e, -4, 4, res, err);
     return res;
 }
 

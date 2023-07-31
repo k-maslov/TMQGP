@@ -178,4 +178,7 @@ double x_integral_cm_onshell(double omp, double om, double p,
             double k, Interpolator2D & iImT, Interpolator2D & iImG, 
             Interpolator eps1, Interpolator eps2, int debug=0);
 
+double sigma_bb_onshell(double om, double p, double T, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2);
+
 #endif
