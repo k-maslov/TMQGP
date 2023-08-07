@@ -158,7 +158,7 @@ class IterController:
 
 class Particle:
     def __init__(self, m, qrange, erange, R=None, stat='f', eps=5e-2, d=6, 
-            propagator=3, Gtab=None):
+            propagator=1, Gtab=None):
         self.m = m
         self.eps = eps
         self.R = None
@@ -205,7 +205,9 @@ class Particle:
         elif self.stat == 'b':
             if self.propagator == 1:
                 # return 1 / (E - self.om0(q) + 1j*self.eps)
-                return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
+                # return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
+                return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
+
             elif self.propagator == 2:
                 return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps*np.sign(E))
             elif self.propagator == 3:
@@ -231,19 +233,20 @@ class Channel:
         self.test_potential = test_potential
 
         if p_i.stat == 'b' and p_j.stat == 'b':
-            if calc == 1:
-                self.func = tm.sigma_bb
-            elif calc == 2:
-                self.func = tm.sigma_bb2
-            elif calc == 3:
-                self.func = tm.sigma_bb3
-            else:
-                raise
+            # if calc == 1:
+            #     self.func = tm.sigma_bb
+            # elif calc == 2:
+            #     self.func = tm.sigma_bb2
+            # elif calc == 3:
+            #     self.func = tm.sigma_bb3
+            # else:
+            #     raise
+            self.func = tm.sigma_bb_onshell
 
             self.Tfunc = tm.T_solve_BB
             
         elif p_i.stat == 'b' and p_j.stat == 'f':
-            self.func = tm.sigma_bf
+            self.func = tm.sigma_bf_onshell
             self.Tfunc = tm.T_solve_BF
             
         elif p_i.stat == 'f' and p_j.stat == 'f':
@@ -251,7 +254,7 @@ class Channel:
             self.Tfunc = tm.T_solve
 
         elif p_i.stat == 'f' and p_j.stat == 'b':
-            self.func = tm.sigma_fb
+            self.func = tm.sigma_fb_onshell
             self.Tfunc = tm.T_solve_BF
         else:
             raise
