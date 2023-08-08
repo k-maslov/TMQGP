@@ -48,6 +48,11 @@ typedef std::string String;
 
 #include "TMQGP/Interpolator.h"
 #include "TMQGP/SigmaInt.h"
+
+#include "TMQGP/SigmaProd.h"
+#include "TMQGP/Thermo.h"
+#include "TMQGP/Tmatrix.h"
+
 // #include <complex>
 
 %}
@@ -69,6 +74,9 @@ typedef std::string String;
 %apply (complex<double>* ARGOUT_ARRAY1, int DIM1) {(complex<double> * out, int dimOut)};
 %include "TMQGP/SigmaInt.h"
 
+%include "TMQGP/SigmaProd.h"
+%include "TMQGP/Thermo.h"
+%include "TMQGP/Tmatrix.h"
 
 %extend Interpolator {
 %pythoncode {
