@@ -264,6 +264,11 @@ class Channel:
             self.Tfunc = tm.T_solve_explicit
         self.ds = ds
         self.da = da
+        if p_j.stat == 'f':
+            self.Nf = 3
+        else:
+            self.Nf = 1
+
         self.erange = p_i.erange ### TODO: dirty
         self.qrange = p_i.qrange
         self.screen = screen
