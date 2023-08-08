@@ -161,3 +161,53 @@ double sigma_fb_onshell(double om, double p, double T,
     integ_E.integrate(&i_func_e, 0, 4, res, err);
     return res;
 }
+
+double sigma_tot(double om, double p, double T, TMArray TMs, Interpolator2D & iImG_Q, Interpolator2D & iImG_G){
+    double res, err;
+
+
+    funct i_func_e = [&](double omp) -> double {
+        double r = 0;
+        double n_j, n_2b;
+        for (auto TM : TMs){
+            double mult = 1;
+            if (TM.stat_j == "f"){
+                n_j = n_f(omp, T);
+            }
+            else{
+                n_j = n_b(omp, T);
+            }
+
+            if (TM.stat_i == "b") mult = -1;
+
+            if ((TM.stat_i == "f" && TM.stat_j == "f") || (TM.stat_i == "b" && TM.stat_j == "b")){
+                n_2b = n_b(omp + om, T);
+            }
+            else{
+                n_2b = n_f(omp + om, T);
+            }
+
+            if (TM.stat_j == "b"){
+                // if (omp < 0){
+                //     r += 0;
+                //     cout << "Im here\n" << endl;
+                // }
+                // else{
+                    double rr = TM.Nf * TM.da * TM.ds / TM.d * k_integral_onshell(omp, om, p, *TM.iImT, iImG_G, *TM.eps_i, *TM.eps_j, 0)
+                    * (n_j + mult*n_2b);
+                    // cout << "rr = " << rr << endl;
+                    r += rr;
+                // }
+            }
+            else{
+                r += TM.Nf * TM.da * TM.ds / TM.d * k_integral_onshell(omp, om, p, *TM.iImT, iImG_Q, *TM.eps_i, *TM.eps_j, 0)
+                * (n_j + mult*n_2b);
+            }
+        }
+
+        return r;
+    };
+    
+    integ_E.integrate(&i_func_e, 0, 4, res, err);
+    return res;
+}

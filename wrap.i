@@ -78,6 +78,8 @@ typedef std::string String;
 %include "TMQGP/Thermo.h"
 %include "TMQGP/Tmatrix.h"
 
+%template(TMArray) std::vector<TMChannel>;
+
 %extend Interpolator {
 %pythoncode {
     def __getstate__(self):

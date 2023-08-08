@@ -280,7 +280,26 @@ class Channel:
         self.iV = tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=do_rel), 'linear')
         self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
         self.set_G2()
+
+        self.eps_i = tm.Interpolator(self.p_i.qrange, self.p_i.om0(self.p_i.qrange),
+            'linear')
+        self.eps_j = tm.Interpolator(self.p_j.qrange, self.p_j.om0(self.p_j.qrange),
+        'linear')
         
+
+    def get_TMChannel(self):
+        TM = tm.TMChannel()
+        TM.da = self.da
+        TM.ds = self.ds
+        TM.d = self.p_i.d
+        TM.Nf = self.Nf
+        TM.iImT = self.iImT
+        TM.eps_i = self.eps_i
+        TM.eps_j = self.eps_j
+        TM.stat_i = self.p_i.stat
+        TM.stat_j = self.p_j.stat
+        return TM
+
     def v(self, q, do_rel=1):
         mult = 1 / (1 + self.screen*self.T**2)
 
