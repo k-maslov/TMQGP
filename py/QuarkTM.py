@@ -205,8 +205,8 @@ class Particle:
         elif self.stat == 'b':
             if self.propagator == 1:
                 # return 1 / (E - self.om0(q) + 1j*self.eps)
-                # return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
-                return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
+                return 1 / (E - self.om0(q) + 1j*self.eps*(np.tanh(E/0.5)**3))
+                # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
 
             elif self.propagator == 2:
                 return 1/((E)**2 - self.om0(q)**2 + 2j*self.eps*np.sign(E))
@@ -308,7 +308,8 @@ class Channel:
         if do_rel:
             rel_factor = np.sqrt(self.p_i.m * self.p_j.m / self.p_i.om0(q) / self.p_j.om0(q))
 
-        return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
+        # return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
+        return rel_factor * np.sqrt(self.Fa) * self.G * self.L**2/(self.L**2 + q**2)
 
     
     
@@ -392,7 +393,7 @@ class Channel:
         if not self.test_potential:
             self.X = np.array([[tm.x_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
                 int(np.sign(self.G))) for k in self.qrange]
-                for E in tqdm.tqdm(self.erange)])
+                for E in (self.erange)])
         # else:
         #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
         #         for E in tqdm.tqdm(self.erange)])

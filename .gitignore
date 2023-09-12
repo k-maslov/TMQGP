@@ -13,3 +13,4 @@ py/__pycache__/QuarkTM.cpython-311.pyc
 *.dat
 *.h5
 FromZhanduo/SelfE_single.h5
+*.p
