@@ -226,9 +226,10 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
                  Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0):
+                 test_potential=0, l=0):
         self.p_i = p_i
         self.p_j = p_j
+        self.l = l
         
         self.test_potential = test_potential
 
@@ -266,6 +267,8 @@ class Channel:
         self.da = da
         if p_j.stat == 'f':
             self.Nf = 3
+            if p_i.stat == 'b': # gluons interact with quarks and antiquarks
+                self.Nf = 6
         else:
             self.Nf = 1
 
@@ -309,7 +312,10 @@ class Channel:
             rel_factor = np.sqrt(self.p_i.m * self.p_j.m / self.p_i.om0(q) / self.p_j.om0(q))
 
         # return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
-        return rel_factor * np.sqrt(self.Fa) * self.G * self.L**2/(self.L**2 + q**2)
+        ff = self.L**2/(self.L**2 + q**2)
+        if self.l == 1:
+            ff = ff * (q / np.sqrt(self.L**2 + q**2))
+        return rel_factor * np.sqrt(self.Fa) * self.G * ff
 
     
     
