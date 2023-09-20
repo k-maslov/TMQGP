@@ -226,10 +226,13 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
                  Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0):
+                 test_potential=0, lmax=0, G1=None):
         self.p_i = p_i
         self.p_j = p_j
-        self.l = l
+        self.lmax = lmax
+        self.set_Gs(G, G1)
+
+        
         
         self.test_potential = test_potential
 
@@ -280,7 +283,8 @@ class Channel:
         self.G = G
         self.L = L
         self.parallel = parallel
-        self.iV = tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=do_rel), 'linear')
+        self.do_rel = do_rel
+        self.init_iV()
         self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
         self.set_G2()
 
@@ -288,7 +292,20 @@ class Channel:
             'linear')
         self.eps_j = tm.Interpolator(self.p_j.qrange, self.p_j.om0(self.p_j.qrange),
         'linear')
+
+    def set_Gs(self, G, G1=None):
+        if self.lmax == 0:
+            self.Gs = [G]
+        else:
+            if G1 is not None:
+                self.Gs = [G, G1]
+            else:
+                self.Gs = [G, G]
         
+    def init_iV(self):
+        self.iVS = []
+        for l in range(self.lmax + 1):
+            self.iVS += [tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=self.do_rel, l=l), 'linear')]
 
     def get_TMChannel(self):
         TM = tm.TMChannel()
@@ -303,7 +320,7 @@ class Channel:
         TM.stat_j = self.p_j.stat
         return TM
 
-    def v(self, q, do_rel=1):
+    def v(self, q, do_rel=1, l=0):
         mult = 1 / (1 + self.screen*self.T**2)
 
         ### Relativistic correction to the vertex: R_S(q, q') from Liu&Rapp
@@ -313,9 +330,13 @@ class Channel:
 
         # return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
         ff = self.L**2/(self.L**2 + q**2)
-        if self.l == 1:
+        if l == 1:
             ff = ff * (q / np.sqrt(self.L**2 + q**2))
-        return rel_factor * np.sqrt(self.Fa) * self.G * ff
+        if l > 1:
+            raise
+
+        G = self.Gs[l]
+        return rel_factor * mult * np.sqrt(self.Fa) * G * ff
 
     
     
@@ -397,14 +418,22 @@ class Channel:
         # if self.p_i.stat == 'b' and self.p_j.stat == 'b':
 
         if not self.test_potential:
-            self.X = np.array([[tm.x_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
-                int(np.sign(self.G))) for k in self.qrange]
-                for E in (self.erange)])
-        # else:
-        #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
-        #         for E in tqdm.tqdm(self.erange)])
-            v1v2 = np.sign(self.G)*self.v(self.qrange)**2
-            self.TM = - 4*np.pi*v1v2 / (1 - self.X)
+            self.TMS = []
+            self.XS = []
+            self.TM = 0.
+            for l, G in enumerate(self.Gs):
+                X = np.array([[tm.x_solve(E, k, k, self.T, self.iVS[l], self.iOm, self.iReG2, self.iImG2, 5,
+                    int(np.sign(self.G))) for k in self.qrange]
+                    for E in (self.erange)])
+                self.XS += [X]
+
+            # else:
+            #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
+            #         for E in tqdm.tqdm(self.erange)])
+                v1v2 = np.sign(self.G)*self.v(self.qrange, l=l)**2
+                TM = - 4*np.pi*v1v2 / (1 - X)
+                self.TM += (2*l + 1)*TM
+                self.TMS += [TM]
 
         else:
             print('XXXX')
