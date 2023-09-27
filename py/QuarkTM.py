@@ -321,22 +321,21 @@ class Channel:
         return TM
 
     def v(self, q, do_rel=1, l=0):
-        mult = 1 / (1 + self.screen*self.T**2)
-
         ### Relativistic correction to the vertex: R_S(q, q') from Liu&Rapp
+        Tc = 0.156
         rel_factor = 1
         if do_rel:
             rel_factor = np.sqrt(self.p_i.m * self.p_j.m / self.p_i.om0(q) / self.p_j.om0(q))
 
         # return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
-        ff = self.L**2/(self.L**2 + q**2)
+        ff = self.L**2/(self.L**2 + q**2 + self.screen * (self.T/Tc)**2)
         if l == 1:
-            ff = ff * (q / np.sqrt(self.L**2 + q**2))
+            ff = ff * (q / np.sqrt(self.L**2 + q**2  + self.screen * (self.T/Tc)**2))
         if l > 1:
             raise
 
         G = self.Gs[l]
-        return rel_factor * mult * np.sqrt(self.Fa) * G * ff
+        return rel_factor * np.sqrt(self.Fa) * G * ff
 
     
     
