@@ -520,3 +520,14 @@ def set_S_q(ch):
         ReSigmas += [ReSigma]
 
     ch.ReS = np.array(ReSigmas).transpose()
+
+
+class ChannelGroup:
+    def __init__(self, p_i, p_j):
+        self.chs = []
+
+    def add_l():
+        pass
+        
+    def get_T():
+        pass
