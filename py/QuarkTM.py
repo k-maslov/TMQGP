@@ -226,10 +226,10 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
                  Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, lmax=0, G1=None):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None):
         self.p_i = p_i
         self.p_j = p_j
-        self.lmax = lmax
+        self.l = l
         self.set_Gs(G, G1)
 
         
@@ -286,7 +286,8 @@ class Channel:
         self.do_rel = do_rel
         self.init_iV()
         self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
-        self.set_G2()
+        # if calc_G2:
+        self.set_G2(G2)
 
         self.eps_i = tm.Interpolator(self.p_i.qrange, self.p_i.om0(self.p_i.qrange),
             'linear')
@@ -294,18 +295,16 @@ class Channel:
         'linear')
 
     def set_Gs(self, G, G1=None):
-        if self.lmax == 0:
-            self.Gs = [G]
-        else:
-            if G1 is not None:
-                self.Gs = [G, G1]
-            else:
-                self.Gs = [G, G]
+        # if self.lmax == 0:
+        self.Gs = [G]
+        # else:
+            # if G1 is not None:
+                # self.Gs = [G, G1]
+            # else:
+                # self.Gs = [G, G]
         
     def init_iV(self):
-        self.iVS = []
-        for l in range(self.lmax + 1):
-            self.iVS += [tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=self.do_rel, l=l), 'linear')]
+        self.iVS = [tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=self.do_rel), 'linear')]
 
     def get_TMChannel(self):
         TM = tm.TMChannel()
@@ -320,7 +319,8 @@ class Channel:
         TM.stat_j = self.p_j.stat
         return TM
 
-    def v(self, q, do_rel=1, l=0):
+    def v(self, q, do_rel=1):
+        l = self.l
         ### Relativistic correction to the vertex: R_S(q, q') from Liu&Rapp
         Tc = 0.156
         rel_factor = 1
@@ -334,7 +334,7 @@ class Channel:
         if l > 1:
             raise
 
-        G = self.Gs[l]
+        G = self.Gs[0]
         return rel_factor * np.sqrt(self.Fa) * G * ff
 
     
@@ -347,58 +347,65 @@ class Channel:
         # res[e == 0] = 10
         return res
 
-    def set_G2(self):
-        de = self.p_i.erange[1] - self.p_i.erange[0]
+    def set_G2(self, G2=None):
+        if G2 is None:
+            de = self.p_i.erange[1] - self.p_i.erange[0]
 
 
 
-        self.ImG2 = -np.array([
-            signal.convolve(r1, r2, mode='same') * de * np.pi
-            for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-        ]).transpose()
-        
-        
+            self.ImG2 = -np.array([
+                signal.convolve(r1, r2, mode='same') * de * np.pi
+                for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+            ]).transpose()
+            
+            
 
-        if self.p_i.stat == 'f':
-            cf1 = lambda z, T: self.nf(z, T)
+            if self.p_i.stat == 'f':
+                cf1 = lambda z, T: self.nf(z, T)
+            else:
+                cf1 = lambda z, T: -self.nb(z, T)
+
+            if self.p_j.stat == 'f':
+                cf2 = lambda z, T: self.nf(z, T)
+            else:
+                cf2 = lambda z, T: -self.nb(z, T)
+                
+                
+            
+            self.ImG2 += np.array([
+                signal.convolve(r1*cf1(self.erange, self.T), r2, 
+                                mode='same')* de * np.pi
+                for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+            ]).transpose()
+            
+            self.ImG2 += np.array([
+                signal.convolve(r1, r2*cf2(self.erange, self.T), 
+                                mode='same')* de * np.pi
+                for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+            ]).transpose()
+            
+                
+                
+            ReG2 = []
+                
+            for _im in self.ImG2.transpose():
+                iImNew = tm.Interpolator(self.erange, _im, 'linear')
+                ReNew = np.array([tm.ReSigmaKK(e, iImNew) for e in self.erange])
+                ReG2 += [ReNew]
+
+            self.ReG2 = np.array(ReG2).transpose()
+            
+            
         else:
-            cf1 = lambda z, T: -self.nb(z, T)
-
-        if self.p_j.stat == 'f':
-            cf2 = lambda z, T: self.nf(z, T)
-        else:
-            cf2 = lambda z, T: -self.nb(z, T)
+            self.ReG2 = np.real(G2)
+            self.ImG2 = np.imag(G2)
             
-            
-        
-        self.ImG2 += np.array([
-            signal.convolve(r1*cf1(self.erange, self.T), r2, 
-                            mode='same')* de * np.pi
-            for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-        ]).transpose()
-        
-        self.ImG2 += np.array([
-            signal.convolve(r1, r2*cf2(self.erange, self.T), 
-                            mode='same')* de * np.pi
-            for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-        ]).transpose()
-        
-            
-            
-        ReG2 = []
-            
-        for _im in self.ImG2.transpose():
-            iImNew = tm.Interpolator(self.erange, _im, 'linear')
-            ReNew = np.array([tm.ReSigmaKK(e, iImNew) for e in self.erange])
-            ReG2 += [ReNew]
-
-        self.ReG2 = np.array(ReG2).transpose()
-        
         self.iReG2 = tm.Interpolator2D(self.qrange, self.erange, 
-                            np.ascontiguousarray(self.ReG2))
+                                np.ascontiguousarray(self.ReG2))
         self.iImG2 = tm.Interpolator2D(self.qrange, self.erange, 
-                            np.ascontiguousarray(self.ImG2))
-        
+                                np.ascontiguousarray(self.ImG2))
+        self.G2 = self.ReG2 + 1j*self.ImG2
+
     def G20(self, E, k):
         return 1/2/(E/2 - self.p_i.om0(k) + 1j*self.p_i.eps)
     
@@ -429,7 +436,7 @@ class Channel:
             # else:
             #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
             #         for E in tqdm.tqdm(self.erange)])
-                v1v2 = np.sign(self.G)*self.v(self.qrange, l=l)**2
+                v1v2 = np.sign(self.G)*self.v(self.qrange)**2
                 TM = - 4*np.pi*v1v2 / (1 - X)
                 self.TM += (2*l + 1)*TM
                 self.TMS += [TM]
@@ -522,12 +529,64 @@ def set_S_q(ch):
     ch.ReS = np.array(ReSigmas).transpose()
 
 
-class ChannelGroup:
-    def __init__(self, p_i, p_j):
-        self.chs = []
+class ChannelL:
+    def __init__(self, key : str, lmax : int, p_i: Particle, p_j: Particle, T : float,  
+                params, Fa=1, ds=1, da=1, Nf=1, G2=None):
+        self.lmax = lmax
+        self.key = key
 
-    def add_l():
-        pass
+        self.ds = ds
+        self.da = da
+        self.Fa = Fa
+        self.p_i = p_i
+        self.p_j = p_j
+        self.T = T
+        self.erange = p_i.erange
+        self.qrange = p_i.qrange
+
+        self.chs = []
+        for l, p in zip(range(0, lmax + 1), params):
+            if G2 == None:
+                if l == 0:
+                    ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
+                    l=l)
+                else:
+                    ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
+                    l=l, G2=self.chs[0].G2)
+            else:
+                ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
+                    l=l, G2=G2)
+
+            self.chs += [ch]
+        self.Nf = self.chs[0].Nf
+
+
+    def populate_T(self):
+        for ch in self.chs:
+            ch.populate_T()
+    
+    def get_T(self):
+        return np.sum([(2 *l + 1) * ch.TM for l, ch in enumerate(self.chs)], axis=0)
         
-    def get_T():
-        pass
+
+class ChannelGroup:
+    def __init__(self):
+        self.channels = dict()
+
+    def addChannel(self, ch):
+        self.channels[ch.key] = ch
+        
+    def populate_T(self):
+        for k, ch in self.channels.items():
+            ch.populate_T()
+
+
+    def get_T(self):
+        self.populate_T()
+
+        return np.sum([
+            ch.Nf * ch.ds * ch.da / ch.p_i.d * ch.get_T() for k, ch in self.channels.items()
+        ], axis=0)
+
+    def __getitem__(self, key):
+        return self.channels[key]
