@@ -10,7 +10,7 @@
 
 double x_cm_onshell_integrand(double x, double omp, double om, double p, 
             double k, Interpolator2D & iImT, Interpolator2D & iImG, 
-            Interpolator eps1, Interpolator eps2, int debug, int l){
+            Interpolator & eps1, Interpolator & eps2, int debug, int l){
     double s = pow(eps1(p) + eps2(k), 2.) - (p*p + k*k + 2*p*k*x);
     double Ecm = (pow(omp + om, 2.) - (p*p + k*k + 2*p*k*x));
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Test disabling the spacelike integration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,7 +45,7 @@ double x_cm_onshell_integrand(double x, double omp, double om, double p,
 
 double x_integral_cm_onshell(double omp, double om, double p, 
             double k, Interpolator2D & iImT, Interpolator2D & iImG, 
-            Interpolator eps1, Interpolator eps2, int debug, int l){
+            Interpolator & eps1, Interpolator & eps2, int debug, int l){
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
@@ -88,7 +88,7 @@ double x_integral_cm_onshell(double omp, double om, double p,
 }
 
 double k_integral_onshell(double omp, double om, double p, 
-Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2, 
+Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
 int l){
     double res, err;
     // gsl_set_error_handler(NULL);
@@ -103,7 +103,7 @@ int l){
 }
 
 double sigma_ff_onshell(double om, double p, double T, 
-    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
     int l){
     double res, err;
     gsl_set_error_handler_off();
@@ -118,7 +118,7 @@ double sigma_ff_onshell(double om, double p, double T,
 }
 
 double sigma_bb_onshell(double om, double p, double T, 
-    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2,
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2,
     int l){
     double res, err;
     gsl_set_error_handler_off();
@@ -133,7 +133,7 @@ double sigma_bb_onshell(double om, double p, double T,
 }
 
 double sigma_bf_onshell(double om, double p, double T, 
-    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2,
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2,
     int l){
     double res, err;
     gsl_set_error_handler_off();
@@ -148,7 +148,7 @@ double sigma_bf_onshell(double om, double p, double T,
 }
 
 double sigma_fb_onshell(double om, double p, double T, 
-    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator eps1, Interpolator eps2,
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2,
     int l){
     double res, err;
     gsl_set_error_handler_off();
@@ -163,51 +163,52 @@ double sigma_fb_onshell(double om, double p, double T,
 }
 
 double sigma_tot(double om, double p, double T, TMArray TMs, Interpolator2D & iImG_Q, Interpolator2D & iImG_G){
-    double res, err;
+    // double res, err;
 
 
-    funct i_func_e = [&](double omp) -> double {
-        double r = 0;
-        double n_j, n_2b;
-        for (auto TM : TMs){
-            double mult = 1;
-            if (TM.stat_j == "f"){
-                n_j = n_f(omp, T);
-            }
-            else{
-                n_j = n_b(omp, T);
-            }
+    // funct i_func_e = [&](double omp) -> double {
+    //     double r = 0;
+    //     double n_j, n_2b;
+    //     for (auto TM : TMs){
+    //         double mult = 1;
+    //         if (TM.stat_j == "f"){
+    //             n_j = n_f(omp, T);
+    //         }
+    //         else{
+    //             n_j = n_b(omp, T);
+    //         }
 
-            if (TM.stat_i == "b") mult = -1;
+    //         if (TM.stat_i == "b") mult = -1;
 
-            if ((TM.stat_i == "f" && TM.stat_j == "f") || (TM.stat_i == "b" && TM.stat_j == "b")){
-                n_2b = n_b(omp + om, T);
-            }
-            else{
-                n_2b = n_f(omp + om, T);
-            }
+    //         if ((TM.stat_i == "f" && TM.stat_j == "f") || (TM.stat_i == "b" && TM.stat_j == "b")){
+    //             n_2b = n_b(omp + om, T);
+    //         }
+    //         else{
+    //             n_2b = n_f(omp + om, T);
+    //         }
 
-            if (TM.stat_j == "b"){
-                // if (omp < 0){
-                //     r += 0;
-                //     cout << "Im here\n" << endl;
-                // }
-                // else{
-                    double rr = TM.Nf * TM.da * TM.ds / TM.d * k_integral_onshell(omp, om, p, *TM.iImT, iImG_G, *TM.eps_i, *TM.eps_j, 0)
-                    * (n_j + mult*n_2b);
-                    // cout << "rr = " << rr << endl;
-                    r += rr;
-                // }
-            }
-            else{
-                r += TM.Nf * TM.da * TM.ds / TM.d * k_integral_onshell(omp, om, p, *TM.iImT, iImG_Q, *TM.eps_i, *TM.eps_j, 0)
-                * (n_j + mult*n_2b);
-            }
-        }
+    //         if (TM.stat_j == "b"){
+    //             // if (omp < 0){
+    //             //     r += 0;
+    //             //     cout << "Im here\n" << endl;
+    //             // }
+    //             // else{
+    //                 double rr = TM.Nf * TM.da * TM.ds / TM.d * k_integral_onshell(omp, om, p, *TM.iImT, iImG_G, TM.eps_i, TM.eps_j, 0)
+    //                 * (n_j + mult*n_2b);
+    //                 // cout << "rr = " << rr << endl;
+    //                 r += rr;
+    //             // }
+    //         }
+    //         else{
+    //             r += TM.Nf * TM.da * TM.ds / TM.d * k_integral_onshell(omp, om, p, *TM.iImT, iImG_Q, TM.eps_i, TM.eps_j, 0)
+    //             * (n_j + mult*n_2b);
+    //         }
+    //     }
 
-        return r;
-    };
+    //     return r;
+    // };
     
-    integ_E.integrate(&i_func_e, 0, 4, res, err);
-    return res;
+    // integ_E.integrate(&i_func_e, 0, 4, res, err);
+    // return res;
+    return -1;
 }

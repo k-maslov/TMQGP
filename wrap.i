@@ -52,7 +52,7 @@ typedef std::string String;
 #include "TMQGP/SigmaProd.h"
 #include "TMQGP/Thermo.h"
 #include "TMQGP/Tmatrix.h"
-
+#include "TMQGP/mp.h"
 // #include <complex>
 
 %}
@@ -71,12 +71,16 @@ typedef std::string String;
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * p, int dimP)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double * out, int dimOut)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double * out2, int dimOut2)};
-%apply (complex<double>* ARGOUT_ARRAY1, int DIM1) {(complex<double> * out, int dimOut)};
+// %apply (complex<double>* ARGOUT_ARRAY1, int DIM1) {(complex<double> * out, int dimOut)};
 %include "TMQGP/SigmaInt.h"
 
 %include "TMQGP/SigmaProd.h"
 %include "TMQGP/Thermo.h"
 %include "TMQGP/Tmatrix.h"
+
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double * omrange, int dimOmrange)};
+%apply (double* ARGOUT_ARRAY1, int DIM1) {(double * out, int dimOut)};
+%include "TMQGP/mp.h"
 
 %template(TMArray) std::vector<TMChannel>;
 
