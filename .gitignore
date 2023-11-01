@@ -20,3 +20,5 @@ Makefile*
 CMakeCache*
 *.cmake
 *.pyc
+*.csv
+*.hdf5

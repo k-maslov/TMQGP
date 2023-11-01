@@ -580,7 +580,6 @@ class ChannelGroup:
         for k, ch in self.channels.items():
             ch.populate_T()
 
-
     def get_T(self):
         self.populate_T()
 
@@ -590,3 +589,6 @@ class ChannelGroup:
 
     def __getitem__(self, key):
         return self.channels[key]
+
+
+

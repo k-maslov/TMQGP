@@ -16,7 +16,7 @@ double OmQ_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & 
     gsl_set_error_handler_off();
 
     double res, err;
-    integ_Om.integrate(&func, -1, 5, res, err);
+    integ_Om.integrate(&func, -5, 5, res, err);
     return res;
 }
 
@@ -26,7 +26,7 @@ double OmQ_F(double T, Interpolator2D & iImG, Interpolator2D & iReG){
     };
 
     double res, err;
-    integ_k.integrate(&func, 0, 3, res, err);
+    integ_k.integrate(&func, 0, 5, res, err);
     return res;
 }
 
