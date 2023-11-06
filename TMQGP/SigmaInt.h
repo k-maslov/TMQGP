@@ -1,6 +1,6 @@
 
-#ifndef COMMANDS_H_
-#define COMMANDS_H_
+#ifndef SIGMAINT_H_
+#define SIGMAINT_H_
 
 #include "Interpolator.h"
 #include "IntGSL.h"
@@ -26,14 +26,15 @@ double x_integrand(double x, double k, double E, double p, Interpolator2D & iImT
 // Int_gsl_fixed * integ_k = new Int_gsl_fixed(1e-3, 5);
 // Int_gsl_fixed * integ_E = new Int_gsl_fixed(1e-3, 5); 
 
-IntGSL<std::function<double(double)>> integ_x;
-IntGSL<std::function<double(double)>> integ_k;
-IntGSL<std::function<double(double)>> integ_E;
-
-Int_gsl_adaptive integ_Om;
-IntGSL<std::function<double(double)>> integ_T;
-// Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
-Int_gsl_cauchy inter_cauchy;
+extern IntGSL<std::function<double(double)>> integ_x;
+extern IntGSL<std::function<double(double)>> integ_k;
+extern IntGSL<std::function<double(double)>> integ_E;
+ 
+extern Int_gsl_adaptive integ_Om;
+extern Int_gsl_adaptive integ_Om2;
+extern IntGSL<std::function<double(double)>> integ_T;
+ // Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
+extern Int_gsl_cauchy inter_cauchy;
 
 double x_integral(double k, double E, double p, Interpolator2D & iImT);
 double k_integral(double E, double om, double p, Interpolator2D & iImT, Interpolator2D & iImG);
@@ -79,29 +80,45 @@ void get_test_gsl_interp(int N, double * p, int dimP, double * out, int dimOut);
 double sigma_bb2(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG);
 double sigma_bb3(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG);
 
-double k_integral_cm2(double omp, double om, double p, Interpolator2D & iImT, Interpolator2D & iImG);
-double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D & iImT, Interpolator2D & iImG);
+double k_integral_cm2(double omp, double om, double p, Interpolator2D & iImT, 
+    Interpolator2D & iImG);
+double x_integral_cm2(double omp, double om, double p, double k, Interpolator2D & iImT, 
+Interpolator2D & iImG, int debug=0);
 
 
 void get_test(double * p, int dimP, double * out, int dimOut);
 void get_test_gsl(int N, double * p, int dimP, double * out, int dimOut);
 
-double OmQ_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG);
-double OmQ_F(double T, Interpolator2D & iImG, Interpolator2D & iReG);
-double OmQ_B_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG);
-double OmQ_B(double T, Interpolator2D & iImG, Interpolator2D & iReG);
-double delta(double om, double q, Interpolator2D & iImG, Interpolator2D & iReG);
 
-double OmS_F_om_int(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
-                                        Interpolator2D & iImS, Interpolator2D & iReS);
-
-double OmS_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
-                                        Interpolator2D & iImS, Interpolator2D & iReS);
 
 std::complex<double> T_solve_BB(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5, int sign=1);
 std::complex<double> T_solve_BF(double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
             double Lambda = 5, int sign=1);
+
+double OmS2_F_om_int2(double omp, double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+double OmS2_F_om_int1(double q, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+double OmS2_F(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+
+std::complex<double> T_solve_explicit(
+    double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
+            double Lambda, int sign);
+
+std::complex<double> J_solve_explicit(
+    double E, double q, double q1, double T, Interpolator & iVK, Interpolator & iOmK, Interpolator2D & iReGqq, Interpolator2D & iImGqq, 
+            double Lambda, int sign);
+
+double OmS_B_qfirst_q_int(double om, double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                            Interpolator2D & iImS, Interpolator2D & iReS);
+                            
+double OmS_B_qfirst(double T, Interpolator2D & iImG, Interpolator2D & iReG,
+                                        Interpolator2D & iImS, Interpolator2D & iReS);
+
+double n_f(double om, double T);
+double n_b(double om, double T);
 // class Runner {
 //     public:
 //         Runner();
@@ -117,6 +134,26 @@ double test_integration(double a);
 double k_integral_QQ(double E, double om, double p, Interpolator2D & iImG);
 double E_integral_QQ(double om, double p, double T, Interpolator2D & iImG);
 double k_integral_QQ_func(double k, double E, double om, double p, Interpolator2D & iImG);
+
+double sigma_integrand_bb(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG);
+
+double sigma_integrand_bf(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG);
+
+double sigma_integrand_fb(double omp, double om, double p, double T, Interpolator2D & iImT, 
+                        Interpolator2D & iImG);
+
+////////////////////////// Phi-functional stuff ////////////////////////////////
+
+
+
+
+//////////////////////////// On-shell integrals ////////////////////////////////
+
+
+
+
 
 
 #endif
