@@ -444,7 +444,7 @@ class Channel:
         else:
             print('XXXX')
             self.X = np.array([[tm.J_solve_explicit(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
-                int(np.sign(self.G))) for k in self.qrange]
+                    int(np.sign(self.G))) for k in self.qrange]
                 for E in tqdm.tqdm(self.erange)])
 
             v1v2 = self.v(self.qrange)**2 * np.sign(self.G)
