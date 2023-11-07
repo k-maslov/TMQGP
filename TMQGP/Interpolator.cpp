@@ -58,17 +58,17 @@ Interpolator2D::Interpolator2D(double *x, int dimX, double *y, int dimY,
 	this->y.clear();
 	this->z.clear();
 
-	// for (int i = 0; i < dimX; i++){
-	// 	this->x.push_back(x[i]);
-	// }
+	for (int i = 0; i < dimX; i++){
+		this->x.push_back(x[i]);
+	}
 
-	// for (int i = 0; i < dimY; i++){
-	// 	this->y.push_back(y[i]);
-	// }
+	for (int i = 0; i < dimY; i++){
+		this->y.push_back(y[i]);
+	}
 
-	// for (int i = 0; i < dimY*dimX; i++){
-	// 	this->z.push_back(z2[i]);
-	// }
+	for (int i = 0; i < dimY*dimX; i++){
+		this->z.push_back(z2[i]);
+	}
 
 	debug = 0;
 }

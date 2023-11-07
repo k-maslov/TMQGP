@@ -10,6 +10,14 @@ if (UNIX)
 set(SWIG_EXEC swig)
 endif(UNIX)
 
+find_package(MPI)
+include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+
+IF(MPI_CXX_FOUND)
+        INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+        LIST(APPEND SCR_EXTERNAL_LIBS ${MPI_CXX_LIBRARIES})
+ENDIF(MPI_CXX_FOUND)
+
 if(WIN32)
 #set(SWIG_EXEC "C:\\msys64\\usr\\bin\\swig.exe"
 set(SWIG_EXEC "C:\\Users\\const.maslov\\Numerics\\swigwin-4.0.1\\swig.exe")
@@ -110,9 +118,9 @@ add_dependencies(DirectUse libTMQGP)
 #)
 
 if (UNIX)
-target_link_libraries(TMQGP gsl gslcblas lapack python3.11 libTMQGP)
-target_link_libraries(libTMQGP gsl gslcblas lapack python3.11)
-target_link_libraries(DirectUse gsl gslcblas lapack python3.11 libTMQGP)
+target_link_libraries(TMQGP gsl gslcblas lapack python3.11 libTMQGP ${MPI_CXX_LIBRARIES})
+target_link_libraries(libTMQGP gsl gslcblas lapack python3.11 ${MPI_CXX_LIBRARIES})
+target_link_libraries(DirectUse gsl gslcblas lapack python3.11 libTMQGP ${MPI_CXX_LIBRARIES})
 endif(UNIX)
 
 if (WIN32)
