@@ -49,7 +49,7 @@ double Interpolator::operator()(double x) {
 
 Interpolator2D::Interpolator2D(double *x, int dimX, double *y, int dimY, 
 			double * z2, int dimZ1, int dimZ2){
-	interp = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
+	interp = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
 	accX = gsl_interp_accel_alloc();
 	accY = gsl_interp_accel_alloc();
 	gsl_spline2d_init(interp, x, y, z2, dimX, dimY);
