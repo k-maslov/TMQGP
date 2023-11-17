@@ -285,14 +285,14 @@ class Channel:
         self.parallel = parallel
         self.do_rel = do_rel
         self.init_iV()
-        self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
+        self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'cubic')
         # if calc_G2:
         self.set_G2(G2)
 
         self.eps_i = tm.Interpolator(self.p_i.qrange, self.p_i.om0(self.p_i.qrange),
-            'linear')
+            'cubic')
         self.eps_j = tm.Interpolator(self.p_j.qrange, self.p_j.om0(self.p_j.qrange),
-        'linear')
+        'cubic')
 
     def set_Gs(self, G, G1=None):
         # if self.lmax == 0:
@@ -304,7 +304,7 @@ class Channel:
                 # self.Gs = [G, G]
         
     def init_iV(self):
-        self.iVS = [tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=self.do_rel), 'linear')]
+        self.iVS = [tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=self.do_rel), 'cubic')]
 
     def get_TMChannel(self):
         TM = tm.TMChannel()
@@ -389,7 +389,7 @@ class Channel:
             ReG2 = []
                 
             for _im in self.ImG2.transpose():
-                iImNew = tm.Interpolator(self.erange, _im, 'linear')
+                iImNew = tm.Interpolator(self.erange, _im, 'cubic')
                 ReNew = np.array([tm.ReSigmaKK(e, iImNew) for e in self.erange])
                 ReG2 += [ReNew]
 
@@ -468,8 +468,8 @@ class Channel:
                 ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R) for q in qr]
                     for e in tqdm.tqdm(self.erange)])
             else:
-                eps1 = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'linear')
-                eps2 = tm.Interpolator(self.qrange, self.p_j.om0(self.qrange), 'linear')
+                eps1 = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'cubic')
+                eps2 = tm.Interpolator(self.qrange, self.p_j.om0(self.qrange), 'cubic')
                 ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.p_j.R,
                 eps1, eps2) for q in qr]
                     for e in tqdm.tqdm(self.erange)])

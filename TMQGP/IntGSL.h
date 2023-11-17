@@ -41,7 +41,7 @@ public:
 		if (gsl_finite(a) && gsl_finite(b))
 			// gsl_integration_qags(&gsl_f, a, b, 1e-7, 1e-7, 1000,
 			// 	w, &result, &error);
-			gsl_integration_qng(&gsl_f, a, b, 1e-5, 1e-5, &result, &error, &neval);
+			gsl_integration_qng(&gsl_f, a, b, 1e-7, 1e-7, &result, &error, &neval);
 		else {
 			if (!gsl_finite(a) && !gsl_finite(b)) {
 				gsl_integration_qagi(&gsl_f, 1e-7, 1e-7, 1000,

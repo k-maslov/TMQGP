@@ -19,18 +19,18 @@ from syntax_sugar import thread_syntax as t
 NTHR = 18
 
 ################## Reading the parameter file ######################
-mode = 'XHI'
+mode = 'HI'
 Trange = [0.16, 0.2, 0.3, 0.4, 0.5]
 mQ = 0.6
 mG = 1.8
 G = 14.5
 G1 = 15.5
 L = .2
-screen = .02
+screen = .01
 
 lmax = 1
 
-out_folder = './output/TestDefCubic_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3f/'%(G, G1, L, mQ, mG, screen)
+out_folder = './output/TestDelta2_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3f/'%(G, G1, L, mQ, mG, screen)
 
 if not os.path.exists(out_folder):
     os.mkdir(out_folder)
@@ -113,7 +113,7 @@ for T in Trange[:]:
     n_iter = 0
     current_iter = 0
     
-    while abs(delta) > 1e-4:
+    while abs(delta) > 1e-3:
 
 
         channels_QQ = QuarkTM.ChannelGroup()
@@ -276,13 +276,21 @@ for T in Trange[:]:
         chss += [[channels_QQ, channels_QG, channels_GQ, channels_GG]]
         pts += [[quark_run, gluon_run]]
 
+#         delta = 0
+#         delta += np.sqrt(np.sum((quark_new.Rtab - quark_run.Rtab)**2)) / len(erange) / len(qrange)
+# #         delta += sum(quark_new.Rtab / quark_run.Rtab) / len(erange) / len(qrange)
+#         delta += np.sqrt(np.sum((gluon_new.Rtab - gluon_run.Rtab)**2)) / len(erange) / len(qrange)
+#         delta /= 2
+#         print(delta)  
+
         delta = 0
-        delta += np.sqrt(np.sum((quark_new.Rtab - quark_run.Rtab)**2)) / len(erange) / len(qrange)
-#         delta += sum(quark_new.Rtab / quark_run.Rtab) / len(erange) / len(qrange)
-        delta += np.sqrt(np.sum((gluon_new.Rtab - gluon_run.Rtab)**2)) / len(erange) / len(qrange)
+        
+        delta += np.trapz(abs(quark_new.Rtab - quark_run.Rtab)[:, 0], x=erange)
+        delta += np.trapz(abs(gluon_new.Rtab - gluon_run.Rtab)[:, 0], x=erange)
         delta /= 2
-        print(delta)
-    
+
+        print('delta = ', delta)
+
         quark_bup = quark_run
 
         quark_run = quark_new

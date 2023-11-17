@@ -30,7 +30,9 @@ screen = .02
 
 lmax = 1
 
-out_folder = './output/TestDefCubic_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3f/'%(G, G1, L, mQ, mG, screen)
+out_folder = './output/TestDeltaInt_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3f/'%(G, G1, L, mQ, mG, screen)
+
+save_iterations = 1
 
 if not os.path.exists(out_folder):
     os.mkdir(out_folder)
@@ -276,13 +278,21 @@ for T in Trange[:]:
         chss += [[channels_QQ, channels_QG, channels_GQ, channels_GG]]
         pts += [[quark_run, gluon_run]]
 
+#         delta = 0
+#         delta += np.sqrt(np.sum((quark_new.Rtab - quark_run.Rtab)**2)) / len(erange) / len(qrange)
+# #         delta += sum(quark_new.Rtab / quark_run.Rtab) / len(erange) / len(qrange)
+#         delta += np.sqrt(np.sum((gluon_new.Rtab - gluon_run.Rtab)**2)) / len(erange) / len(qrange)
+#         delta /= 2
+#         print(delta)  
+
         delta = 0
-        delta += np.sqrt(np.sum((quark_new.Rtab - quark_run.Rtab)**2)) / len(erange) / len(qrange)
-#         delta += sum(quark_new.Rtab / quark_run.Rtab) / len(erange) / len(qrange)
-        delta += np.sqrt(np.sum((gluon_new.Rtab - gluon_run.Rtab)**2)) / len(erange) / len(qrange)
+        wh = quark_run.Rtab != 0
+        delta += np.max(np.abs(quark_new.Rtab[wh] - quark_run.Rtab[wh]))
+        wh = gluon_run.Rtab != 0
+        delta += np.max(np.abs(gluon_new.Rtab[wh] - gluon_run.Rtab[wh]))
         delta /= 2
-        print(delta)
-    
+        print('delta = ', delta)
+
         quark_bup = quark_run
 
         quark_run = quark_new
@@ -296,6 +306,31 @@ for T in Trange[:]:
 
         if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
             raise ValueError('Sum rule not fulfilled, STOP')
+
+        if save_iterations:
+            folder_iter = out_folder + Tlabel
+            if not os.path.exists(folder_iter):
+                os.mkdir(folder_iter)
+            fname_iter = folder_iter + '/iter_%i.hdf5'%n_iter
+            print(fname_iter)
+            f_iter = h5py.File(fname_iter, 'w')
+            # f.create_dataset('%i/TM'%n_iter)
+            kk = ['Q', 'Q', 'G', 'G']
+            for _k, gr in zip(kk, [channels_QQ, channels_QG, channels_GQ, channels_GG]):
+                for k, chl in gr.channels.items():
+                    for l in range(chl.lmax + 1):
+                        c = chl.chs[l]
+                        f_iter.create_dataset(f'TM/{k}/{l}', data=c.TM)
+                        f_iter.create_dataset(f'X/{k}/{l}', data=c.XS[0])
+
+            for k in IMAGs.keys():
+                f_iter.create_dataset(f'S/{k}', data=REALs[k] + 1j*IMAGs[k])
+            f_iter.create_dataset(f'Q/G', data=quark_new.Gtab)
+            f_iter.create_dataset(f'G/G', data=gluon_new.Gtab)
+            f_iter.create_dataset(f'Q/S', data=quark_new.S)
+            f_iter.create_dataset(f'G/S', data=gluon_new.S)
+            f_iter.close()
+
         n_iter += 1
 
     IMAGs = IMAGss[-1]
