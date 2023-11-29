@@ -33,6 +33,7 @@ extern IntGSL<std::function<double(double)>> integ_E;
 extern Int_gsl_adaptive integ_Om;
 extern Int_gsl_adaptive integ_Om2;
 extern IntGSL<std::function<double(double)>> integ_T;
+extern Int_gsl_adaptive integ_T_adaptive;
  // Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
 extern Int_gsl_cauchy inter_cauchy;
 

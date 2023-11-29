@@ -22,3 +22,4 @@ CMakeCache*
 *.pyc
 *.csv
 *.hdf5
+*.h5py
