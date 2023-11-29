@@ -19,7 +19,7 @@ from syntax_sugar import thread_syntax as t
 NTHR = 18
 
 ################## Reading the parameter file ######################
-mode = 'XHI'
+mode = 'LO'
 Trange = [0.16, 0.2, 0.3, 0.4, 0.5]
 mQ = 0.6
 mG = 1.8
@@ -30,7 +30,9 @@ screen = .02
 
 lmax = 1
 
-out_folder = './output/TestDeltaInt_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3f/'%(G, G1, L, mQ, mG, screen)
+suppress = 1
+
+out_folder = './output/TestDeltaInt_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3fsuppress=%.2f/'%(G, G1, L, mQ, mG, screen, suppress)
 
 save_iterations = 1
 
@@ -63,11 +65,11 @@ gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 params = {'G' : G, 'L' : L, 'screen' : screen}
 params1 = {'G' : G1, 'L' : L, 'screen' : screen}
 
-params_QG = {'G' : G, 'L': L, 'screen': screen}
-params_QG1 = {'G' : G1, 'L' : L, 'screen' : screen}
+params_QG = {'G' : G, 'L': suppress*L, 'screen': screen}
+params_QG1 = {'G' : G1, 'L' : suppress*L, 'screen' : screen}
 
-params_GG = {'G' : G, 'L': L, 'screen': screen}
-params_GG1 = {'G' : G1, 'L' : L, 'screen' : screen}
+params_GG = {'G' : G, 'L': suppress**2 * L, 'screen': screen}
+params_GG1 = {'G' : G1, 'L' : suppress**2 * L, 'screen' : screen}
    
 params_rep = params.copy()
 params_rep['G'] = -params_rep['G']
@@ -94,7 +96,8 @@ f.attrs.update({
     'mQ' : mQ,
     'mG' : mG,
     'qrange' : qrange,
-    'erange' : erange
+    'erange' : erange,
+    'suppress' : suppress
 })
 
 ########################### Iteration logic ###################
