@@ -74,13 +74,13 @@ params_rep['G'] = -params_rep['G']
 params_rep1 = params1.copy()
 params_rep1['G'] = -params_rep1['G']
 params_rep_QG = params_QG.copy()
-params_rep_QG['G'] = -params_rep['G']
+params_rep_QG['G'] = -params_QG['G']
 params_rep_QG1 = params_QG1.copy()
-params_rep_QG1['G'] = -params_rep1['G']
+params_rep_QG1['G'] = -params_QG1['G']
 params_rep_GG = params_GG.copy()
-params_rep_GG['G'] = -params_rep['G']
+params_rep_GG['G'] = -params_GG['G']
 params_rep_GG1 = params_GG1.copy()
-params_rep_GG1['G'] = -params_rep1['G']
+params_rep_GG1['G'] = -params_GG1['G']
 
 ############################# Setting up the IO ##############
 

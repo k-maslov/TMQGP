@@ -19,6 +19,7 @@ Int_gsl_adaptive integ_Om;
 Int_gsl_adaptive integ_Om2;
 IntGSL<std::function<double(double)>> integ_T;
 // Int_gsl_fixed * integ_T = new Int_gsl_fixed(1e-3, 5);
+Int_gsl_adaptive integ_T_adaptive;
 Int_gsl_cauchy inter_cauchy;
 
 double x_integrand(double x, double k, double E, double p, Interpolator2D & iImT){
