@@ -274,6 +274,19 @@ P_Phi_G = (Nc**2 - 1) * Ns * Phis_G
 P_Phi = P_Phi_G + P_Phi_Q
 P_tot = P_QP_G + P_QP_Q + P_Phi
 
+
+df_P = pd.DataFrame(array([Trange, P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G]).transpose(), 
+               columns=['T', 'Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'])
+
+df_P.to_csv(os.path.join(folder, 'pressure.csv'))
+
+f_phi.attrs.update(
+    dict(zip(['T', 'Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'], 
+            array([Trange, P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G])))
+)
+
+f_phi.close()
+
 from matplotlib import pyplot as plt
 import matplotlib
 matplotlib.style.use('publication')
@@ -294,15 +307,3 @@ plt.axhline(0, lw=1, ls=':', c='black')
 plt.savefig(os.path.join(folder, 'PT.pdf'), bbox_inches='tight')
 plt.xlabel('T [GeV]')
 plt.ylabel(r'P/T$^4$')
-
-df_P = pd.DataFrame(array([Trange, P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G]).transpose(), 
-               columns=['T', 'Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'])
-
-df_P.to_csv(os.path.join(folder, 'pressure.csv'))
-
-f_phi.attrs.update(
-    dict(zip(['T', 'Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'], 
-            array([Trange, P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G])))
-)
-
-f_phi.close()
