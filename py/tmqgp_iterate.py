@@ -70,7 +70,7 @@ params_QG1 = {'G' : G1, 'L' : suppress*L, 'screen' : screen}
 
 params_GG = {'G' : G, 'L': suppress**2 * L, 'screen': screen}
 params_GG1 = {'G' : G1, 'L' : suppress**2 * L, 'screen' : screen}
-   
+
 params_rep = params.copy()
 params_rep['G'] = -params_rep['G']
 params_rep1 = params1.copy()
@@ -190,7 +190,7 @@ for T in Trange[:]:
         )
 
         if n_iter == 0:
-            for k, ch_l in (list(channels_QQ.channels.items()) + list(channels_QG.channels.items()) 
+            for k, ch_l in (list(channels_QQ.channels.items()) + list(channels_QG.channels.items())
                         + list(channels_GQ.channels.items()) + list(channels_GG.channels.items())):
                 
     
@@ -198,14 +198,12 @@ for T in Trange[:]:
                     ch = ch_l.chs[l]
     
                     lbl = f'{Tlabel}/V/{k}/{l}'
-                    # print(lbl)
+                    
                     f.create_dataset(lbl, data=ch.v(ch.qrange))
                     f[f'{Tlabel}/V/{k}/{l}'].attrs.update({'ds': ch.ds, 'da' : ch.da, 'Fa' : ch.Fa})
                     
                     np.savetxt(out_folder + f'{k}_vq_l=%i_T=%.3f.dat'%(l, ch.T), ch.v(ch.qrange))
                 np.savetxt(out_folder + f'{k}_weights', np.array([ch.ds, ch.da, ch.Fa]))
-
-        # break
 
         for chg in [channels_QQ, channels_QG, channels_GQ, channels_GG]:
             TM = chg.get_T()
@@ -218,27 +216,19 @@ for T in Trange[:]:
         for key, func, channels in zip(keys, funcs, [channels_QQ, channels_QG, channels_GQ, channels_GG]):
             TM_tot = channels.get_T()
 
-            # break
-            
-            # plt.plot(erange, imag(TM_tot[:, 0]))
             ch = list(channels.channels.items())[0][1] #ch = list(channels.items())[0][1] # take any of the channels since SFs are the same
             iImTM_tot = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(np.imag(TM_tot)))
             eps1 = tm.Interpolator(qrange, ch.p_i.om0(qrange), 'cubic')
             eps2 = tm.Interpolator(qrange, ch.p_j.om0(qrange), 'cubic')
             Ntot = len(erange)*len(qrange)
             pairs = np.array([[[q, e] for e in erange] for q in qrange]).reshape(1, Ntot, 2)[0]
-            
-            # for q in tqdm.tqdm(qrange):
-            
-                # res = pipe(erange) | p[lambda z: func(z, q, ch.T, iImTM_tot, 
-                #                                                 ch.p_j.R, eps1, eps2)]*(NTHR//1) | END
+
             start = timer()
             ress = np.array(pipe(pairs) | p[lambda z: func(z[1], z[0], ch.T, iImTM_tot, ch.p_j.R, eps1, eps2)]*(NTHR//1) | END)
             end = timer()
             print('Channel ', key, 'time = ', end-start, ' s')
             ress = ress.reshape(len(qrange), len(erange)).transpose()
 
-            # ress = np.array(ress).transpose()
             IMAGs[key] = ress
 
             ReSigmas = []
@@ -271,9 +261,8 @@ for T in Trange[:]:
         om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
         arrE = np.array([gluon_run.erange for q in gluon_run.qrange]).transpose()
 
-    #     G_G_new = 1/(arrE**2 - om0_k**2 + 2*1j*gluon_run.eps*arrE - (ReS_G + 1j*ImS_G))
         G_G_new = 1/(arrE - om0_k + 0*1j*gluon_run.eps - (ReS_G + 1j*ImS_G))
-    #     gluon_new = Particle(gluon_run.m, qrange, erange, eps=2e-2, stat='b', d=16, R=-2*imag(G_G_new))
+
         gluon_new = Particle(gluon_run.m, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
         
         gluon_new.S = ReS_G + 1j*ImS_G

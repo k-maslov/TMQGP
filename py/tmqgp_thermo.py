@@ -18,7 +18,7 @@ from syntax_sugar import process_syntax as p
 from syntax_sugar import thread_syntax as t
 NTHR = 18
 from numpy import log, sqrt, exp, pi, real, imag, array
-
+import TM_thermo
 # parse the arguments
 
 parser = argparse.ArgumentParser()
