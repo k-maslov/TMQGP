@@ -19,11 +19,15 @@ from syntax_sugar import thread_syntax as t
 NTHR = 18
 
 ################## Reading the parameter file ######################
+
+parser = argparse.ArgumentParser()
+
+
 mode = 'LO'
-Trange = [0.16, 0.2, 0.3, 0.4, 0.5]
+Trange = [0.0.5]
 mQ = 0.6
 mG = 1.8
-G = 14
+G = 13.5
 G1 = 14.5
 L = .2
 screen = .01

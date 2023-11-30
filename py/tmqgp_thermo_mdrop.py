@@ -18,8 +18,13 @@ from syntax_sugar import process_syntax as p
 from syntax_sugar import thread_syntax as t
 NTHR = 18
 from numpy import log, sqrt, exp, pi, real, imag, array
-
+from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.style.use('publication')
 # parse the arguments
+
+# print(os.path.dirname(__file__))
+# exit()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("folder", type=str, help='Folder to process')
@@ -37,14 +42,15 @@ Trange = array([1e-3*int(T) for T in Tkeys])
 qrange = df.attrs['qrange']
 erange = df.attrs['erange']
 
-mQ = df.attrs['mQ']
+# mQ = df.attrs['mQ']
+mQs = df.attrs['mQs']
 mG = df.attrs['mG']
 
 pQs = []
 pGs = []
 
-for T, Tkey in zip(Trange, Tkeys):
-    pQ = Particle(df.attrs['mQ'], qrange, erange, Gtab=df[Tkey]['Q']['G'])
+for T, Tkey, mQ in zip(Trange, Tkeys, mQs):
+    pQ = Particle(mQ, qrange, erange, Gtab=df[Tkey]['Q']['G'])
     pG = Particle(df.attrs['mG'], qrange, erange, Gtab=df[Tkey]['G']['G'], stat='b', d=16)
 
     pQs += [pQ]
@@ -53,7 +59,7 @@ for T, Tkey in zip(Trange, Tkeys):
 ps_Q = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pQs)])
 ps_G = np.array([tm.OmQ_B(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pGs)])
 
-ps_free_Q = np.array([quad(lambda z: z*z*T*log(1 + exp(-sqrt(mQ**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T in Trange])
+ps_free_Q = np.array([quad(lambda z: z*z*T*log(1 + exp(-sqrt(mQ**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T, mQ in zip(Trange, mQs)])
 ps_free_G = np.array([quad(lambda z: -z*z*T*log(1 - exp(-sqrt(mG**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T in Trange])
 
 ps_S_Q = []
@@ -301,7 +307,9 @@ plt.plot(Trange, P_tot/Trange**4, c='black', label='total')
 plt.ylim(-0.5, 5)
 plt.legend(ncol=2, fontsize=14)
 
-lat = pd.read_csv('/home/const/MEGA/Physics/GrabbedFigures/LiuRapp2018/PT.csv')
+
+
+lat = pd.read_csv(os.path.join(os.path.dirname(__file__), "PT.csv"))
 plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
 plt.axhline(0, lw=1, ls=':', c='black')
 plt.savefig(os.path.join(folder, 'PT.pdf'), bbox_inches='tight')

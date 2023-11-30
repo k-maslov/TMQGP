@@ -20,9 +20,11 @@ NTHR = 18
 
 ################## Reading the parameter file ######################
 mode = 'LO'
-Trange = [0.16, 0.2, 0.3, 0.4, 0.5]
-mQ = 0.6
-mG = 1.8
+Trange = [0.16, 0.2, 0.3, 0.4]
+mQs = [0.6, 0.58, 0.55, 0.5, 0.45]
+mGs = [1.8, 1.75, 1.6, 1.5]
+# mQ = 0.6
+# mG = 1.8
 G = 14
 G1 = 14.5
 L = .2
@@ -32,7 +34,7 @@ lmax = 1
 
 suppress = 1
 
-out_folder = './output/TestSuppressIter_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3fsuppress=%.2f/'%(G, G1, L, mQ, mG, screen, suppress)
+out_folder = './output/TestMdropQG_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
 
 save_iterations = 0
 
@@ -59,8 +61,6 @@ else:
     raise ValueError
 
 eps = 0.05
-quark_run = Particle(mQ, qrange, erange, eps=eps)
-gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 
 params = {'G' : G, 'L' : L, 'screen' : screen}
 params1 = {'G' : G1, 'L' : L, 'screen' : screen}
@@ -93,16 +93,19 @@ f.attrs.update({
     "screen" : screen,
     'L' : L,
     'Trange' : Trange,
-    'mQ' : mQ,
-    'mG' : mG,
+    'mQs' : mQs,
+    'mGs' : mGs,
     'qrange' : qrange,
     'erange' : erange,
-    'suppress' : suppress
+    'suppress' : suppress,
 })
 
 ########################### Iteration logic ###################
+quark_run = Particle(mQs[0], qrange, erange, eps=eps)
+gluon_run = Particle(mGs[0], qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 
-for T in Trange[:]:    
+
+for T, mQ, mG in zip(Trange[:], mQs, mGs):
     print('Running G = ', G, 'T = ', T)
     Tlabel = '%i'%(T*1e3)
     chss = []
@@ -119,8 +122,6 @@ for T in Trange[:]:
     current_iter = 0
     
     while abs(delta) > 1e-4:
-
-
         channels_QQ = QuarkTM.ChannelGroup()
         channels_QG = QuarkTM.ChannelGroup()
 
@@ -256,25 +257,26 @@ for T in Trange[:]:
         ImS_Q = IMAGs['QQ'] + IMAGs['QG']
         ReS_Q = REALs['QQ'] + REALs['QG']
 
-        om0_k = np.array([quark_run.om0(quark_run.qrange) for e in quark_run.erange])
+        om0_k = np.array([np.sqrt(mQ**2 + qrange**2) for e in quark_run.erange])
         arrE = np.array([quark_run.erange for q in quark_run.qrange]).transpose()
 
         G_Q_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_Q + 1j*ImS_Q))
 
-        quark_new = Particle(quark_run.m, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new)
+        quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new)
         
         quark_new.S = ReS_Q + 1j*ImS_Q
         
         ImS_G = IMAGs['GG'] + IMAGs['GQ']
         ReS_G = REALs['GG'] + REALs['GQ']
         
-        om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
+        # om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
+        om0_k = np.array([np.sqrt(mG**2 + qrange**2) for e in gluon_run.erange])
         arrE = np.array([gluon_run.erange for q in gluon_run.qrange]).transpose()
 
     #     G_G_new = 1/(arrE**2 - om0_k**2 + 2*1j*gluon_run.eps*arrE - (ReS_G + 1j*ImS_G))
         G_G_new = 1/(arrE - om0_k + 0*1j*gluon_run.eps - (ReS_G + 1j*ImS_G))
     #     gluon_new = Particle(gluon_run.m, qrange, erange, eps=2e-2, stat='b', d=16, R=-2*imag(G_G_new))
-        gluon_new = Particle(gluon_run.m, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
+        gluon_new = Particle(mG, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
         
         gluon_new.S = ReS_G + 1j*ImS_G
         
