@@ -19,6 +19,10 @@ from syntax_sugar import thread_syntax as t
 NTHR = 18
 
 ################## Reading the parameter file ######################
+
+
+
+
 mode = 'LO'
 Trange = [0.16, 0.2, 0.3, 0.4][::1]
 # mQs = [0.5, 0.48, 0.45, 0.4, 0.35][::-1]

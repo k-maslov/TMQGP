@@ -21,27 +21,57 @@ NTHR = 18
 ################## Reading the parameter file ######################
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--mode', type=str, default='LO', choices=['LO', 'HI', 'XHI'])
+parser.add_argument('--trange', action='append', default=[0.16, 0.2, 0.3, 0.4])
+parser.add_argument('--mQs', nargs='+', default=[0.6]*4)
+parser.add_argument('--mGs', nargs='+', default=[1.4]*4)
+parser.add_argument('G', type=float, default=10)
+parser.add_argument('G1', type=float, default=10)
+parser.add_argument('L',  type=float, default=0.2)
+parser.add_argument('screen',  type=float, default=0.01)
+parser.add_argument('suppress',  type=float, default=1)
+parser.add_argument('--folder', action='store_const')
+parser.add_argument('--save_iter', type=bool)
+parser.add_argument('-f', '--force', )
 
+args = parser.parse_args()
+print(args)
+mode = args.mode
 
-mode = 'LO'
-
-mQ = 0.6
-mG = 1.8
-G = 13.5
-G1 = 14.5
-L = .2
-screen = .01
+Trange = args.trange
+# mQs = [0.5, 0.48, 0.45, 0.4, 0.35][::-1]
+# mQs = [0.6, 0.57, 0.53, 0.515, 0.5][::1]
+mQs = args.mQs
+# mQs = [0.6]*4
+# mGs = [1.8, 1.7, 1.55, 1.4]
+# mGs = [1.6, 1.5, 1.35, 1.2]
+mGs = args.mGs
+# mGs = [1.8]*4
+# mQ = 0.6
+# mG = 1.8
+G = args.G
+G1 = args.G1
+L = args.L
+screen = args.screen
 
 lmax = 1
 
-suppress = 1
+suppress = args.suppress
 
-out_folder = './output/TestSuppressIter_' +mode+'_G=(%.2f,%.2f)L=%.3fMQ=%.2fMG=%.2fscreen=%.3fsuppress=%.2f/'%(G, G1, L, mQ, mG, screen, suppress)
+if args.folder == None:
+    out_folder = './output/MdropBothQG9_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
+else:
+    out_folder = args.folder
 
-save_iterations = 0
+comment = 'Both masses decrease, m_g 1.4 to 1.0\nscreen  0.9'
+
+save_iterations = args.save_iter
 
 if not os.path.exists(out_folder):
     os.mkdir(out_folder)
+else:
+    raise ValueError(f"Not gonna overwrite folder {out_folder}")
+    pass
 
 ####################################################################
 ######################## Setting up the parameters #################
@@ -63,8 +93,6 @@ else:
     raise ValueError
 
 eps = 0.05
-quark_run = Particle(mQ, qrange, erange, eps=eps)
-gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 
 params = {'G' : G, 'L' : L, 'screen' : screen}
 params1 = {'G' : G1, 'L' : L, 'screen' : screen}
@@ -97,16 +125,20 @@ f.attrs.update({
     "screen" : screen,
     'L' : L,
     'Trange' : Trange,
-    'mQ' : mQ,
-    'mG' : mG,
+    'mQs' : mQs,
+    'mGs' : mGs,
     'qrange' : qrange,
     'erange' : erange,
-    'suppress' : suppress
+    'suppress' : suppress,
+    'comment' : comment
 })
 
 ########################### Iteration logic ###################
+quark_run = Particle(mQs[0], qrange, erange, eps=eps)
+gluon_run = Particle(mGs[0], qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 
-for T in Trange[:]:    
+
+for T, mQ, mG in zip(Trange[:], mQs, mGs):
     print('Running G = ', G, 'T = ', T)
     Tlabel = '%i'%(T*1e3)
     chss = []
@@ -123,8 +155,6 @@ for T in Trange[:]:
     current_iter = 0
     
     while abs(delta) > 1e-4:
-
-
         channels_QQ = QuarkTM.ChannelGroup()
         channels_QG = QuarkTM.ChannelGroup()
 
@@ -260,25 +290,26 @@ for T in Trange[:]:
         ImS_Q = IMAGs['QQ'] + IMAGs['QG']
         ReS_Q = REALs['QQ'] + REALs['QG']
 
-        om0_k = np.array([quark_run.om0(quark_run.qrange) for e in quark_run.erange])
+        om0_k = np.array([np.sqrt(mQ**2 + qrange**2) for e in quark_run.erange])
         arrE = np.array([quark_run.erange for q in quark_run.qrange]).transpose()
 
         G_Q_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_Q + 1j*ImS_Q))
 
-        quark_new = Particle(quark_run.m, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new)
+        quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new)
         
         quark_new.S = ReS_Q + 1j*ImS_Q
         
         ImS_G = IMAGs['GG'] + IMAGs['GQ']
         ReS_G = REALs['GG'] + REALs['GQ']
         
-        om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
+        # om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
+        om0_k = np.array([np.sqrt(mG**2 + qrange**2) for e in gluon_run.erange])
         arrE = np.array([gluon_run.erange for q in gluon_run.qrange]).transpose()
 
     #     G_G_new = 1/(arrE**2 - om0_k**2 + 2*1j*gluon_run.eps*arrE - (ReS_G + 1j*ImS_G))
         G_G_new = 1/(arrE - om0_k + 0*1j*gluon_run.eps - (ReS_G + 1j*ImS_G))
     #     gluon_new = Particle(gluon_run.m, qrange, erange, eps=2e-2, stat='b', d=16, R=-2*imag(G_G_new))
-        gluon_new = Particle(gluon_run.m, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
+        gluon_new = Particle(mG, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
         
         gluon_new.S = ReS_G + 1j*ImS_G
         
@@ -311,8 +342,9 @@ for T in Trange[:]:
         print('sum Q = ', sumQ)
         print('sum G = ', sumG)
 
-        if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
-            raise ValueError('Sum rule not fulfilled, STOP')
+        if n_iter > 1:
+            if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
+                raise ValueError('Sum rule not fulfilled, STOP')
 
         if save_iterations:
             folder_iter = out_folder + Tlabel
