@@ -44,14 +44,15 @@ erange = df.attrs['erange']
 
 # mQ = df.attrs['mQ']
 mQs = df.attrs['mQs']
-mG = df.attrs['mG']
+# mG = df.attrs['mG']
+mGs = df.attrs['mGs']
 
 pQs = []
 pGs = []
 
-for T, Tkey, mQ in zip(Trange, Tkeys, mQs):
+for T, Tkey, mQ, mG in zip(Trange, Tkeys, mQs, mGs):
     pQ = Particle(mQ, qrange, erange, Gtab=df[Tkey]['Q']['G'])
-    pG = Particle(df.attrs['mG'], qrange, erange, Gtab=df[Tkey]['G']['G'], stat='b', d=16)
+    pG = Particle(mG, qrange, erange, Gtab=df[Tkey]['G']['G'], stat='b', d=16)
 
     pQs += [pQ]
     pGs += [pG]
@@ -60,7 +61,7 @@ ps_Q = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pQs)])
 ps_G = np.array([tm.OmQ_B(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pGs)])
 
 ps_free_Q = np.array([quad(lambda z: z*z*T*log(1 + exp(-sqrt(mQ**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T, mQ in zip(Trange, mQs)])
-ps_free_G = np.array([quad(lambda z: -z*z*T*log(1 - exp(-sqrt(mG**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T in Trange])
+ps_free_G = np.array([quad(lambda z: -z*z*T*log(1 - exp(-sqrt(mG**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T, mG in zip(Trange, mGs)])
 
 ps_S_Q = []
 ps_S_G = []
@@ -314,4 +315,8 @@ plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
 plt.axhline(0, lw=1, ls=':', c='black')
 plt.savefig(os.path.join(folder, 'PT.pdf'), bbox_inches='tight')
 plt.xlabel('T [GeV]')
+try:
+    plt.title(df.attrs['comment'])
+except:
+    pass
 plt.ylabel(r'P/T$^4$')

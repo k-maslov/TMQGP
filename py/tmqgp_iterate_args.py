@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser()
 
 
 mode = 'LO'
-Trange = [0.0.5]
+
 mQ = 0.6
 mG = 1.8
 G = 13.5

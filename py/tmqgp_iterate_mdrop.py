@@ -20,26 +20,37 @@ NTHR = 18
 
 ################## Reading the parameter file ######################
 mode = 'LO'
-Trange = [0.16, 0.2, 0.3, 0.4]
-mQs = [0.6, 0.58, 0.55, 0.5, 0.45]
-mGs = [1.8, 1.75, 1.6, 1.5]
+Trange = [0.16, 0.2, 0.3, 0.4][::1]
+# mQs = [0.5, 0.48, 0.45, 0.4, 0.35][::-1]
+# mQs = [0.6, 0.57, 0.53, 0.515, 0.5][::1]
+mQs = [0.6 , 0.57, 0.5 , 0.45, 0.4 ]
+# mQs = [0.6]*4
+# mGs = [1.8, 1.7, 1.55, 1.4]
+# mGs = [1.6, 1.5, 1.35, 1.2]
+mGs = [1.4, 1.3, 1.15, 1.][::1]
+# mGs = [1.8]*4
 # mQ = 0.6
 # mG = 1.8
-G = 14
-G1 = 14.5
-L = .2
-screen = .01
+G = 10.0
+G1 = 10.5
+L = .3
+screen = .005
 
 lmax = 1
 
-suppress = 1
+suppress = 0.8
 
-out_folder = './output/TestMdropQG_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
+out_folder = './output/MdropBothQG9_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
+
+comment = 'Both masses decrease, m_g 1.4 to 1.0\nscreen  0.9'
 
 save_iterations = 0
 
 if not os.path.exists(out_folder):
     os.mkdir(out_folder)
+else:
+    raise ValueError(f"Not gonna overwrite folder {out_folder}")
+    pass
 
 ####################################################################
 ######################## Setting up the parameters #################
@@ -98,6 +109,7 @@ f.attrs.update({
     'qrange' : qrange,
     'erange' : erange,
     'suppress' : suppress,
+    'comment' : comment
 })
 
 ########################### Iteration logic ###################
@@ -309,8 +321,9 @@ for T, mQ, mG in zip(Trange[:], mQs, mGs):
         print('sum Q = ', sumQ)
         print('sum G = ', sumG)
 
-        if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
-            raise ValueError('Sum rule not fulfilled, STOP')
+        if n_iter > 1:
+            if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
+                raise ValueError('Sum rule not fulfilled, STOP')
 
         if save_iterations:
             folder_iter = out_folder + Tlabel
