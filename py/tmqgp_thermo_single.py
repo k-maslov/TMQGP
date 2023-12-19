@@ -27,32 +27,34 @@ matplotlib.style.use('publication')
 # exit()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("folder", type=str, help='Folder to process')
+parser.add_argument("file", type=str, help='Data file name')
 
 args = parser.parse_args()
 
-folder = args.folder
-if not os.path.exists(folder):
-    raise ValueError('Folder not found')
+file = args.file
+if not os.path.exists(file):
+    raise ValueError('Data file not found')
 
-df = h5py.File(os.path.join(folder, 'data.hdf5'), 'r')
-Tkeys = list(df.keys())
+df = h5py.File(file, 'r+')
 
-Trange = array([1e-3*int(T) for T in Tkeys])
+df_phi = h5py.File('th_'+file, 'w')
+
+Trange = [df.attrs['T']]
+
 qrange = df.attrs['qrange']
 erange = df.attrs['erange']
 
 # mQ = df.attrs['mQ']
-mQs = df.attrs['mQs']
+mQs = [df.attrs['mQ']]
 # mG = df.attrs['mG']
-mGs = df.attrs['mGs']
+mGs = [df.attrs['mG']]
 
 pQs = []
 pGs = []
 
-for T, Tkey, mQ, mG in zip(Trange, Tkeys, mQs, mGs):
-    pQ = Particle(mQ, qrange, erange, Gtab=df[Tkey]['Q']['G'])
-    pG = Particle(mG, qrange, erange, Gtab=df[Tkey]['G']['G'], stat='b', d=16)
+for T, mQ, mG in zip(Trange, mQs, mGs):
+    pQ = Particle(mQ, qrange, erange, Gtab=df['Q']['G'])
+    pG = Particle(mG, qrange, erange, Gtab=df['G']['G'], stat='b', d=16)
 
     pQs += [pQ]
     pGs += [pG]
@@ -66,8 +68,8 @@ ps_free_G = np.array([quad(lambda z: -z*z*T*log(1 - exp(-sqrt(mG**2 + z**2)/T)) 
 ps_S_Q = []
 ps_S_G = []
 
-for T, Tkey, pt in zip(Trange, Tkeys, pQs):
-    sigma = df[Tkey]['Q']['S']
+for T, pt in zip(Trange, pQs):
+    sigma = df['Q']['S']
     
     iReS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(sigma)))
     iImS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(sigma)))
@@ -77,8 +79,8 @@ for T, Tkey, pt in zip(Trange, Tkeys, pQs):
     
     ps_S_Q += [tm.OmS_F(T, iImG, iReG, iImS, iReS)]
 
-for T, Tkey, pt in zip(Trange, Tkeys, pGs):
-    sigma = df[Tkey]['G']['S']
+for T, pt in zip(Trange, pGs):
+    sigma = df['G']['S']
 
     iReS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(sigma)))
     iImS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(sigma)))
@@ -102,55 +104,55 @@ keys_QG = ['qg3', 'qg6', 'qg15']
 keys_GG = ['gg1', 'gg16', 'gg27']
 keys_GQ = ['gq3', 'gq6', 'gq15']
 
-f_phi = h5py.File(os.path.join(folder, 'Phi.h5py'), 'w')
+# f_phi = h5py.File(os.path.join(folder, 'Phi.h5py'), 'w')
 lmax = 1
 
 LTs = [dict() for T in Trange]
 LTs_Q = []
-for T, Tkey, LT in zip(Trange, Tkeys, LTs):
+for T, LT in zip(Trange, LTs):
     LT_Q = {'QQ':0, 'QG':0}
     
     for keys, _ in zip([keys_QQ, keys_QG], ['QQ', 'QG']):
         for k in keys:
-            ds = df[Tkey]['V'][k]['0'].attrs['ds']
-            da = df[Tkey]['V'][k]['0'].attrs['da']
-            Fa = df[Tkey]['V'][k]['0'].attrs['Fa']
+            ds = df['V'][k]['0'].attrs['ds']
+            da = df['V'][k]['0'].attrs['da']
+            Fa = df['V'][k]['0'].attrs['Fa']
             # print(k, ds, da, Fa, NFS[k])
     
             _lt = 0
             lts = []
             LT[k] = 0
             for l in range(lmax + 1):
-                x = array(df[Tkey]['X'][k]['%i'%l])
-                v = array(df[Tkey]['V'][k]['%i'%l])
+                x = array(df['X'][k]['%i'%l])
+                v = array(df['V'][k]['%i'%l])
                 
                 _lt = (2*l + 1) * np.sign(v[1])*4*pi*NFS[k]*ds * da / 6 * v**2 / x * log(1 - x)
                 LT_Q[_] += _lt
                 LT[k] += _lt
-                f_phi.create_dataset(f'{Tkey}/LogT/{k}/{l}', data=_lt)
+                df_phi.create_dataset(f'LogT/{k}/{l}', data=_lt)
     LTs_Q += [LT_Q]
 
 LTs_G = []
-for T, Tkey, LT in zip(Trange, Tkeys, LTs):
+for T, LT in zip(Trange, LTs):
     LT_G = {'GG':0, 'GQ':0}
     
     for keys, _ in zip([keys_GG, keys_GQ], ['GG', 'GQ']):
         for k in keys:
-            ds = df[Tkey]['V'][k]['0'].attrs['ds']
-            da = df[Tkey]['V'][k]['0'].attrs['da']
-            Fa = df[Tkey]['V'][k]['0'].attrs['Fa']
+            ds = df['V'][k]['0'].attrs['ds']
+            da = df['V'][k]['0'].attrs['da']
+            Fa = df['V'][k]['0'].attrs['Fa']
     
             _lt = 0
             lts = []
             LT[k] = 0
             for l in range(lmax + 1):
-                x = array(df[Tkey]['X'][k]['%i'%l])
-                v = array(df[Tkey]['V'][k]['%i'%l])
+                x = array(df['X'][k]['%i'%l])
+                v = array(df['V'][k]['%i'%l])
                 
                 _lt = (2*l + 1) * np.sign(v[1])*4*pi*NFS[k]*ds * da / 16 * v**2 / x * log(1 - x)
                 LT_G[_] += _lt
                 LT[k] += _lt
-                f_phi.create_dataset(f'{Tkey}/LogT/{k}/{l}', data=_lt)
+                df_phi.create_dataset(f'LogT/{k}/{l}', data=_lt)
     LTs_G += [LT_G]
 
 ################################ Calculating Phi ###############################
@@ -159,7 +161,7 @@ for T, Tkey, LT in zip(Trange, Tkeys, LTs):
 LogSs_Q = []
 Phis_Q = []
 
-for i, T, Tkey, LTs in zip(range(len(Trange)), Trange, Tkeys, LTs_Q):
+for i, T, LTs in zip(range(len(Trange)), Trange, LTs_Q):
     ImLogSs_Q = []
     ReLogSs_Q = []
     # iterating over types of diagrams -- QQ and QG
@@ -190,7 +192,7 @@ for i, T, Tkey, LTs in zip(range(len(Trange)), Trange, Tkeys, LTs_Q):
         ImLogSs_Q += [ST]
         ReLogSs_Q += [ReST]
 
-        f_phi.create_dataset(f'{Tkey}/LogS/{key}', data=1j*ST + ReST)
+        df_phi.create_dataset(f'LogS/{key}', data=1j*ST + ReST)
 
     LogSs_Q += [1j*np.array(ImLogSs_Q) + np.array(ReLogSs_Q)]
 
@@ -211,7 +213,7 @@ Phis_Q = array(Phis_Q)
 LogSs_G = []
 Phis_G = []
 
-for i, T, Tkey, LTs in zip(range(len(Trange)), Trange, Tkeys, LTs_G):
+for i, T, LTs in zip(range(len(Trange)), Trange, LTs_G):
     ImLogSs_G = []
     ReLogSs_G = []
     # iterating over types of diagrams -- GG and GQ
@@ -242,7 +244,7 @@ for i, T, Tkey, LTs in zip(range(len(Trange)), Trange, Tkeys, LTs_G):
         ImLogSs_G += [ST]
         ReLogSs_G += [ReST]
 
-        f_phi.create_dataset(f'{Tkey}/LogS/{key}', data=1j*ST + ReST)
+        df_phi.create_dataset(f'LogS/{key}', data=1j*ST + ReST)
 
     LogSs_G += [1j*np.array(ImLogSs_G) + np.array(ReLogSs_G)]
 
@@ -285,39 +287,47 @@ P_tot = P_QP_G + P_QP_Q + P_Phi
 df_P = pd.DataFrame(array([Trange, P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G]).transpose(), 
                columns=['T', 'Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'])
 
-df_P.to_csv(os.path.join(folder, 'pressure.csv'))
 
-f_phi.attrs.update(
-    dict(zip(['T', 'Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'], 
-            array([Trange, P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G])))
+
+# df_P.to_csv('pressure.csv')
+
+
+df.attrs.update(
+    dict(zip(['Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'], 
+            array([P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G])))
 )
 
-f_phi.close()
+df_phi.attrs.update(
+    dict(zip(['Ptot', 'P_Q_Q', 'P_Q_G', 'P_S_Q', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_G'], 
+            array([P_tot, P_Q_Q, P_Q_G, P_S_Q, P_S_G, P_Phi, P_Phi_Q, P_Phi_G])))
+)
 
-from matplotlib import pyplot as plt
-import matplotlib
-matplotlib.style.use('publication')
+df.close()
+df_phi.close()
+# from matplotlib import pyplot as plt
+# import matplotlib
+# matplotlib.style.use('publication')
 
-lp, = plt.plot(Trange, P_Phi/Trange**4, label=r'$\frac{1}{ 2 }\Phi$')
-lQ, = plt.plot(Trange, P_QP_Q/Trange**4, label='quarks')
-plt.plot(Trange, 3*3*2*2*ps_free_Q/Trange**4, ls=':', c=lQ.get_c())
-lG, = plt.plot(Trange, P_QP_G/Trange**4, label='gluons')
-plt.plot(Trange, 8*2*ps_free_G/Trange**4, ls=':', c=lG.get_c(), label='free')
-plt.plot(Trange, (P_QP_Q + P_QP_G)/Trange**4, ls='-.', c='black')
-plt.plot(Trange, P_tot/Trange**4, c='black', label='total')
-plt.ylim(-0.5, 5)
-plt.legend(ncol=2, fontsize=14)
+# lp, = plt.plot(Trange, P_Phi/Trange**4, label=r'$\frac{1}{ 2 }\Phi$')
+# lQ, = plt.plot(Trange, P_QP_Q/Trange**4, label='quarks')
+# plt.plot(Trange, 3*3*2*2*ps_free_Q/Trange**4, ls=':', c=lQ.get_c())
+# lG, = plt.plot(Trange, P_QP_G/Trange**4, label='gluons')
+# plt.plot(Trange, 8*2*ps_free_G/Trange**4, ls=':', c=lG.get_c(), label='free')
+# plt.plot(Trange, (P_QP_Q + P_QP_G)/Trange**4, ls='-.', c='black')
+# plt.plot(Trange, P_tot/Trange**4, c='black', label='total')
+# plt.ylim(-0.5, 5)
+# plt.legend(ncol=2, fontsize=14)
 
-lat = pd.read_csv(os.path.join(os.path.dirname(__file__), "PT.csv"))
-plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
-plt.axhline(0, lw=1, ls=':', c='black')
-plt.xlabel('T [GeV]')
+# lat = pd.read_csv(os.path.join(os.path.dirname(__file__), "PT.csv"))
+# plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
+# plt.axhline(0, lw=1, ls=':', c='black')
+# plt.xlabel('T [GeV]')
 
-# try:
-#     plt.title(df.attrs['comment'])
-# except:
-#     pass
-plt.ylabel(r'P/T$^4$')
+# # try:
+# #     plt.title(df.attrs['comment'])
+# # except:
+# #     pass
+# plt.ylabel(r'P/T$^4$')
 
 
-plt.savefig(os.path.join(folder, 'PT.pdf'), bbox_inches='tight')
+# plt.savefig(os.path.join(folder, 'PT.pdf'), bbox_inches='tight')

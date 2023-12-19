@@ -24,3 +24,5 @@ CMakeCache*
 *.hdf5
 *.h5py
 *.swp
+screenlog*
+0.*

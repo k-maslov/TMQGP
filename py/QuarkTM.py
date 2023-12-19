@@ -158,7 +158,7 @@ class IterController:
 
 class Particle:
     def __init__(self, m, qrange, erange, R=None, stat='f', eps=5e-2, d=6, 
-            propagator=1, Gtab=None):
+            propagator=1, Gtab=None, mu=0):
         self.m = m
         self.eps = eps
         self.R = None
@@ -175,7 +175,7 @@ class Particle:
             self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(Gtab)))
         else:
             if R is None:
-                self.Gtab =np.array([[self.G0(_e, _k)
+                self.Gtab =np.array([[self.G0(_e, _k, mu=mu)
                                 for _k in self.qrange]
                                 for _e in self.erange])
                 self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(self.Gtab)))
@@ -196,10 +196,10 @@ class Particle:
     def om0(self, q):
         return np.sqrt(self.m**2 + q**2)
         
-    def G0(self, E, q):
+    def G0(self, E, q, mu=0):
         # if self.propagator == 'Th':
         if self.stat == 'f':
-            return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2)
+            return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2 + mu)
             # return 1 / (E - self.om0(q) + 1j*self.eps)
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
@@ -226,7 +226,7 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float,  
                  Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True):
         self.p_i = p_i
         self.p_j = p_j
         self.l = l
@@ -270,8 +270,9 @@ class Channel:
         self.da = da
         if p_j.stat == 'f':
             self.Nf = 3
-            if p_i.stat == 'b': # gluons interact with quarks and antiquarks
-                self.Nf = 6
+            if mu0:
+                if p_i.stat == 'b': # gluons interact with quarks and antiquarks
+                    self.Nf = 6
         else:
             self.Nf = 1
 
@@ -531,7 +532,7 @@ def set_S_q(ch):
 
 class ChannelL:
     def __init__(self, key : str, lmax : int, p_i: Particle, p_j: Particle, T : float,  
-                params, Fa=1, ds=1, da=1, Nf=1, G2=None):
+                params, Fa=1, ds=1, da=1, G2=None, mu0=True):
         self.lmax = lmax
         self.key = key
 
@@ -549,13 +550,13 @@ class ChannelL:
             if G2 == None:
                 if l == 0:
                     ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
-                    l=l)
+                    l=l, mu0=mu0)
                 else:
                     ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
-                    l=l, G2=self.chs[0].G2)
+                    l=l, G2=self.chs[0].G2, mu0=mu0)
             else:
                 ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
-                    l=l, G2=G2)
+                    l=l, G2=G2, mu0=mu0)
 
             self.chs += [ch]
         self.Nf = self.chs[0].Nf
@@ -570,10 +571,16 @@ class ChannelL:
         
 
 class ChannelGroup:
-    def __init__(self):
+    def __init__(self, label='', mu0=True):
+        self.label = label
         self.channels = dict()
+        self.mu0 = mu0
 
     def addChannel(self, ch):
+        if self.mu0 == False and ch.Nf == 6:
+            for c in ch.chs:
+                c.Nf = 3 # TODO: too dirty
+                ch.Nf = 3
         self.channels[ch.key] = ch
         
     def populate_T(self):

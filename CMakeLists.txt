@@ -12,13 +12,13 @@ endif(UNIX)
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy)
 
-find_package(MPI)
-include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+#find_package(MPI)
+#include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
-IF(MPI_CXX_FOUND)
-        INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
-        LIST(APPEND SCR_EXTERNAL_LIBS ${MPI_CXX_LIBRARIES})
-ENDIF(MPI_CXX_FOUND)
+#IF(MPI_CXX_FOUND)
+#        INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
+#        LIST(APPEND SCR_EXTERNAL_LIBS ${MPI_CXX_LIBRARIES})
+#ENDIF(MPI_CXX_FOUND)
 
 if(WIN32)
 #set(SWIG_EXEC "C:\\msys64\\usr\\bin\\swig.exe"

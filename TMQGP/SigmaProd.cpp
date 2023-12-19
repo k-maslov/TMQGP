@@ -98,7 +98,7 @@ int l){
     funct i_func_k = [&](double k) -> double {
         return x_integral_cm_onshell(omp, om, p, k, iImT, iImG, eps1, eps2, 0, l) *  iImG(k, omp);
     };
-    integ_k.integrate(&i_func_k, 0, 3, res, err);
+    integ_k.integrate(&i_func_k, 0, 5, res, err);
     return res;
 }
 
@@ -113,7 +113,7 @@ double sigma_ff_onshell(double om, double p, double T,
         return res;
     };
 
-    integ_E.integrate(&i_func_e, -1, 4, res, err);
+    integ_E.integrate(&i_func_e, -3, 5, res, err);
     return res;
 }
 
@@ -128,7 +128,7 @@ double sigma_bb_onshell(double om, double p, double T,
         return res;
     };
 
-    integ_E.integrate(&i_func_e, 0, 4, res, err);
+    integ_E.integrate(&i_func_e, 0, 5, res, err);
     return res;
 }
 
@@ -143,7 +143,7 @@ double sigma_bf_onshell(double om, double p, double T,
         return res;
     };
 
-    integ_E.integrate(&i_func_e, -1, 4, res, err);
+    integ_E.integrate(&i_func_e, -3, 5, res, err);
     return res;
 }
 
@@ -158,7 +158,7 @@ double sigma_fb_onshell(double om, double p, double T,
         return res;
     };
 
-    integ_E.integrate(&i_func_e, 0, 4, res, err);
+    integ_E.integrate(&i_func_e, 0, 5, res, err);
     return res;
 }
 
@@ -208,7 +208,7 @@ double sigma_tot(double om, double p, double T, TMArray TMs, Interpolator2D & iI
     //     return r;
     // };
     
-    // integ_E.integrate(&i_func_e, 0, 4, res, err);
+    // integ_E.integrate(&i_func_e, 0, 5, res, err);
     // return res;
     return -1;
 }

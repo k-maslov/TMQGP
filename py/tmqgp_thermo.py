@@ -301,7 +301,7 @@ plt.plot(Trange, P_tot/Trange**4, c='black', label='total')
 plt.ylim(-0.5, 5)
 plt.legend(ncol=2, fontsize=14)
 
-lat = pd.read_csv('/home/const/MEGA/Physics/GrabbedFigures/LiuRapp2018/PT.csv')
+lat = pd.read_csv(os.path.join(os.path.dirname(__file__), "PT.csv"))
 plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
 plt.axhline(0, lw=1, ls=':', c='black')
 plt.savefig(os.path.join(folder, 'PT.pdf'), bbox_inches='tight')
