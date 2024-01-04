@@ -23,16 +23,16 @@ NTHR = 18
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', type=str, default='LO', choices=['LO', 'HI', 'XHI'])
 parser.add_argument('--trange', action='append', default=[0.16, 0.2, 0.3, 0.4])
-parser.add_argument('--mQs', type=float, nargs='+', default=[0.6]*4)
-parser.add_argument('--mGs', type=float, nargs='+', default=[1.4]*4)
+parser.add_argument('--mQs', nargs='+', default=[0.6]*4)
+parser.add_argument('--mGs', nargs='+', default=[1.4]*4)
 parser.add_argument('G', type=float, default=10)
 parser.add_argument('G1', type=float, default=10)
 parser.add_argument('L',  type=float, default=0.2)
 parser.add_argument('screen',  type=float, default=0.01)
 parser.add_argument('suppress',  type=float, default=1)
-parser.add_argument('--folder', type=str, default='')
-parser.add_argument('--save_iter', action='store_true')
-parser.add_argument('-f', '--force', action='store_true')
+parser.add_argument('--folder', action='store_const')
+parser.add_argument('--save_iter', type=bool)
+parser.add_argument('-f', '--force', )
 
 args = parser.parse_args()
 print(args)
@@ -58,7 +58,7 @@ lmax = 1
 
 suppress = args.suppress
 
-if args.folder == '':
+if args.folder == None:
     out_folder = './output/MdropBothQG9_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
 else:
     out_folder = args.folder
@@ -70,10 +70,8 @@ save_iterations = args.save_iter
 if not os.path.exists(out_folder):
     os.mkdir(out_folder)
 else:
-    if not args.force:
-        raise ValueError(f"Not gonna overwrite folder {out_folder}")
-    else:
-        pass
+    raise ValueError(f"Not gonna overwrite folder {out_folder}")
+    pass
 
 ####################################################################
 ######################## Setting up the parameters #################
@@ -156,7 +154,7 @@ for T, mQ, mG in zip(Trange[:], mQs, mGs):
     n_iter = 0
     current_iter = 0
     
-    while abs(delta) > 1e-3:
+    while abs(delta) > 1e-4:
         channels_QQ = QuarkTM.ChannelGroup()
         channels_QG = QuarkTM.ChannelGroup()
 
@@ -344,6 +342,10 @@ for T, mQ, mG in zip(Trange[:], mQs, mGs):
         print('sum Q = ', sumQ)
         print('sum G = ', sumG)
 
+        if n_iter > 1:
+            if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
+                raise ValueError('Sum rule not fulfilled, STOP')
+
         if save_iterations:
             folder_iter = out_folder + Tlabel
             if not os.path.exists(folder_iter):
@@ -367,13 +369,6 @@ for T, mQ, mG in zip(Trange[:], mQs, mGs):
             f_iter.create_dataset(f'Q/S', data=quark_new.S)
             f_iter.create_dataset(f'G/S', data=gluon_new.S)
             f_iter.close()
-
-
-        if n_iter > 1:
-            if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
-                break
-                raise ValueError('Sum rule not fulfilled, STOP')
-                
 
         n_iter += 1
 
