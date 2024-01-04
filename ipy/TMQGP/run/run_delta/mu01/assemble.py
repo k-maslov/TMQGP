@@ -50,27 +50,22 @@ P_QP_Q = df_p.P_Q_Q + df_p.P_S_Q
 P_QP_A = df_p.P_Q_A + df_p.P_S_A
 P_QP_G = df_p.P_Q_G + df_p.P_S_G
 
-print(P_QP_A)
-print(P_QP_Q)
+print(P_QP_A/Trange**4)
+print(P_QP_Q/Trange**4)
 
-lat2 = pd.read_csv(os.path.join(os.path.dirname(QuarkTM.__file__), "lat_bors2012.csv"))
-
-lp, = plt.plot(Trange, df_p.P_Phi/Trange**4, label=r'$\Phi$')
-plt.plot(Trange, df_p.P_Phi_Q/Trange**4, label=r'$\Phi_Q$', c=lp.get_c(), ls='--')
-plt.plot(Trange, df_p.P_Phi_A/Trange**4, label=r'$\Phi_A$', c=lp.get_c(), ls=':')
+lp, = plt.plot(Trange, df_p.P_Phi/Trange**4, label=r'$\frac{1}{ 2 }\Phi$')
 lQ, = plt.plot(Trange, P_QP_Q/Trange**4, label='quarks')
-lQ, = plt.plot(Trange, P_QP_A/Trange**4, label='aquarks')
+lA, = plt.plot(Trange, P_QP_A/Trange**4, label='aquarks', ls='--')
 # plt.plot(Trange, 3*3*2*2*ps_free_Q/Trange**4, ls=':', c=lQ.get_c())
 lG, = plt.plot(Trange, P_QP_G/Trange**4, label='gluons')
 # plt.plot(Trange, 8*2*ps_free_G/Trange**4, ls=':', c=lG.get_c(), label='free')
 plt.plot(Trange, (P_QP_Q + P_QP_G)/Trange**4, ls='-.', c='black')
 plt.plot(Trange, df_p.Ptot/Trange**4, c='black', label='total')
-plt.ylim(-0.5, 7)
+plt.ylim(-0.5, 5)
 plt.legend(ncol=2, fontsize=14)
 
 # lat = pd.read_csv(os.path.join(os.path.dirname(Quark), "PT.csv"))
 plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
-plt.plot(lat2.t*1e-3, lat2.P4, ls='none', marker='o')
 plt.axhline(0, lw=1, ls=':', c='black')
 plt.xlabel('T [GeV]')
 

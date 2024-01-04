@@ -10,7 +10,8 @@ Trange_fit = lat.x[(lat.x > 0.16) & (lat.x < 0.4)].values[::2]
 
 df_out = h5py.File('result.hdf5', 'w')
 
-
+mQs = []
+mGs = []
 for T in Trange_fit:
     mQ = float(np.loadtxt('sol_%.3f.dat'%T))
     fname = 'fit_%.3f_%.16e.h5py'%(T, mQ)
@@ -21,9 +22,16 @@ for T in Trange_fit:
     # df_out.create_group(f'{Tkey}/')
     df.copy(df, df_out, Tkey)
     # df_out.create_dataset(f'{Tkey}/', data=df)
+    mQs += [df.attrs['mQ']]
+    mGs += [df.attrs['mG']]
 
     df.close()
 
+print(mQs)
+print(mGs)
+print(Trange_fit)
+
+df_out.attrs.update({'mQs' : mQs, 'mGs' : mGs, 'Trange' : Trange_fit})
 
 keys = ['P_Phi', 'P_Phi_G', 'P_Phi_Q', 'P_Q_G', 'P_Q_Q', 'P_S_G', 'P_S_Q', 'Ptot']
 

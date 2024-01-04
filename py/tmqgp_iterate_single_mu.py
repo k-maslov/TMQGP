@@ -170,7 +170,7 @@ delta = 1
 
 n_iter = 0
 current_iter = 0
-thr = 1e-3
+thr = 1e-2
 
 while abs(delta) > thr:
     channels_QQ = QuarkTM.ChannelGroup(mu0=False)

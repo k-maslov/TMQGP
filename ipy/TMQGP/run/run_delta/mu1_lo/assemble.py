@@ -70,7 +70,7 @@ plt.legend(ncol=2, fontsize=14)
 
 # lat = pd.read_csv(os.path.join(os.path.dirname(Quark), "PT.csv"))
 plt.plot(lat.x, lat.PT_lat, ls='none', marker='o')
-plt.plot(lat2.t*1e-3, lat2.P4, ls='none', marker='o')
+# plt.plot(lat2.t*1e-3, lat2.P4, ls='none', marker='o')
 plt.axhline(0, lw=1, ls=':', c='black')
 plt.xlabel('T [GeV]')
 

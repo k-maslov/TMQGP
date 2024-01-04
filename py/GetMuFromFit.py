@@ -18,13 +18,23 @@ from syntax_sugar import process_syntax as p
 from syntax_sugar import thread_syntax as t
 NTHR = 18
 
+parser = argparse.ArgumentParser()
+parser.add_argument('mu_B', type=float)
+args = parser.parse_args()
+
+fname_fit = '/home/rfrgroup/k.maslov/Numerics/TMQGP/ipy/TMQGP/run/run_delta/try_fit/result.hdf5'
+df_fit = h5py.File(fname_fit, 'r')
+
+Trange = df_fit.attrs['Trange']
+mGs = df_fit.attrs['mGs']
+mQs = df_fit.attrs['mQs']
 
 out_folder = '.'
 
-Trange = [0.16, 0.2, 0.3, 0.4]
+# Trange = [0.16, 0.2, 0.3, 0.4]
 
-mGs = [1.4, 1.25, 1., 0.9]
-mQs = [0.61, 0.6, 0.56, 0.49]
+# mGs = [1.4, 1.25, 1., 0.9]
+# mQs = [0.61, 0.6, 0.56, 0.49]
 
 screen = 0.0065
 suppress = 0.8
@@ -53,7 +63,7 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
             f.close()
     
     if not exists or force_iterate:
-        mu = 1/3 * T
+        mu = args.mu_B/3 * T
         cmd = f'python3 -m tmqgp_iterate_single_mu {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} '
         cmd += init_arg
         print('Running ' + cmd)

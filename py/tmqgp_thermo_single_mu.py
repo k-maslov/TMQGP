@@ -328,7 +328,9 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_G):
     ImLogSs_G = []
     ReLogSs_G = []
     # iterating over types of diagrams -- GG and GQ
-    for key, func, p2 in zip(['GG', 'GQ'], [tm.sigma_bb_onshell, tm.sigma_bf_onshell], [pGs[i], pQs[i]]):
+    for key, func, p2 in zip(['GG', 'GQ', 'GA'], 
+    [tm.sigma_bb_onshell, tm.sigma_bf_onshell, tm.sigma_bf_onshell], 
+    [pGs[i], pQs[i], pAs[i]]):
         LT = LTs[key]
 
         iImLT = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(LT)))
@@ -386,7 +388,7 @@ P_QP_A = Nc * Nf * Ns * Na * (ps_A - ps_S_A)
 
 P_Q_G = (Nc**2 - 1) * Ns * (ps_G)
 P_Q_Q = Nc * Nf * Ns * Na * (ps_Q)
-P_Q_A = Nc * Nf * Ns * Na * (ps_Q)
+P_Q_A = Nc * Nf * Ns * Na * (ps_A)
 
 P_S_G = (Nc**2 - 1) * Ns * (- ps_S_G)
 P_S_Q = Nc * Nf * Ns * Na * (- ps_S_Q)
@@ -413,12 +415,14 @@ df_P = pd.DataFrame(array([Trange, P_tot, P_Q_Q, P_Q_A,
 
 
 df.attrs.update(
-    df_P.to_dict()
+     dict(zip(['Ptot', 'P_Q_Q', 'P_Q_A', 'P_Q_G', 'P_S_Q', 'P_S_A', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'], 
+            array([P_tot, P_Q_Q, P_Q_A, P_Q_G, P_S_Q, P_S_A, P_S_G, P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G])))
 )
 
 df_phi.attrs.update(
-    df_P.to_dict()
-)
+dict(zip(['Ptot', 'P_Q_Q', 'P_Q_A', 'P_Q_G', 'P_S_Q', 'P_S_A', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'], 
+            array([P_tot, P_Q_Q, P_Q_A, P_Q_G, P_S_Q, P_S_A, P_S_G, P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G])))
+            )
 
 df.close()
 df_phi.close()
