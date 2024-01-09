@@ -64,7 +64,7 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
     
     if not exists or force_iterate:
         mu = args.mu_B/3 * T
-        cmd = f'python3 -m tmqgp_iterate_single_mu {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} '
+        cmd = f'python3 -m tmqgp_iterate_single_mu {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter '
         cmd += init_arg
         print('Running ' + cmd)
         ret_code = os.system(cmd)
