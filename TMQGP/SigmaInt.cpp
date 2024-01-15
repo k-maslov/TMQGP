@@ -14,6 +14,7 @@
 IntGSL<std::function<double(double)>> integ_x;
 IntGSL<std::function<double(double)>> integ_k;
 IntGSL<std::function<double(double)>> integ_E;
+// Int_gsl_adaptive integ_E;
 
 Int_gsl_adaptive integ_Om;
 Int_gsl_adaptive integ_Om2;

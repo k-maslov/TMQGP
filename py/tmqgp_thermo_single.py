@@ -231,6 +231,12 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_G):
                     for q in tqdm.tqdm(qrange)])
     
         ST = ST.transpose()
+        
+        mult = 1
+        if key == 'GQ':
+            mult = 2
+        
+        ST *= mult
     
         ReST = []
     

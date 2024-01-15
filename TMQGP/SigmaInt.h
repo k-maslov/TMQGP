@@ -29,6 +29,7 @@ double x_integrand(double x, double k, double E, double p, Interpolator2D & iImT
 extern IntGSL<std::function<double(double)>> integ_x;
 extern IntGSL<std::function<double(double)>> integ_k;
 extern IntGSL<std::function<double(double)>> integ_E;
+// extern Int_gsl_adaptive integ_E;
  
 extern Int_gsl_adaptive integ_Om;
 extern Int_gsl_adaptive integ_Om2;

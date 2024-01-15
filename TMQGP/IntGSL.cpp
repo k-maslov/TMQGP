@@ -8,7 +8,7 @@ void Int_gsl_adaptive::integrate(funct * func, double a, double b, double & resu
 		gsl_f.params = func;
 		size_t neval;
 
-        gsl_integration_qags(&gsl_f, a, b, 1e-9, 1e-9, 1000,
+        gsl_integration_qag(&gsl_f, a, b, 1e-7, 1e-7, 20, 2,
 				w, &result, &error);
 }
 

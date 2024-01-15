@@ -8,22 +8,28 @@ import QuarkTM
 lat = pd.read_csv(os.path.join(os.path.dirname(QuarkTM.__file__), "PT.csv"))
 Trange_fit = lat.x[(lat.x > 0.16) & (lat.x < 0.4)].values[::2]
 
-df_out = h5py.File('data.hdf5', 'w')
+df_out = h5py.File('result.hdf5', 'w')
+th_out = h5py.File('thermo.hdf5', 'w')
 
 mQs = []
 mGs = []
 for T in Trange_fit:
-    Tkey = str(int(1e3*T))
-    # mQ = float(np.loadtxt('sol_%.3f.dat'%T))
-    fname = f'data_single_{Tkey}.hdf5'
+    mQ = float(np.loadtxt('sol_%.3f.dat'%T))
+    fname = 'fit_%.3f_%.16e.h5py'%(T, mQ)
 
     df = h5py.File(fname, 'r')
+    df_th = h5py.File('th_' + fname, 'r')
+
+    Tkey = str(int(1e3*T))
     # df_out.create_group(f'{Tkey}/')
     df.copy(df, df_out, Tkey)
+    df_th.copy(df_th, th_out, Tkey)
     # df_out.create_dataset(f'{Tkey}/', data=df)
     mQs += [df.attrs['mQ']]
     mGs += [df.attrs['mG']]
+
     df.close()
+    df_th.close()
 
 print(mQs)
 print(mGs)
@@ -39,11 +45,9 @@ df_p = pd.DataFrame(d_p)
 
 print(df_p)
 
-print(df_p.to_dict('list'))
 
-df_out.attrs.update(df_p.to_dict('list'))
+
 df_out.close()
-
 
 from matplotlib import pyplot as plt
 import matplotlib
@@ -76,3 +80,6 @@ plt.ylabel(r'P/T$^4$')
 
 
 plt.savefig('PT.pdf', bbox_inches='tight')
+
+
+
