@@ -407,7 +407,7 @@ class Channel:
                                 np.ascontiguousarray(self.ImG2))
         self.G2 = self.ReG2 + 1j*self.ImG2
 
-    def G20(self, E, k):
+    def G20(self, E, k):#1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2
         return 1/2/(E/2 - self.p_i.om0(k) + 1j*self.p_i.eps)
     
     def populate_T_old(self):

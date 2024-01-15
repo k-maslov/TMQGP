@@ -12,8 +12,8 @@ endif(UNIX)
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy)
 
-#find_package(MPI)
-#include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+find_package(MPI)
+include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
 #IF(MPI_CXX_FOUND)
 #        INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
@@ -41,7 +41,7 @@ file (GLOB_RECURSE libTMQGP_SRC
 )
 
 file (GLOB_RECURSE libTMQGP_HEADERS
-${CMAKE_CURRENT_SOURCE_DIR}/TMQGP/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/TMQGP/*.h
 )
 
 if (UNIX)
@@ -93,6 +93,8 @@ add_library(TMQGP SHARED ${CMAKE_CURRENT_SOURCE_DIR}/wrap.cpp
 
 
 add_executable(DirectUse ${CMAKE_CURRENT_SOURCE_DIR}/DirectUse.cpp)
+add_executable(tmqgp_mpi ${CMAKE_CURRENT_SOURCE_DIR}/tmqgp_mpi.cpp)
+
 
 set_target_properties(TMQGP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
@@ -123,7 +125,9 @@ if (UNIX)
 target_link_libraries(TMQGP gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
 target_link_libraries(libTMQGP gsl gslcblas lapack ${Python3_LIBRARIES} ${MPI_CXX_LIBRARIES})
 target_link_libraries(DirectUse gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
+target_link_libraries(tmqgp_mpi gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
 endif(UNIX)
+
 
 if (WIN32)
 target_link_libraries(TMQGP gsl cblas blas blas_nowrap levmar lapack python38 vcf2c libTMQGP gslbase Tdbase StackTrace)

@@ -220,6 +220,8 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_G):
     for key, func, p2 in zip(['GG', 'GQ'], [tm.sigma_bb_onshell, tm.sigma_bf_onshell], [pGs[i], pQs[i]]):
         LT = LTs[key]
 
+        
+
         iImLT = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(LT)))
 
         iEps1 = tm.Interpolator(qrange, pGs[i].om0(qrange), 'cubic')
