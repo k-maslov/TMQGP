@@ -9,5 +9,5 @@ Particle::Particle(double m, double * erange, int dimE, double * qrange, int dim
     this->erange = erange;
     this->qrange = qrange;
     
-            
+    
 }
