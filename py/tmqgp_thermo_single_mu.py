@@ -311,7 +311,7 @@ Phis_Q = array(Phis_Q)
 
 Phis_A = []
 
-for pt, LogSs, T in zip(pQs, LogSs_A, Trange):
+for pt, LogSs, T in zip(pAs, LogSs_A, Trange):
     iImST = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(np.sum(imag(LogSs), axis=0)))
     iReST = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(np.sum(real(LogSs), axis=0)))
     

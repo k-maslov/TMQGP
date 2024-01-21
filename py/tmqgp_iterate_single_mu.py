@@ -187,31 +187,31 @@ while abs(delta) > thr:
     pss_rep_GG = [params_rep_GG, params_rep_GG1]
 
     channels_QQ.addChannel(
-        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, )
+        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
     )
 
     channels_QQ.addChannel(
-        QuarkTM.ChannelL('qq6', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=6, Fa=1/4, )
+        QuarkTM.ChannelL('qq6', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=6, Fa=1/4, mu=mu)
     )
 
     channels_QA.addChannel(
-        QuarkTM.ChannelL('qa8', lmax, quark_run, aquark_run, T, pss_rep, ds=4, da=8, Fa=1/8, )
+        QuarkTM.ChannelL('qa8', lmax, quark_run, aquark_run, T, pss_rep, ds=4, da=8, Fa=1/8, mu=mu)
     )
 
     channels_QA.addChannel(
-        QuarkTM.ChannelL('qa1', lmax, quark_run, aquark_run, T, pss, ds=4, da=1, Fa=1, )
+        QuarkTM.ChannelL('qa1', lmax, quark_run, aquark_run, T, pss, ds=4, da=1, Fa=1, mu=mu)
     )
 
     channels_QG.addChannel(
-        QuarkTM.ChannelL('qg3', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, )
+        QuarkTM.ChannelL('qg3', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, mu=mu)
     )
 
     channels_QG.addChannel(
-        QuarkTM.ChannelL('qg6', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, )
+        QuarkTM.ChannelL('qg6', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, mu=mu)
     )
 
     channels_QG.addChannel(
-        QuarkTM.ChannelL('qg15', lmax, quark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, )
+        QuarkTM.ChannelL('qg15', lmax, quark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, mu=mu)
     )
 
 
@@ -221,31 +221,31 @@ while abs(delta) > thr:
 
 
     channels_AA.addChannel(
-        QuarkTM.ChannelL('aa3', lmax, aquark_run, aquark_run, T, pss, ds=4, da=3, Fa=1/2, )
+        QuarkTM.ChannelL('aa3', lmax, aquark_run, aquark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
     )
 
     channels_AA.addChannel(
-        QuarkTM.ChannelL('aa6', lmax, aquark_run, aquark_run, T, pss_rep, ds=4, da=6, Fa=1/4, )
+        QuarkTM.ChannelL('aa6', lmax, aquark_run, aquark_run, T, pss_rep, ds=4, da=6, Fa=1/4, mu=mu)
     )
 
     channels_AQ.addChannel(
-        QuarkTM.ChannelL('aq8', lmax, aquark_run, quark_run, T, pss_rep, ds=4, da=8, Fa=1/8, )
+        QuarkTM.ChannelL('aq8', lmax, aquark_run, quark_run, T, pss_rep, ds=4, da=8, Fa=1/8, mu=mu)
     )
 
     channels_AQ.addChannel(
-        QuarkTM.ChannelL('aq1', lmax, aquark_run, quark_run, T, pss, ds=4, da=1, Fa=1, )
+        QuarkTM.ChannelL('aq1', lmax, aquark_run, quark_run, T, pss, ds=4, da=1, Fa=1, mu=mu)
     )
 
     channels_AG.addChannel(
-        QuarkTM.ChannelL('ag3', lmax, aquark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, )
+        QuarkTM.ChannelL('ag3', lmax, aquark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, mu=mu)
     )
 
     channels_AG.addChannel(
-        QuarkTM.ChannelL('ag6', lmax, aquark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, )
+        QuarkTM.ChannelL('ag6', lmax, aquark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, mu=mu)
     )
 
     channels_AG.addChannel(
-        QuarkTM.ChannelL('ag15', lmax, aquark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, )
+        QuarkTM.ChannelL('ag15', lmax, aquark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, mu=mu)
     )
 
 
@@ -254,39 +254,39 @@ while abs(delta) > thr:
     channels_GG = QuarkTM.ChannelGroup(mu0=False)
 # 
     channels_GQ.addChannel(
-        QuarkTM.ChannelL('gq3', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=3, Fa=9/8)
+        QuarkTM.ChannelL('gq3', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=3, Fa=9/8, mu=mu)
     )
 
     channels_GQ.addChannel(
-        QuarkTM.ChannelL('gq6', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=6, Fa=3/8)
+        QuarkTM.ChannelL('gq6', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=6, Fa=3/8, mu=mu)
     )
 
     channels_GQ.addChannel(
-        QuarkTM.ChannelL('gq15', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=15, Fa=3/8)
+        QuarkTM.ChannelL('gq15', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=15, Fa=3/8, mu=mu)
     )
 
     channels_GA.addChannel(
-        QuarkTM.ChannelL('ga3', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=3, Fa=9/8)
+        QuarkTM.ChannelL('ga3', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=3, Fa=9/8, mu=mu)
     )
 
     channels_GA.addChannel(
-        QuarkTM.ChannelL('ga6', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=6, Fa=3/8)
+        QuarkTM.ChannelL('ga6', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=6, Fa=3/8, mu=mu)
     )
 
     channels_GA.addChannel(
-        QuarkTM.ChannelL('ga15', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=15, Fa=3/8)
+        QuarkTM.ChannelL('ga15', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=15, Fa=3/8, mu=mu)
     )
 
     channels_GG.addChannel(
-        QuarkTM.ChannelL('gg1', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=1, Fa=9/4)
+        QuarkTM.ChannelL('gg1', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=1, Fa=9/4, mu=mu)
     )
 
     channels_GG.addChannel(
-        QuarkTM.ChannelL('gg16', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=16, Fa=9/8)
+        QuarkTM.ChannelL('gg16', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=16, Fa=9/8, mu=mu)
     )
 
     channels_GG.addChannel(
-        QuarkTM.ChannelL('gg27', lmax, gluon_run, gluon_run, T, pss_rep_GG, ds=4, da=27, Fa=3/4)
+        QuarkTM.ChannelL('gg27', lmax, gluon_run, gluon_run, T, pss_rep_GG, ds=4, da=27, Fa=3/4, mu=mu)
     )
 
     if n_iter == 0:

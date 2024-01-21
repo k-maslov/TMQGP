@@ -22,7 +22,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('mu_B', type=float)
 args = parser.parse_args()
 
-fname_fit = '/home/rfrgroup/k.maslov/Numerics/TMQGP/ipy/TMQGP/run/run_delta/try_fit_HD/result.hdf5'
+fname_fit = '/home/rfrgroup/k.maslov/Numerics/TMQGP/ipy/TMQGP/run/run_delta/fit_fix_G_HD/result.hdf5'
+print('Loading fit from ', fname_fit)
 df_fit = h5py.File(fname_fit, 'r')
 
 Trange = df_fit.attrs['Trange']

@@ -93,7 +93,7 @@ add_library(TMQGP SHARED ${CMAKE_CURRENT_SOURCE_DIR}/wrap.cpp
 
 
 add_executable(DirectUse ${CMAKE_CURRENT_SOURCE_DIR}/DirectUse.cpp)
-add_executable(tmqgp_mpi ${CMAKE_CURRENT_SOURCE_DIR}/tmqgp_mpi.cpp)
+# add_executable(tmqgp_mpi ${CMAKE_CURRENT_SOURCE_DIR}/tmqgp_mpi.cpp)
 
 
 set_target_properties(TMQGP PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -125,7 +125,7 @@ if (UNIX)
 target_link_libraries(TMQGP gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
 target_link_libraries(libTMQGP gsl gslcblas lapack ${Python3_LIBRARIES} ${MPI_CXX_LIBRARIES})
 target_link_libraries(DirectUse gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
-target_link_libraries(tmqgp_mpi gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
+# target_link_libraries(tmqgp_mpi gsl gslcblas lapack ${Python3_LIBRARIES} libTMQGP ${MPI_CXX_LIBRARIES})
 endif(UNIX)
 
 

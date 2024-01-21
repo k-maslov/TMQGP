@@ -223,13 +223,14 @@ class Particle:
                        self.stat, self.eps)
 
 class Channel:
-    def __init__(self, p_i: Particle, p_j: Particle, T : float,  
-                 Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
+    def __init__(self, p_i: Particle, p_j: Particle, T : float, 
+                Fa=1, G=6, L=0.5, screen=4, screen_mu=0, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0):
         self.p_i = p_i
         self.p_j = p_j
         self.l = l
+        self.mu = mu
         self.set_Gs(G, G1)
 
         
@@ -282,6 +283,7 @@ class Channel:
         self.T = T
         self.Fa = Fa
         self.G = G
+        self.screen_mu = screen_mu
         self.L = L
         self.parallel = parallel
         self.do_rel = do_rel
@@ -331,7 +333,7 @@ class Channel:
         # return rel_factor * np.sqrt(self.Fa) * self.G * np.exp(-q**2 / (self.L * mult)**2)
         ff = self.L**2/(self.L**2 + q**2 + self.screen * (self.T/Tc)**2)
         if l == 1:
-            ff = ff * (q / np.sqrt(self.L**2 + q**2  + self.screen * (self.T/Tc)**2))
+            ff = ff * (q / np.sqrt(self.L**2 + q**2  + self.screen * (self.T/Tc)**2 + self.screen_mu * self.mu**2))
         if l > 1:
             raise
 
@@ -532,7 +534,7 @@ def set_S_q(ch):
 
 class ChannelL:
     def __init__(self, key : str, lmax : int, p_i: Particle, p_j: Particle, T : float,  
-                params, Fa=1, ds=1, da=1, G2=None, mu0=True):
+                params, Fa=1, ds=1, da=1, G2=None, mu0=True, mu=0):
         self.lmax = lmax
         self.key = key
 
@@ -550,13 +552,13 @@ class ChannelL:
             if G2 == None:
                 if l == 0:
                     ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
-                    l=l, mu0=mu0)
+                    l=l, mu0=mu0, mu=mu)
                 else:
                     ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
-                    l=l, G2=self.chs[0].G2, mu0=mu0)
+                    l=l, G2=self.chs[0].G2, mu0=mu0, mu=mu)
             else:
                 ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
-                    l=l, G2=G2, mu0=mu0)
+                    l=l, G2=G2, mu0=mu0, mu=mu)
 
             self.chs += [ch]
         self.Nf = self.chs[0].Nf

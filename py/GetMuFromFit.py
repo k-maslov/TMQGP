@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('mu_B', type=float)
 args = parser.parse_args()
 
-fname_fit = '/home/rfrgroup/k.maslov/Numerics/TMQGP/ipy/TMQGP/run/run_delta/try_fit/result.hdf5'
+fname_fit = '/home/rfrgroup/k.maslov/Numerics/TMQGP/ipy/TMQGP/run/run_delta/fit_fix_G_HD/result.hdf5'
 df_fit = h5py.File(fname_fit, 'r')
 
 Trange = df_fit.attrs['Trange']
@@ -64,7 +64,7 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
     
     if not exists or force_iterate:
         mu = args.mu_B/3 * T
-        cmd = f'python3 -m tmqgp_iterate_single_mu {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter '
+        cmd = f'python3 -m tmqgp_iterate_single_mu {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter --showtime '
         cmd += init_arg
         print('Running ' + cmd)
         ret_code = os.system(cmd)

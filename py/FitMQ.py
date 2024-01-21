@@ -62,7 +62,7 @@ class TargetMemory:
     def target(self, T, mQ, mG, G, G1, L, screen, suppress):
         fname = 'fit_%.3f_%.16e.h5py'%(T, mQ)
         ret_code = RunHelpers.iterate(fname, T, float(mQ), mG, G, G1, L, screen, suppress, 
-                    init=self.init)
+                    init=self.init, mode='HI')
         ret_th = RunHelpers.thermo(fname)
 
         df = h5py.File(fname, 'r')

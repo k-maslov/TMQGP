@@ -243,7 +243,7 @@ while abs(delta) > thr:
                     + list(channels_GQ.channels.items()) + list(channels_GG.channels.items())):
             for l in range(lmax + 1):
                 ch = ch_l.chs[l]
-                print(k, ch.Nf)
+                # print(k, ch.Nf)
                 lbl = f'V/{k}/{l}'
                 # print(lbl)
                 f.create_dataset(lbl, data=ch.v(ch.qrange))

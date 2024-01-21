@@ -8,6 +8,8 @@ import pandas as pd
 import TMQGP as tm
 import QuarkTM
 from QuarkTM import Channel, Particle
+from scipy.interpolate import interp1d
+from scipy.optimize import minimize
 
 import tqdm
 import numpy as np
@@ -138,7 +140,9 @@ for r in resonances:
         tm = imag(df[key]['TM'][r]['0'][:, 0])
         # plt.plot(erange, tm)
         # print(erange[np.argmin(tm)])
+
         mres += [erange[np.argmin(tm)]]
+
     mress += [mres]
 
 fig, ax = plt.subplots(1, 2, figsize=(12, 6))

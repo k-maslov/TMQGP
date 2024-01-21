@@ -2,7 +2,7 @@ import os
 import h5py
 
 
-def iterate(fname, T, mQ, mG, G, G1, L, screen, suppress, init='', force=False):
+def iterate(fname, T, mQ, mG, G, G1, L, screen, suppress, init='', mode='LO', force=False):
     exists = 0
 
     if os.path.exists(fname):
@@ -16,7 +16,7 @@ def iterate(fname, T, mQ, mG, G, G1, L, screen, suppress, init='', force=False):
             f.close()
     
     if not exists or force:
-        cmd = f'python3 -m tmqgp_iterate_single {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --showtime '
+        cmd = f'python3 -m tmqgp_iterate_single {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --showtime --mode {mode} '
         if init == '':
             init_arg = ''
         else:
