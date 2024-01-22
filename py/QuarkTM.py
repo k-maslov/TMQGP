@@ -224,9 +224,9 @@ class Particle:
 
 class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float, 
-                Fa=1, G=6, L=0.5, screen=4, screen_mu=0, ds=1, da=1, calc=2, 
+                Fa=1, G=6, L=0.5, screen=4, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0):
         self.p_i = p_i
         self.p_j = p_j
         self.l = l

@@ -160,6 +160,12 @@ for T, LT in zip(Trange, LTs):
                 _lt = (2*l + 1) * np.sign(v[1])*4*pi*NFS[k]*ds * da / 6 * v**2 / x * log(1 - x)
                 LT_Q[_] += _lt
                 LT[k] += _lt
+
+                if k == 'qa1' and l == 0:
+                    print(np.max(real(x)))
+                    print(np.max(real(_lt)))
+                    print(k, ds, da, Fa, NFS[k])
+
                 df_phi.create_dataset(f'LogT/{k}/{l}', data=_lt)
     LTs_Q += [LT_Q]
 
@@ -184,6 +190,7 @@ for T, LT in zip(Trange, LTs):
                 _lt = (2*l + 1) * np.sign(v[1])*4*pi*NFS[k]*ds * da / 6 * v**2 / x * log(1 - x)
                 LT_A[_] += _lt
                 LT[k] += _lt
+
                 df_phi.create_dataset(f'LogT/{k}/{l}', data=_lt)
     LTs_A += [LT_A]
 
