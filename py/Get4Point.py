@@ -18,7 +18,7 @@ for mu in mu_scales:
     if not os.path.exists(folder):
         os.mkdir(folder)
     os.chdir(folder)
-    cmd = f'python3 -m GetMuFromFit {mu}'
+    cmd = f'python3 -m GetMuFromFit_LO_txt {mu}'
     print('Running ' + cmd)
     os.system(cmd)
     # print(os.getcwd())

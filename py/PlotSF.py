@@ -33,7 +33,9 @@ df = h5py.File(os.path.join(args.folder, 'data.hdf5'), 'r')
 
 nplots = len(list(df.keys()))
 
-erange = df.attrs['erange']
+keys = list(df.keys())
+
+erange = df[keys[0]].attrs['erange']
 trange = df.attrs['Trange']
 
 fig, ax = plt.subplots(2, nplots, figsize=(4*nplots, 8), sharey='row', sharex='all')
@@ -160,8 +162,8 @@ plt.savefig(os.path.join(folder, 'mres.pdf'), bbox_inches='tight')
 
 d = dict(df.attrs)
 
-del d['erange']
-del d['qrange']
+# del d['erange']
+# del d['qrange']
 
 fig = plt.figure()
 fig.text(0, 0, str(d))
