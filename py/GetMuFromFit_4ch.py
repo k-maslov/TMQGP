@@ -46,8 +46,8 @@ out_folder = '.'
 screen = 0.0065
 suppress = 0.8
 
-G = 8.0
-G1 = 8.5
+G = 14.0
+G1 = 14.5
 L = 0.2
 
 ##### Iteration logic ######

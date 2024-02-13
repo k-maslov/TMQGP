@@ -51,29 +51,29 @@ mQs = [df.attrs['mQ']]
 mGs = [df.attrs['mG']]
 
 pQs = []
-pGs = []
+# pGs = []
 pAs = []
 
 for T, mQ, mG in zip(Trange, mQs, mGs):
     pQ = Particle(mQ, qrange, erange, Gtab=df['Q']['G'])
     pA = Particle(mQ, qrange, erange, Gtab=df['A']['G'])
-    pG = Particle(mG, qrange, erange, Gtab=df['G']['G'], stat='b', d=16)
+    # pG = Particle(mG, qrange, erange, Gtab=df['G']['G'], stat='b', d=16)
 
     pQs += [pQ]
-    pGs += [pG]
+    # pGs += [pG]
     pAs += [pA]
 
 ps_Q = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pQs)])
 ps_A = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pAs)])
-ps_G = np.array([tm.OmQ_B(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pGs)])
+# ps_G = np.array([tm.OmQ_B(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pGs)])
 
 ps_free_Q = np.array([quad(lambda z: z*z*T*log(1 + exp(-(sqrt(mQ**2 + z**2) - mu)/T)) / 2/pi**2, 0, 5)[0] for T, mQ in zip(Trange, mQs)])
 ps_free_A = np.array([quad(lambda z: z*z*T*log(1 + exp(-(sqrt(mQ**2 + z**2) + mu)/T)) / 2/pi**2, 0, 5)[0] for T, mQ in zip(Trange, mQs)])
-ps_free_G = np.array([quad(lambda z: -z*z*T*log(1 - exp(-sqrt(mG**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T, mG in zip(Trange, mGs)])
+# ps_free_G = np.array([quad(lambda z: -z*z*T*log(1 - exp(-sqrt(mG**2 + z**2)/T)) / 2/pi**2, 0, 5)[0] for T, mG in zip(Trange, mGs)])
 
 ps_S_Q = []
 ps_S_A = []
-ps_S_G = []
+# ps_S_G = []
 
 for T, pt in zip(Trange, pQs):
     sigma = df['Q']['S']
@@ -98,20 +98,20 @@ for T, pt in zip(Trange, pAs):
     ps_S_A += [tm.OmS_F(T, iImG, iReG, iImS, iReS)]
 
 
-for T, pt in zip(Trange, pGs):
-    sigma = df['G']['S']
+# for T, pt in zip(Trange, pGs):
+#     sigma = df['G']['S']
 
-    iReS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(sigma)))
-    iImS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(sigma)))
+#     iReS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(sigma)))
+#     iImS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(sigma)))
     
-    iImG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(pt.Gtab)))
-    iReG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(pt.Gtab)))
+#     iImG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(pt.Gtab)))
+#     iReG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(pt.Gtab)))
     
-    ps_S_G += [tm.OmS_B(T, iImG, iReG, iImS, iReS)]
+#     ps_S_G += [tm.OmS_B(T, iImG, iReG, iImS, iReS)]
 
 ps_S_Q = np.array(ps_S_Q)
 ps_S_A = np.array(ps_S_A)
-ps_S_G = np.array(ps_S_G)
+# ps_S_G = np.array(ps_S_G)
 
 ################################## Calculating Phi #################################
 NFS = {
@@ -229,7 +229,7 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_Q):
     # iterating over types of diagrams -- QQ and QG
     for key, func, p2 in zip(['QQ', 'QA'], 
                 [tm.sigma_ff_onshell, tm.sigma_ff_onshell], 
-                [pQs[i], pGs[i], pAs[i]]):
+                [pQs[i], pAs[i]]):
         LT = LTs[key]
 
         iImLT = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(LT)))
@@ -270,7 +270,7 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_A):
     # iterating over types of diagrams -- QQ and QG
     for key, func, p2 in zip(['AA', 'AQ'], 
                 [tm.sigma_ff_onshell, tm.sigma_ff_onshell], 
-                [pAs[i], pGs[i], pQs[i]]):
+                [pAs[i], pQs[i]]):
         LT = LTs[key]
 
         iImLT = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(LT)))
@@ -388,16 +388,16 @@ Nf = 3
 Ns = 2
 Na = 1 ### antiquarks taken explicitly
 
-P_QP_G = (Nc**2 - 1) * Ns * (ps_G - ps_S_G)
+# P_QP_G = (Nc**2 - 1) * Ns * (ps_G - ps_S_G)
 P_QP_Q = Nc * Nf * Ns * Na * (ps_Q - ps_S_Q)
 P_QP_A = Nc * Nf * Ns * Na * (ps_A - ps_S_A)
 
 
-P_Q_G = (Nc**2 - 1) * Ns * (ps_G)
+# P_Q_G = (Nc**2 - 1) * Ns * (ps_G)
 P_Q_Q = Nc * Nf * Ns * Na * (ps_Q)
 P_Q_A = Nc * Nf * Ns * Na * (ps_A)
 
-P_S_G = (Nc**2 - 1) * Ns * (- ps_S_G)
+# P_S_G = (Nc**2 - 1) * Ns * (- ps_S_G)
 P_S_Q = Nc * Nf * Ns * Na * (- ps_S_Q)
 P_S_A = Nc * Nf * Ns * Na * (- ps_S_A)
 
@@ -406,14 +406,14 @@ P_Phi_A = Nc * Nf * Ns * Na * Phis_A
 P_Phi_G = (Nc**2 - 1) * Ns * Phis_G 
 
 P_Phi = P_Phi_G + P_Phi_Q + P_Phi_A
-P_tot = P_QP_G + P_QP_Q + P_QP_A + P_Phi
+P_tot = P_QP_Q + P_QP_A + P_Phi
 
 
 df_P = pd.DataFrame(array([Trange, P_tot, P_Q_Q, P_Q_A, 
-                           P_Q_G, P_S_Q, P_S_A, P_S_G, 
+                           P_S_Q, P_S_A, 
                            P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G]).transpose(), 
                columns=['T', 'Ptot', 'P_Q_Q', 'P_Q_A', 
-                        'P_Q_G', 'P_S_Q', 'P_S_A', 'P_S_G', 
+                        'P_S_Q', 'P_S_A', 
                         'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'])
 
 
@@ -422,13 +422,13 @@ df_P = pd.DataFrame(array([Trange, P_tot, P_Q_Q, P_Q_A,
 
 
 df.attrs.update(
-     dict(zip(['Ptot', 'P_Q_Q', 'P_Q_A', 'P_Q_G', 'P_S_Q', 'P_S_A', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'], 
-            array([P_tot, P_Q_Q, P_Q_A, P_Q_G, P_S_Q, P_S_A, P_S_G, P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G])))
+     dict(zip(['Ptot', 'P_Q_Q', 'P_Q_A',  'P_S_Q', 'P_S_A',  'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'], 
+            array([P_tot, P_Q_Q, P_Q_A,  P_S_Q, P_S_A,  P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G])))
 )
 
 df_phi.attrs.update(
-dict(zip(['Ptot', 'P_Q_Q', 'P_Q_A', 'P_Q_G', 'P_S_Q', 'P_S_A', 'P_S_G', 'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'], 
-            array([P_tot, P_Q_Q, P_Q_A, P_Q_G, P_S_Q, P_S_A, P_S_G, P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G])))
+dict(zip(['Ptot', 'P_Q_Q', 'P_Q_A',  'P_S_Q', 'P_S_A',  'P_Phi', 'P_Phi_Q', 'P_Phi_A', 'P_Phi_G'], 
+            array([P_tot, P_Q_Q, P_Q_A,  P_S_Q, P_S_A,  P_Phi, P_Phi_Q, P_Phi_A, P_Phi_G])))
             )
 
 df.close()
