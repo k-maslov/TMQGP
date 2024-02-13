@@ -27,24 +27,24 @@ mode = 'LO'
 Trange = [0.16, 0.2, 0.3, 0.4][::1]
 # mQs = [0.5, 0.48, 0.45, 0.4, 0.35][::-1]
 # mQs = [0.6, 0.57, 0.53, 0.515, 0.5][::1]
-mQs = [0.6 , 0.57, 0.5 , 0.45, 0.4 ]
+mQs = [0.54, 0.52, 0.48, 0.45]
 # mQs = [0.6]*4
 # mGs = [1.8, 1.7, 1.55, 1.4]
 # mGs = [1.6, 1.5, 1.35, 1.2]
-mGs = [1.4, 1.3, 1.15, 1.][::1]
+mGs = [1.8, 1.7, 1.5, 1.3][::1]
 # mGs = [1.8]*4
 # mQ = 0.6
 # mG = 1.8
-G = 10.0
-G1 = 10.5
-L = .3
-screen = .005
+G = 6
+G1 = 8
+L = .5
+screen = .03
 
 lmax = 1
 
 suppress = 0.8
 
-out_folder = './output/MdropBothQG9_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
+out_folder = './MdropBothQG9_' +mode+'_G=(%.2f,%.2f)L=%.3fscreen=%.3fsuppress=%.2f/'%(G, G1, L, screen, suppress)
 
 comment = 'Both masses decrease, m_g 1.4 to 1.0\nscreen  0.9'
 

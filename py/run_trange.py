@@ -24,19 +24,19 @@ out_folder = '.'
 Trange = [0.16, 0.2, 0.3, 0.4]
 
 mGs = [1.4, 1.25, 1., 0.9]
-mQs = [0.61, 0.6, 0.56, 0.49]
+mQs = [0.54, 0.52, 0.48, 0.46]
 
-screen = 0.0065
+screen = 0.06
 suppress = 0.8
 
-G = 14.0
-G1 = 14.5
-L = 0.2
+G = 6.0
+G1 = 8.
+L = 0.5
 
 ##### Iteration logic ######
 init_arg = ''
 
-force_iterate = 1
+force_iterate = 0
 force_thermo = 1
 
 for T, mQ, mG in zip(Trange, mQs, mGs):
@@ -53,7 +53,7 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
             f.close()
     
     if not exists or force_iterate:
-        cmd = f'python3 -m tmqgp_iterate_single {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} '
+        cmd = f'python3 -m tmqgp_iterate_single {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --showtime '
         cmd += init_arg
         cmd += ' --save_iter'
         print('Running ' + cmd)

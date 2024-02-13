@@ -5,8 +5,9 @@ import numpy as np
 import QuarkTM
 
 # iLat = interp1d(lat.x, lat.PT_lat, kind='cubic')
-lat = pd.read_csv(os.path.join(os.path.dirname(QuarkTM.__file__), "PT.csv"))
+lat = pd.read_csv(os.path.join(os.path.dirname(QuarkTM.__file__), "PT.csv_keep"))
 Trange_fit = lat.x[(lat.x > 0.16) & (lat.x < 0.4)].values[::2]
+# Trange_fit = np.array([0.16, 0.2, 0.3, 0.4])
 
 # Trange_fit = np.array([0.16, 0.2, 0.3, 0.4])
 

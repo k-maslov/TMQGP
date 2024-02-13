@@ -27,7 +27,8 @@ matplotlib.style.use('publication')
 # exit()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("folder", type=str, help='Folder to process')
+parser.add_argument('T', type=float)
+# parser.add_argument("folder", type=str, help='Folder to process')
 
 args = parser.parse_args()
 
