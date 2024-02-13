@@ -22,6 +22,7 @@ NTHR = 18
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', type=str, default='LO', choices=['LO', 'HI', 'XHI'])
+parser.add_argument('mu', type=float)
 parser.add_argument('T', type=float)
 parser.add_argument('mQ', type=float)
 parser.add_argument('mG', type=float)
@@ -43,6 +44,7 @@ args = parser.parse_args()
 print(args)
 mode = args.mode
 
+mu = args.mu
 T = args.T
 mQ = args.mQ
 mG = args.mG
@@ -62,7 +64,7 @@ else:
 
 # comment = 'Both masses decrease, m_g 1.4 to 1.0\nscreen  0.9'
 
-save_iterations = args.save_iter
+save_iterations = 1 #args.save_iter
 
 if out_folder != '.':
     if not os.path.exists(out_folder):
@@ -136,21 +138,24 @@ f.attrs.update({
     'qrange' : qrange,
     'erange' : erange,
     'suppress' : suppress,
-    'status' : 'RUN'
+    'status' : 'RUN',
+    'mu' : mu
     # 'comment' : comment
 })
 
 ########################### Iteration logic ###################
 
 if args.init == '':
-    quark_run = Particle(mQ, qrange, erange, eps=eps)
-    gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b', d=16, propagator=1)
+    quark_run = Particle(mQ, qrange, erange, eps=eps, mu=0)
+    aquark_run = Particle(mQ, qrange, erange, eps=eps, mu=0)
+    # gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 else:
     print('Loading init from ' + args.init)
     f_init = h5py.File(args.init, 'r')
-    quark_run = Particle(mQ, qrange, erange, eps=eps, Gtab=np.array(f_init['Q']['G']))
-    gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b',
-                         d=16, propagator=1, Gtab=np.array(f_init['G']['G']))
+    quark_run = Particle(mQ, qrange, erange, eps=eps, Gtab=np.array(f_init['Q']['G']), mu=mu)
+    aquark_run = Particle(mQ, qrange, erange, eps=eps, Gtab=np.array(f_init['A']['G']), mu=-mu)
+    # gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b',
+    #                      d=16, propagator=1, Gtab=np.array(f_init['G']['G']))
     f_init.close()
 
 print('Running G = ', G, 'T = ', T)
@@ -163,15 +168,14 @@ REALss = []
 
 delta = 1
 
-Nf = 3
-
 n_iter = 0
 current_iter = 0
 thr = 1e-2
 
 while abs(delta) > thr:
-    channels_QQ = QuarkTM.ChannelGroup()
-    channels_QG = QuarkTM.ChannelGroup()
+    channels_QQ = QuarkTM.ChannelGroup(mu0=False)
+    # channels_QG = QuarkTM.ChannelGroup(mu0=False)
+    channels_QA = QuarkTM.ChannelGroup(mu0=False)
 
     pss = [params, params1]
     pss_rep = [params_rep, params_rep1]
@@ -181,93 +185,148 @@ while abs(delta) > thr:
 
     pss_GG = [params_GG, params_GG1]
     pss_rep_GG = [params_rep_GG, params_rep_GG1]
-    
-    
-    channels_QQ.addChannel(
-        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, )
-    )
 
     channels_QQ.addChannel(
-        QuarkTM.ChannelL('qa1', lmax, quark_run, quark_run, T, pss, ds=4, da=1, Fa=1, )
+        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
     )
 
-    channels_QQ.addChannel(
-        QuarkTM.ChannelL('qq6', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=6, Fa=1/4, )
+    # channels_QQ.addChannel(
+    #     QuarkTM.ChannelL('qq6', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=6, Fa=1/4, mu=mu)
+    # )
+
+    # channels_QA.addChannel(
+    #     QuarkTM.ChannelL('qa8', lmax, quark_run, aquark_run, T, pss_rep, ds=4, da=8, Fa=1/8, mu=mu)
+    # )
+
+    channels_QA.addChannel(
+        QuarkTM.ChannelL('qa1', lmax, quark_run, aquark_run, T, pss, ds=4, da=1, Fa=1, mu=mu)
     )
 
-    channels_QQ.addChannel(
-        QuarkTM.ChannelL('qa8', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=8, Fa=1/8, )
+    # channels_QG.addChannel(
+    #     QuarkTM.ChannelL('qg3', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, mu=mu)
+    # )
+
+    # channels_QG.addChannel(
+    #     QuarkTM.ChannelL('qg6', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, mu=mu)
+    # )
+
+    # channels_QG.addChannel(
+    #     QuarkTM.ChannelL('qg15', lmax, quark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, mu=mu)
+    # )
+
+
+    channels_AA = QuarkTM.ChannelGroup(mu0=False)
+    # channels_AG = QuarkTM.ChannelGroup(mu0=False)
+    channels_AQ = QuarkTM.ChannelGroup(mu0=False)
+
+
+    channels_AA.addChannel(
+        QuarkTM.ChannelL('aa3', lmax, aquark_run, aquark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
     )
 
-    channels_QG.addChannel(
-        QuarkTM.ChannelL('qg3', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, )
+    # channels_AA.addChannel(
+    #     QuarkTM.ChannelL('aa6', lmax, aquark_run, aquark_run, T, pss_rep, ds=4, da=6, Fa=1/4, mu=mu)
+    # )
+
+    # channels_AQ.addChannel(
+    #     QuarkTM.ChannelL('aq8', lmax, aquark_run, quark_run, T, pss_rep, ds=4, da=8, Fa=1/8, mu=mu)
+    # )
+
+    channels_AQ.addChannel(
+        QuarkTM.ChannelL('aq1', lmax, aquark_run, quark_run, T, pss, ds=4, da=1, Fa=1, mu=mu)
     )
 
-    channels_QG.addChannel(
-        QuarkTM.ChannelL('qg6', lmax, quark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, )
-    )
+    # channels_AG.addChannel(
+    #     QuarkTM.ChannelL('ag3', lmax, aquark_run, gluon_run, T, pss_QG, ds=4, da=3, Fa=9./8, mu=mu)
+    # )
 
-    channels_QG.addChannel(
-        QuarkTM.ChannelL('qg15', lmax, quark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, )
-    )
+    # channels_AG.addChannel(
+    #     QuarkTM.ChannelL('ag6', lmax, aquark_run, gluon_run, T, pss_QG, ds=4, da=6, Fa=3./8, mu=mu)
+    # )
 
-    channels_GQ = QuarkTM.ChannelGroup()
-    channels_GG = QuarkTM.ChannelGroup()
-# 
-    channels_GQ.addChannel(
-        QuarkTM.ChannelL('gq3', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=3, Fa=9/8)
-    )
+    # channels_AG.addChannel(
+    #     QuarkTM.ChannelL('ag15', lmax, aquark_run, gluon_run, T, pss_rep_QG, ds=4, da=15, Fa=3./8, mu=mu)
+    # )
 
-    channels_GQ.addChannel(
-        QuarkTM.ChannelL('gq6', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=6, Fa=3/8)
-    )
 
-    channels_GQ.addChannel(
-        QuarkTM.ChannelL('gq15', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=15, Fa=3/8)
-    )
+#     channels_GQ = QuarkTM.ChannelGroup(mu0=False)
+#     channels_GA = QuarkTM.ChannelGroup(mu0=False)
+#     channels_GG = QuarkTM.ChannelGroup(mu0=False)
+# # 
+#     channels_GQ.addChannel(
+#         QuarkTM.ChannelL('gq3', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=3, Fa=9/8, mu=mu)
+#     )
 
-    channels_GG.addChannel(
-        QuarkTM.ChannelL('gg1', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=1, Fa=9/4)
-    )
+#     channels_GQ.addChannel(
+#         QuarkTM.ChannelL('gq6', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=6, Fa=3/8, mu=mu)
+#     )
 
-    channels_GG.addChannel(
-        QuarkTM.ChannelL('gg16', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=16, Fa=9/8)
-    )
+#     channels_GQ.addChannel(
+#         QuarkTM.ChannelL('gq15', lmax, gluon_run, quark_run, T, pss_QG, ds=4, da=15, Fa=3/8, mu=mu)
+#     )
 
-    channels_GG.addChannel(
-        QuarkTM.ChannelL('gg27', lmax, gluon_run, gluon_run, T, pss_rep_GG, ds=4, da=27, Fa=3/4)
-    )
+#     channels_GA.addChannel(
+#         QuarkTM.ChannelL('ga3', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=3, Fa=9/8, mu=mu)
+#     )
+
+#     channels_GA.addChannel(
+#         QuarkTM.ChannelL('ga6', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=6, Fa=3/8, mu=mu)
+#     )
+
+#     channels_GA.addChannel(
+#         QuarkTM.ChannelL('ga15', lmax, gluon_run, aquark_run, T, pss_QG, ds=4, da=15, Fa=3/8, mu=mu)
+#     )
+
+#     channels_GG.addChannel(
+#         QuarkTM.ChannelL('gg1', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=1, Fa=9/4, mu=mu)
+#     )
+
+#     channels_GG.addChannel(
+#         QuarkTM.ChannelL('gg16', lmax, gluon_run, gluon_run, T, pss_GG, ds=4, da=16, Fa=9/8, mu=mu)
+#     )
+
+#     channels_GG.addChannel(
+#         QuarkTM.ChannelL('gg27', lmax, gluon_run, gluon_run, T, pss_rep_GG, ds=4, da=27, Fa=3/4, mu=mu)
+#     )
 
     if n_iter == 0:
-        for k, ch_l in (list(channels_QQ.channels.items()) + list(channels_QG.channels.items()) 
-                    + list(channels_GQ.channels.items()) + list(channels_GG.channels.items())):
+        for k, ch_l in (list(channels_QQ.channels.items()) + 
+                    list(channels_QA.channels.items()) + list(channels_AA.channels.items()) + 
+                    list(channels_AQ.channels.items())):
             for l in range(lmax + 1):
                 ch = ch_l.chs[l]
-                # print(k, ch.Nf)
+                # print(k, l, ch.Nf)
                 lbl = f'V/{k}/{l}'
                 # print(lbl)
                 f.create_dataset(lbl, data=ch.v(ch.qrange))
                 f[f'V/{k}/{l}'].attrs.update({'ds': ch.ds, 'da' : ch.da, 'Fa' : ch.Fa})
 
-    # exit()
 
-    for chg in [channels_QQ, channels_QG, channels_GQ, channels_GG]:
-        TM = chg.get_T()
+    # exit()
+    # for chg in [channels_QQ, channels_QG, channels_GQ, channels_GG]:
+    #     TM = chg.get_T()
 
     IMAGs = dict()
     REALs = dict()
-    keys = ['QQ', 'QG', 'GQ', 'GG']
-    funcs = [tm.sigma_ff_onshell, tm.sigma_fb_onshell, tm.sigma_bf_onshell, tm.sigma_bb_onshell]
+    keys = ['QQ', 'QA', 
+            'AQ', 'AA']
 
-    for key, func, channels in zip(keys, funcs, [channels_QQ, channels_QG, channels_GQ, channels_GG]):
+    funcs = [tm.sigma_ff_onshell, tm.sigma_ff_onshell, 
+             tm.sigma_ff_onshell, tm.sigma_ff_onshell]
+
+    chg_list = [channels_QQ, channels_QA,
+                channels_AQ, channels_AA]
+
+    for key, func, channels in zip(keys, funcs, chg_list):
         TM_tot = channels.get_T()
+        # print(key)
 
+        # # break
         # lbl = f'TMtot/{key}'
         # print(lbl)
         # f.create_dataset(lbl, data=TM_tot)
 
-        # break
-        
+
         # plt.plot(erange, imag(TM_tot[:, 0]))
         ch = list(channels.channels.items())[0][1] #ch = list(channels.items())[0][1] # take any of the channels since SFs are the same
         iImTM_tot = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(np.imag(TM_tot)))
@@ -302,34 +361,46 @@ while abs(delta) > thr:
     IMAGss += [IMAGs]
     REALss += [REALs]
     
-    ImS_Q = IMAGs['QQ'] + IMAGs['QG']
-    ReS_Q = REALs['QQ'] + REALs['QG']
+    ImS_Q = IMAGs['QQ']  + IMAGs['QA']
+    ReS_Q = REALs['QQ']  + REALs['QA']
 
     om0_k = np.array([np.sqrt(mQ**2 + qrange**2) for e in quark_run.erange])
     arrE = np.array([quark_run.erange for q in quark_run.qrange]).transpose()
 
-    G_Q_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_Q + 1j*ImS_Q))
+    G_Q_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_Q + 1j*ImS_Q) + mu)
 
-    quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new)
+    quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new, mu=mu)
     
     quark_new.S = ReS_Q + 1j*ImS_Q
-    
-    ImS_G = IMAGs['GG'] + IMAGs['GQ']
-    ReS_G = REALs['GG'] + REALs['GQ']
-    
-    # om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
-    om0_k = np.array([np.sqrt(mG**2 + qrange**2) for e in gluon_run.erange])
-    arrE = np.array([gluon_run.erange for q in gluon_run.qrange]).transpose()
+##########
+    ImS_A = IMAGs['AA'] + IMAGs['AQ']
+    ReS_A = REALs['AA'] + REALs['AQ']
 
-#     G_G_new = 1/(arrE**2 - om0_k**2 + 2*1j*gluon_run.eps*arrE - (ReS_G + 1j*ImS_G))
-    G_G_new = 1/(arrE - om0_k + 0*1j*gluon_run.eps - (ReS_G + 1j*ImS_G))
-#     gluon_new = Particle(gluon_run.m, qrange, erange, eps=2e-2, stat='b', d=16, R=-2*imag(G_G_new))
-    gluon_new = Particle(mG, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
+    om0_k = np.array([np.sqrt(mQ**2 + qrange**2) for e in aquark_run.erange])
+    arrE = np.array([aquark_run.erange for q in aquark_run.qrange]).transpose()
+
+    G_A_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_A + 1j*ImS_A) - mu)
+
+    aquark_new = Particle(mQ, qrange, erange, eps=aquark_run.eps, Gtab=G_A_new, mu=-mu)
     
-    gluon_new.S = ReS_G + 1j*ImS_G
+    aquark_new.S = ReS_A + 1j*ImS_A
+####    
+#     ImS_G = 0.05#IMAGs['GG'] + IMAGs['GQ'] + IMAGs['GA']
+#     ReS_G = 0# REALs['GG'] + REALs['GQ'] + REALs['GA']
+    
+#     # om0_k = np.array([gluon_run.om0(gluon_run.qrange) for e in gluon_run.erange])
+#     om0_k = np.array([np.sqrt(mG**2 + qrange**2) for e in gluon_run.erange])
+#     arrE = np.array([gluon_run.erange for q in gluon_run.qrange]).transpose()
+
+# #     G_G_new = 1/(arrE**2 - om0_k**2 + 2*1j*gluon_run.eps*arrE - (ReS_G + 1j*ImS_G))
+#     G_G_new = 1/(arrE - om0_k + 1j*gluon_run.eps - (ReS_G + 1j*ImS_G))
+# #     gluon_new = Particle(gluon_run.m, qrange, erange, eps=2e-2, stat='b', d=16, R=-2*imag(G_G_new))
+#     gluon_new = Particle(mG, qrange, erange, eps=gluon_run.eps, stat='b', d=16, Gtab=G_G_new)
+    
+#     gluon_new.S = ReS_G + 1j*ImS_G
 
 
-#         delta = 0
+# #         delta = 0
 #         delta += np.sqrt(np.sum((quark_new.Rtab - quark_run.Rtab)**2)) / len(erange) / len(qrange)
 # #         delta += sum(quark_new.Rtab / quark_run.Rtab) / len(erange) / len(qrange)
 #         delta += np.sqrt(np.sum((gluon_new.Rtab - gluon_run.Rtab)**2)) / len(erange) / len(qrange)
@@ -339,44 +410,49 @@ while abs(delta) > thr:
     delta = 0
     wh = quark_run.Rtab != 0
     delta += np.max(np.abs(quark_new.Rtab[wh] - quark_run.Rtab[wh]))
-    wh = gluon_run.Rtab != 0
-    delta += np.max(np.abs(gluon_new.Rtab[wh] - gluon_run.Rtab[wh]))
+    wh = aquark_run.Rtab != 0
+    delta += np.max(np.abs(aquark_new.Rtab[wh] - aquark_run.Rtab[wh]))
+    # wh = gluon_run.Rtab != 0
+    # delta += np.max(np.abs(gluon_new.Rtab[wh] - gluon_run.Rtab[wh]))
     delta /= 2
 
 
         
     if abs(delta) < thr and n_iter == 0:
         quark_run.S = quark_new.S
-        gluon_run.S = gluon_new.S
+        aquark_run.S = aquark_new.S
+        # gluon_run.S = gluon_new.S
     
-    chss += [[channels_QQ, channels_QG, channels_GQ, channels_GG]]
-    pts += [[quark_run, gluon_run]]
+    chss += [[channels_QQ]]
+    pts += [[quark_run, aquark_run]]
 
     quark_bup = quark_run
 
     quark_run = quark_new
-    gluon_run = gluon_new
+    aquark_run = aquark_new
+    # gluon_run = gluon_new
 
 
     sumQ = np.trapz(quark_new.Rtab[:, 0], x=erange)
-    sumG = np.trapz(gluon_new.Rtab[:, 0], x=erange)
+    sumA = np.trapz(aquark_new.Rtab[:, 0], x=erange)
+    # sumG = np.trapz(gluon_new.Rtab[:, 0], x=erange)
     # print('delta = ', delta)
     # print('sum Q = ', sumQ)
     # print('sum G = ', sumG)
 
-    print('T = %.3f iteration %i: delta = %f, sum Q = %f, sum G = %f'%(T, n_iter,
-    delta, sumQ, sumG))
+    print('T = %.3f iteration %i: delta = %f, sum Q = %f, sum A = %f'%(T, n_iter,
+    delta, sumQ, sumA))
 
     if save_iterations:
         folder_iter = os.path.join(out_folder, Tlabel)
         if not os.path.exists(folder_iter):
             os.mkdir(folder_iter)
         fname_iter = folder_iter + '/iter_%i.hdf5'%n_iter
-        print(fname_iter)
+        # print(fname_iter)
         f_iter = h5py.File(fname_iter, 'w')
         # f.create_dataset('%i/TM'%n_iter)
-        kk = ['Q', 'Q', 'G', 'G']
-        for _k, gr in zip(kk, [channels_QQ, channels_QG, channels_GQ, channels_GG]):
+        # kk = ['Q', 'Q', 'G', 'G']
+        for _k, gr in zip(keys, chg_list):
             for k, chl in gr.channels.items():
                 for l in range(chl.lmax + 1):
                     c = chl.chs[l]
@@ -386,20 +462,22 @@ while abs(delta) > thr:
         for k in IMAGs.keys():
             f_iter.create_dataset(f'S/{k}', data=REALs[k] + 1j*IMAGs[k])
         f_iter.create_dataset(f'Q/G', data=quark_new.Gtab)
-        f_iter.create_dataset(f'G/G', data=gluon_new.Gtab)
+        f_iter.create_dataset(f'A/G', data=aquark_new.Gtab)
+        # f_iter.create_dataset(f'G/G', data=gluon_new.Gtab)
         f_iter.create_dataset(f'Q/S', data=quark_new.S)
-        f_iter.create_dataset(f'G/S', data=gluon_new.S)
-        for key, func, channels in zip(keys, funcs, [channels_QQ, channels_QG, channels_GQ, channels_GG]):
+        f_iter.create_dataset(f'A/S', data=aquark_new.S)
+        # f_iter.create_dataset(f'G/S', data=gluon_new.S)
+        for key, func, channels in zip(keys, funcs, chg_list):
             TM_tot = channels.get_T()
 
             lbl = f'TMtot/{key}'
-            print(lbl)
+            # print(lbl)
             f_iter.create_dataset(lbl, data=TM_tot)
         f_iter.close()
 
 
     if n_iter > 1:
-        if any([abs(sumQ - 1) > 1e-1, abs(sumG - 1) > 1e-1]):
+        if any([abs(sumQ - 1) > 1e-1]):
             # break
             raise ValueError('Sum rule not fulfilled, STOP')
         
@@ -413,8 +491,8 @@ while abs(delta) > thr:
 IMAGs = IMAGss[-1]
 REALs = REALss[-1]
 
-kk = ['Q', 'Q', 'G', 'G']
-for _k, gr in zip(kk, [channels_QQ, channels_QG, channels_GQ, channels_GG]):
+# kk = ['Q', 'Q', 'G', 'G']
+for _k, gr in zip(keys, chg_list):
     for k, chl in gr.channels.items():
         for l in range(chl.lmax + 1):
             c = chl.chs[l]
@@ -426,19 +504,20 @@ for k in IMAGs.keys():
     f.create_dataset(f'S/{k}', data=REALs[k] + 1j*IMAGs[k])
 
 f.create_dataset(f'Q/R', data=pts[-1][0].Rtab)
-f.create_dataset(f'G/R', data=pts[-1][1].Rtab)
+f.create_dataset(f'A/R', data=pts[-1][1].Rtab)
+# f.create_dataset(f'G/R', data=pts[-1][2].Rtab)
 # print(pts[-1][0].Gtab)
 
 f.create_dataset(f'Q/G', data=pts[-1][0].Gtab)
-f.create_dataset(f'G/G', data=pts[-1][1].Gtab)
+f.create_dataset(f'A/G', data=pts[-1][1].Gtab)
+# f.create_dataset(f'G/G', data=pts[-1][2].Gtab)
 
 f.create_dataset(f'Q/S', data=pts[-1][0].S)
-f.create_dataset(f'G/S', data=pts[-1][1].S)
+f.create_dataset(f'A/S', data=pts[-1][1].S)
+# f.create_dataset(f'G/S', data=pts[-1][2].S)
 
 f.attrs.update({'status' : 'DONE'})
 
 f.close()
-
-
 
 ########################## Thermodynamics ##########################

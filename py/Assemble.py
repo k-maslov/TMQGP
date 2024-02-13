@@ -8,6 +8,8 @@ import QuarkTM
 lat = pd.read_csv(os.path.join(os.path.dirname(QuarkTM.__file__), "PT.csv"))
 Trange_fit = lat.x[(lat.x > 0.16) & (lat.x < 0.4)].values[::2]
 
+# Trange_fit = np.array([0.16, 0.2, 0.3, 0.4])
+
 df_out = h5py.File('data.hdf5', 'w')
 
 mQs = []

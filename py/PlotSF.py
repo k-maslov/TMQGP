@@ -63,6 +63,28 @@ plt.close()
 fig, ax = plt.subplots(2, nplots, figsize=(4*nplots, 8), sharey='row', sharex='all')
 
 for i, key in enumerate(sorted(list(df.keys()))):
+    ax[0][i].plot(erange, imag(df[key]['TM']['qa1']['1'][:, 10]))
+    ax[1][i].plot(erange, imag(df[key]['TM']['qq3']['1'][:, 10]))
+    ax[0][i].set_title('T = %.2f'%trange[i])
+# for i in irange:
+
+for _ in ax.flatten():
+    _.set_xlim(0, 2.99)
+
+for _ in ax[1]:
+    _.set_xlabel(r'E [GeV]')
+
+ax[0][0].set_ylabel(r'$T_{\bar q q_1}$ [GeV$^{-2}$]')
+ax[1][0].set_ylabel(r'$T_{q q_3}$ [GeV$^{-2}$]')
+
+plt.subplots_adjust(hspace=0, wspace=0)
+
+plt.savefig(os.path.join(folder, 'T_Q_l1.pdf'), bbox_inches='tight')
+plt.close()
+
+fig, ax = plt.subplots(2, nplots, figsize=(4*nplots, 8), sharey='row', sharex='all')
+
+for i, key in enumerate(sorted(list(df.keys()))):
     ax[0][i].plot(erange, imag(df[key]['TM']['gg1']['0'][:, 0]))
     ax[1][i].plot(erange, imag(df[key]['TM']['gg27']['0'][:, 0]))
     ax[0][i].set_title('T = %.2f'%trange[i])
@@ -171,7 +193,7 @@ plt.savefig(os.path.join(folder, 'caption.pdf'), bbox_inches='tight')
 
 merger = PyPDF2.PdfWriter()
 
-for f in ['caption.pdf', 'mres.pdf', 'Rho_Q.pdf', 'Rho_G.pdf', 'T_Q_l0.pdf', 'T_G_l0.pdf']:
+for f in ['caption.pdf', 'mres.pdf', 'Rho_Q.pdf', 'Rho_G.pdf', 'T_Q_l0.pdf', 'T_Q_l1.pdf', 'T_G_l0.pdf']:
     pdf = os.path.join(folder, f)
     merger.append(pdf)
 merger.write(os.path.join(folder, 'report.pdf'))
