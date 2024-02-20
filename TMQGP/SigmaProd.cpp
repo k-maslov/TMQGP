@@ -227,7 +227,7 @@ double x_integral_cm_onshell2(double omp, double om, double p,
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
-        return x_cm_onshell_integrand(x, omp, om ,p, k, iImT, iImG, eps1, eps2, debug, l);
+        return x_cm_onshell_integrand2(x, omp, om ,p, k, T, iImT, iImG, eps1, eps2, debug, l);
     };
 
     integ_x.integrate(&i_func_x, -1, 1, res, err);
@@ -243,7 +243,7 @@ int l){
 
     // printf("Hello!!!\n");
     funct i_func_k = [&](double k) -> double {
-        return x_integral_cm_onshell(omp, om, p, k, iImT, iImG, eps1, eps2, 0, l);
+        return x_integral_cm_onshell2(omp, om, p, k, T, iImT, iImG, eps1, eps2, 0, l);
     };
     integ_k.integrate(&i_func_k, 0, 5, res, err);
     return res;
@@ -255,13 +255,16 @@ double sigma_ff_onshell2(double om, double p, double T,
     double res, err, res_m, err_m, res_p, err_p;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double omp) -> double {
-        double res = k_integral_onshell(omp, om, p, iImT, iImG, eps1, eps2, l);
+        double res = k_integral_onshell2(omp, om, p, T, iImT, iImG, eps1, eps2, l);
         return res;
     };
 
-    integ_E.integrate(&i_func_e, -5, -1, res_m, err_m);
-    integ_E.integrate(&i_func_e, -1, 2, res, err);
-    integ_E.integrate(&i_func_e, 2, 5, res_p, err_p);
+    // integ_E.integrate(&i_func_e, -5, -1, res_m, err_m);
+    // integ_E.integrate(&i_func_e, -1, 2, res, err);
+    // integ_E.integrate(&i_func_e, 2, 5, res_p, err_p);
 
-    return res_m + res + res_p;
+    // return res_m + res + res_p;
+    integ_E.integrate(&i_func_e, -5, 5, res, err);
+
+    return res, err;
 }
