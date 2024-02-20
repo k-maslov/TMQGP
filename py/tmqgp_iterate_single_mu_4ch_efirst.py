@@ -82,11 +82,11 @@ if mode == 'XHI':
     qrange = np.linspace(0, 5, 201)   
 elif mode == 'HI':
     erange = np.linspace(-5, 5, 201)
-    qrange = np.linspace(0, 5, 51)    
+    qrange = np.linspace(0, 5, 51)
 
-elif mode == 'HI_Q':
-    erange = np.linspace(-5, 5, 201)
-    qrange = np.linspace(0, 5, 201)    
+# elif mode == 'HI_Q':
+#     erange = np.linspace(-5, 5, 201)
+#     qrange = np.linspace(0, 5, 201)    
     
 elif mode == 'LO':
     erange = np.linspace(-5, 5, 101)
@@ -311,8 +311,7 @@ while abs(delta) > thr:
     keys = ['QQ', 'QA', 
             'AQ', 'AA']
 
-    funcs = [tm., tm.sigma_ff_onshell, 
-             tm.sigma_ff_onshell, tm.sigma_ff_onshell]
+    funcs = [tm.Efirst_k_integral]*4
 
     chg_list = [channels_QQ, channels_QA,
                 channels_AQ, channels_AA]
