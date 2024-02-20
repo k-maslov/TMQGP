@@ -12,6 +12,7 @@
 
 // Define the integrators once
 IntGSL<std::function<double(double)>> integ_x;
+// Int_gsl_adaptive integ_x;
 IntGSL<std::function<double(double)>> integ_k;
 IntGSL<std::function<double(double)>> integ_E;
 // Int_gsl_adaptive integ_E;

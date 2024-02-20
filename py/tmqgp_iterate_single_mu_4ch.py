@@ -79,7 +79,7 @@ if out_folder != '.':
 ######################## Setting up the parameters #################
 if mode == 'XHI':
     erange = np.linspace(-5, 5, 401)
-    qrange = np.linspace(0, 5, 101)   
+    qrange = np.linspace(0, 5, 201)   
 elif mode == 'HI':
     erange = np.linspace(-5, 5, 201)
     qrange = np.linspace(0, 5, 51)    
@@ -170,7 +170,7 @@ delta = 1
 
 n_iter = 0
 current_iter = 0
-thr = 1e-2
+thr = 1e-4
 
 while abs(delta) > thr:
     channels_QQ = QuarkTM.ChannelGroup(mu0=False)
