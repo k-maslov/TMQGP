@@ -52,6 +52,7 @@ typedef std::string String;
 #include "TMQGP/SigmaProd.h"
 #include "TMQGP/Thermo.h"
 #include "TMQGP/Tmatrix.h"
+#include "TMQGP/Sigma_Efirst.h"
 // #include <complex>
 
 %}
@@ -65,6 +66,10 @@ typedef std::string String;
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* x, int dimX)};
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double* y, int dimY)};
 %apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* z2, int dimZ1, int dimZ2)};
+%apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* ReZ2, int dimZ1, int dimZ2)};
+%apply (double* INPLACE_ARRAY2, int DIM1, int DIM2) {(double* ImZ2, int dimZ3, int dimZ4)};
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* q, int dimQ)};
+%apply (double* INPLACE_ARRAY1, int DIM1) {(double* pole, int dimPole)};
 %include "TMQGP/Interpolator.h"
 
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * p, int dimP)};
@@ -76,6 +81,7 @@ typedef std::string String;
 %include "TMQGP/SigmaProd.h"
 %include "TMQGP/Thermo.h"
 %include "TMQGP/Tmatrix.h"
+%include "TMQGP/Sigma_Efirst.h"
 
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * omrange, int dimOmrange)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double * out, int dimOut)};
