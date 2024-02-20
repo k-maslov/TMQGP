@@ -33,7 +33,8 @@ double Efirst_cm_onshell_integrand(double omp, double om, double p,
     // double res = iImT(sqrt(k2), 
     //             ((om + omp > 0) - (om + omp < 0)) * Ecm) * iImG(k, omp);
 
-    double res = iImT(sqrt(k2), Ecm * ((om + omp > 0) - (om + omp < 0)));
+    double res = iImT(sqrt(k2), Ecm * ((om + omp > 0) - (om + omp < 0))) * iImG(k, omp) * (n_f(omp, T) + n_b(om + omp, T))
+                * k * k / 4 / M_PI/ M_PI;
 
     // double res = k*k * iImT(sqrt(k2), sqrt(s))  / 4 / M_PI/ M_PI;
 
@@ -45,25 +46,22 @@ double Efirst_cm_onshell_integrand(double omp, double om, double p,
     return res;
 }
 
-double Efirst_integral_cm_onshell(double om, double p, 
+double Efirst_integral_cm_onshell(double om, double p,
             double k, double x, double T, Interpolator2D & iImT, Interpolator2D & iImG, 
             Interpolator & eps1, Interpolator & eps2, int debug, int l){
     double res, err, res_m, err_m, res_p, err_p;
 
     funct i_func_x = [&](double x) -> double {
-        return Efirst_cm_onshell_integrand(x, om, p, k, x, T, iImT, iImG, eps1, eps2, debug, l) * iImG(k, x) * (n_f(x, T) + n_b(x + om, T));
+        return Efirst_cm_onshell_integrand(x, om, p, k, x, T, iImT, iImG, eps1, eps2, debug, l) ;
     };
 
+    integ_E.integrate(&i_func_x, -5, -1, res_m, err_m);
+    integ_E.integrate(&i_func_x, -1, 2, res, err);
+    integ_E.integrate(&i_func_x, 2, 5, res_p, err_p);
 
-    // integ_E.integrate(&i_func_x, -5, -1, res_m, err_m);
-    // integ_E.integrate(&i_func_x, -1, 2, res, err);
-    // integ_E.integrate(&i_func_x, 2, 5, res_p, err_p);
-
-    // return res_m + res + res_p;
-
-    integ_E.integrate(&i_func_x, -5, 5, res_p, err_p);
-
-    return res_p;
+    return res_m + res + res_p;
+    // integ_E.integrate(&i_func_x, -5, 5, res_p, err_p);
+    // return res_p;
 }
 
 double Efirst_x_integral(double om, double p, 
@@ -85,10 +83,35 @@ double Efirst_k_integral(double om, double p, double T, Interpolator2D & iImT, I
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
-        return Efirst_x_integral(om, p, x, T, iImT, iImG, eps1, eps2, debug, l) * x * x / 4 / M_PI/ M_PI;
+        return Efirst_x_integral(om, p, x, T, iImT, iImG, eps1, eps2, debug, l);
     };
 
     integ_k.integrate(&i_func_x, 0, 5, res, err);
+    return res;
+}
+
+double Efirst_kfirst_int(double om, double p, 
+            double x, double T, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator & eps1, Interpolator & eps2, int debug, int l){
+    double res, err;
+
+    funct i_func_x = [&](double k) -> double {
+        return Efirst_integral_cm_onshell(om, p, k, x, T, iImT, iImG, eps1, eps2, debug, l);
+    };
+
+    integ_x.integrate(&i_func_x, 0, 5, res, err);
+    return res;
+}
+
+double Efirst_kfirst_x(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator & eps1, Interpolator & eps2, int debug, int l){
+    double res, err;
+
+    funct i_func_x = [&](double x) -> double {
+        return Efirst_kfirst_int(om, p, x, T, iImT, iImG, eps1, eps2, debug, l) ;
+    };
+
+    integ_k.integrate(&i_func_x, -1, 1, res, err);
     return res;
 }
 

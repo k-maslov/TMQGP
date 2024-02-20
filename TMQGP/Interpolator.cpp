@@ -96,7 +96,8 @@ double Interpolator2D::operator()(double x, double y){
 	return res;
 }
 
-InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ2, int dimZ1, int dimZ2, double *ImZ2, int dimZ3, int dimZ4){
+InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ2, 
+			int dimZ1, int dimZ2, double *ImZ2, int dimZ3, int dimZ4, string what){
 	this->iRe = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
 	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
 	accImX = gsl_interp_accel_alloc();
@@ -105,6 +106,8 @@ InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ
 	accReY = gsl_interp_accel_alloc();
 	gsl_spline2d_init(iRe, x, y, ReZ2, dimX, dimY);
 	gsl_spline2d_init(iIm, x, y, ImZ2, dimX, dimY);
+
+	this->what = what;
 
 	this->x.clear();
 	this->y.clear();
@@ -149,14 +152,22 @@ double InterDenom2D::imag(double x, double y){
 }
 
 double InterDenom2D::operator()(double x, double y){
-	return this->imag(x, y);
+	if (this->what == "real"){
+		return this->real(x, y);
+	}
+	if (this->what == "imag"){
+		return this->imag(x, y);
+	}
+	else{
+		return -1;
+	}
 }
 
 PoleInterpolator::PoleInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole)
+			double * q, int dimQ, double * pole, int dimPole, string what)
 {
 	iPole = Interpolator(q, dimQ, pole, dimPole, "cubic");
-	InterDenom2D(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4);
+	InterDenom2D(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4, what);
 }
 

@@ -56,7 +56,8 @@ class InterDenom2D : public Interpolator2D{
 	public:
 		InterDenom2D(){};
 		InterDenom2D(double *x, int dimX, double *y, int dimY, 
-			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4);
+			double * ReZ2, int dimZ1, int dimZ2, 
+			double * ImZ2, int dimZ3, int dimZ4, string what);
 
 		gsl_interp_accel * accReX;
 		gsl_interp_accel * accReY;
@@ -67,6 +68,7 @@ class InterDenom2D : public Interpolator2D{
 		gsl_spline2d * iIm;
 
 		vector<double> z2;
+		string what;
 		double real(double x, double y);
 		double imag(double x, double y);
 		double operator()(double x, double y) override;
@@ -79,7 +81,7 @@ class PoleInterpolator: public InterDenom2D{
 		PoleInterpolator(){};
 		PoleInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole);
+			double * q, int dimQ, double * pole, int dimPole, string what);
 
 		Interpolator iPole;
 };

@@ -1,4 +1,5 @@
 
+
 #ifndef SIGMAPROD_H_
 #define SIGMAPROD_H_
 
@@ -69,5 +70,22 @@ double sigma_bb_onshell(double om, double p, double T,
     int l=0);
 
 double sigma_tot(double om, double p, double T, TMArray TMs, Interpolator2D & iImG_Q, Interpolator2D & iImG_G);
+
+
+double x_cm_onshell_integrand2(double x, double omp, double om, double p, 
+            double k, double T, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator & eps1, Interpolator & eps2, int debug, int l);
+
+double x_integral_cm_onshell2(double omp, double om, double p, 
+            double k, double T, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator & eps1, Interpolator & eps2, int debug, int l);
+
+double k_integral_onshell2(double omp, double om, double p, double T,
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
+    int l);
+
+double sigma_ff_onshell2(double om, double p, double T, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
+    int l);
 
 #endif
