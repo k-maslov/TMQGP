@@ -51,8 +51,8 @@ double Efirst_integral_cm_onshell(double om, double p,
             Interpolator & eps1, Interpolator & eps2, int debug, int l){
     double res, err, res_m, err_m, res_p, err_p;
 
-    funct i_func_x = [&](double x) -> double {
-        return Efirst_cm_onshell_integrand(x, om, p, k, x, T, iImT, iImG, eps1, eps2, debug, l) ;
+    funct i_func_x = [&](double omp) -> double {
+        return Efirst_cm_onshell_integrand(omp, om, p, k, x, T, iImT, iImG, eps1, eps2, debug, l) ;
     };
 
     integ_E.integrate(&i_func_x, -5, -1, res_m, err_m);
@@ -64,7 +64,7 @@ double Efirst_integral_cm_onshell(double om, double p,
     // return res_p;
 }
 
-double Efirst_x_integral(double om, double p, 
+double Efirst_x_integral(double om, double p,
             double k, double T, Interpolator2D & iImT, Interpolator2D & iImG, 
             Interpolator & eps1, Interpolator & eps2, int debug, int l){
     double res, err;
@@ -82,8 +82,8 @@ double Efirst_k_integral(double om, double p, double T, Interpolator2D & iImT, I
             Interpolator & eps1, Interpolator & eps2, int debug, int l){
     double res, err;
 
-    funct i_func_x = [&](double x) -> double {
-        return Efirst_x_integral(om, p, x, T, iImT, iImG, eps1, eps2, debug, l);
+    funct i_func_x = [&](double k) -> double {
+        return Efirst_x_integral(om, p, k, T, iImT, iImG, eps1, eps2, debug, l);
     };
 
     integ_k.integrate(&i_func_x, 0, 5, res, err);

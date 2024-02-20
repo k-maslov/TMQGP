@@ -227,7 +227,7 @@ double x_integral_cm_onshell2(double omp, double om, double p,
     double res, err;
 
     funct i_func_x = [&](double x) -> double {
-        return x_cm_onshell_integrand2(x, omp, om ,p, k, T, iImT, iImG, eps1, eps2, debug, l);
+        return x_cm_onshell_integrand2(x, omp, om, p, k, T, iImT, iImG, eps1, eps2, debug, l);
     };
 
     integ_x.integrate(&i_func_x, -1, 1, res, err);
@@ -255,8 +255,8 @@ double sigma_ff_onshell2(double om, double p, double T,
     double res, err, res_m, err_m, res_p, err_p;
     gsl_set_error_handler_off();
     funct i_func_e = [&](double omp) -> double {
-        double res = k_integral_onshell2(omp, om, p, T, iImT, iImG, eps1, eps2, l);
-        return res;
+        return k_integral_onshell2(omp, om, p, T, iImT, iImG, eps1, eps2, l);
+        // return res;
     };
 
     // integ_E.integrate(&i_func_e, -5, -1, res_m, err_m);
@@ -266,5 +266,5 @@ double sigma_ff_onshell2(double om, double p, double T,
     // return res_m + res + res_p;
     integ_E.integrate(&i_func_e, -5, 5, res, err);
 
-    return res, err;
+    return res;
 }
