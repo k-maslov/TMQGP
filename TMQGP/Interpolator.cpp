@@ -36,8 +36,8 @@ Interpolator::Interpolator(double * x, int dimX, double * y, int dimY, string ki
 }
 
 Interpolator::~Interpolator() {
-// 	gsl_spline_free(interp);
-// 	gsl_interp_accel_free(accel);
+	gsl_spline_free(interp);
+	gsl_interp_accel_free(accel);
 }
 
 double Interpolator::operator()(double x) {
@@ -73,6 +73,15 @@ Interpolator2D::Interpolator2D(double *x, int dimX, double *y, int dimY,
 	debug = 0;
 }
 
+Interpolator2D::~Interpolator2D()
+{
+	gsl_spline2d_free(this->interp);
+	gsl_interp_accel_free(this->accX);
+	gsl_interp_accel_free(this->accY);
+
+
+}
+
 double Interpolator2D::operator()(double x, double y){
 	// gsl_set_error_handler_off();
 	double res;
@@ -98,13 +107,13 @@ double Interpolator2D::operator()(double x, double y){
 
 InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ2, 
 			int dimZ1, int dimZ2, double *ImZ2, int dimZ3, int dimZ4, string what){
-	this->iRe = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
+	this->interp = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
 	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
 	accImX = gsl_interp_accel_alloc();
 	accImY = gsl_interp_accel_alloc();
-	accReX = gsl_interp_accel_alloc();
-	accReY = gsl_interp_accel_alloc();
-	gsl_spline2d_init(iRe, x, y, ReZ2, dimX, dimY);
+	accX = gsl_interp_accel_alloc();
+	accY = gsl_interp_accel_alloc();
+	gsl_spline2d_init(interp, x, y, ReZ2, dimX, dimY);
 	gsl_spline2d_init(iIm, x, y, ImZ2, dimX, dimY);
 
 	this->what = what;
@@ -133,14 +142,24 @@ InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ
 	debug = 0;
 }
 
+InterDenom2D::~InterDenom2D()
+{
+	// gsl_spline2d_free(this->interp);
+	// gsl_interp_accel_free(this->accX);
+	// gsl_interp_accel_free(this->accY);
+	gsl_spline2d_free(this->iIm);
+	gsl_interp_accel_free(this->accImX);
+	gsl_interp_accel_free(this->accImY);
+}
+
 double InterDenom2D::real(double x, double y){
-	double re = gsl_spline2d_eval(iRe, x, y, accReX, accReY);
+	double re = gsl_spline2d_eval(interp, x, y, accX, accY);
 	double im = gsl_spline2d_eval(iIm, x, y, accImX, accImY);
 	return re / (re*re + im*im);
 }
 
 double InterDenom2D::imag(double x, double y){
-	double re = gsl_spline2d_eval(iRe, x, y, accReX, accReY);
+	double re = gsl_spline2d_eval(interp, x, y, accX, accY);
 	// cout << "re = " << re << endl;
 	double im = gsl_spline2d_eval(iIm, x, y, accImX, accImY);
 	// cout << "im = " << im << endl;

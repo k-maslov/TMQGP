@@ -40,6 +40,8 @@ class Interpolator2D{
 		Interpolator2D(double *x, int dimX, double *y, int dimY, 
 			double * z2, int dimZ1, int dimZ2);
 
+		~Interpolator2D();
+
 		gsl_spline2d * interp;
 		gsl_interp_accel * accX;
 		gsl_interp_accel * accY;
@@ -59,12 +61,16 @@ class InterDenom2D : public Interpolator2D{
 			double * ReZ2, int dimZ1, int dimZ2, 
 			double * ImZ2, int dimZ3, int dimZ4, string what);
 
-		gsl_interp_accel * accReX;
-		gsl_interp_accel * accReY;
+		~InterDenom2D();
+
+		// Assume base class members interpolate the real part
+
+		// gsl_interp_accel * accReX;
+		// gsl_interp_accel * accReY;
 		gsl_interp_accel * accImX;
 		gsl_interp_accel * accImY;
 
-		gsl_spline2d * iRe;
+		// gsl_spline2d * iRe;
 		gsl_spline2d * iIm;
 
 		vector<double> z2;

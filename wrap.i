@@ -53,6 +53,7 @@ typedef std::string String;
 #include "TMQGP/Thermo.h"
 #include "TMQGP/Tmatrix.h"
 #include "TMQGP/Sigma_Efirst.h"
+#include "TMQGP/SigmaQP.h"
 // #include <complex>
 
 %}
@@ -82,6 +83,7 @@ typedef std::string String;
 %include "TMQGP/Thermo.h"
 %include "TMQGP/Tmatrix.h"
 %include "TMQGP/Sigma_Efirst.h"
+%include "TMQGP/SigmaQP.h"
 
 %apply (double* INPLACE_ARRAY1, int DIM1) {(double * omrange, int dimOmrange)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double * out, int dimOut)};

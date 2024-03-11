@@ -199,8 +199,8 @@ class Particle:
     def G0(self, E, q, mu=0):
         # if self.propagator == 'Th':
         if self.stat == 'f':
-            return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2 + mu)
-            # return 1 / (E - self.om0(q) + 1j*self.eps + mu)
+            # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2 + mu)
+            return 1 / (E - self.om0(q) + 1j*self.eps + mu)
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
             if self.propagator == 1:
@@ -455,6 +455,31 @@ class Channel:
 
 
         self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
+
+    def populate_T_fast(self):
+        # if self.p_i.stat == 'b' and self.p_j.stat == 'b':
+
+        self.TMS = []
+        self.XS = []
+        self.TM = 0.
+        for l, G in enumerate(self.Gs):
+            x = np.array([tm.x_solve(E, 0, 0, self.T, self.iVS[l], self.iOm, self.iReG2, self.iImG2, 5,
+                int(np.sign(self.G))) for E in self.erange])
+            X = np.array([x for q in self.qrange]).transpose()
+
+            self.XS += [X]
+
+        # else:
+        #     self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2) for k in (self.qrange)]
+        #         for E in tqdm.tqdm(self.erange)])
+            v1v2 = np.sign(self.G)*self.v(self.qrange)**2
+            TM = - 4*np.pi*v1v2 / (1 - X)
+            self.TM += (2*l + 1)*TM
+            self.TMS += [TM]
+
+
+
+        self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
         
     def get_S_q(self, q):
         res = pipe(self.erange) | p[lambda z: self.func(z, q, self.T, self.iImT,
@@ -549,7 +574,7 @@ class ChannelL:
 
         self.chs = []
         for l, p in zip(range(0, lmax + 1), params):
-            if G2 == None:
+            if G2 is None:
                 if l == 0:
                     ch = Channel(p_i, p_j, T, Fa, p['G'], p['L'], p['screen'], ds, da,
                     l=l, mu0=mu0, mu=mu)
@@ -566,10 +591,10 @@ class ChannelL:
 
     def populate_T(self):
         for ch in self.chs:
-            ch.populate_T()
+            ch.populate_T_fast()
     
     def get_T(self):
-        return np.sum([(2 *l + 1) * ch.TM for l, ch in enumerate(self.chs)], axis=0)
+        return np.sum([(2*l + 1) * ch.TM for l, ch in enumerate(self.chs)], axis=0)
         
 
 class ChannelGroup:
@@ -598,6 +623,3 @@ class ChannelGroup:
 
     def __getitem__(self, key):
         return self.channels[key]
-
-
-
