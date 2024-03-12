@@ -87,9 +87,12 @@ class PoleInterpolator: public InterDenom2D{
 		PoleInterpolator(){};
 		PoleInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole, string what);
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what);
 
-		Interpolator iPole;
+		Interpolator * iPole;
+		Interpolator * iWidth;
+
+		~PoleInterpolator();
 };
 
 

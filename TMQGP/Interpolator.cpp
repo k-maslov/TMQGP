@@ -182,11 +182,16 @@ double InterDenom2D::operator()(double x, double y){
 	}
 }
 
-PoleInterpolator::PoleInterpolator(double *x, int dimX, double *y, int dimY, 
-			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole, string what)
-{
-	iPole = Interpolator(q, dimQ, pole, dimPole, "cubic");
-	InterDenom2D(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4, what);
+PoleInterpolator::PoleInterpolator(double *x, int dimX, double *y, int dimY,
+			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4,
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what) : 
+			InterDenom2D(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4, what)
+			{
+	iPole = new Interpolator(q, dimQ, pole, dimPole, "cubic");
+	iWidth = new Interpolator(q, dimQ, width, dimWidth, "cubic");
 }
 
+PoleInterpolator::~PoleInterpolator(){
+	delete iPole;
+	delete iWidth;
+}
