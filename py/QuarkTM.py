@@ -1,163 +1,18 @@
 import numpy as np
 from scipy import signal
 import TMQGP as tm
-import tqdm.notebook as tqdm
+import tqdm as tqdm
 from syntax_sugar import pipe, END
 
+from scipy.interpolate import interp1d
 from syntax_sugar import thread_syntax as t, process_syntax as p
 
-class IterController:
-    def __init__(self) -> None:
-        pass
-
-#TODO class for spectral functions and T-matrix
-
-# class Runner:
-#     def __init__(self, T, channel='ff', Fa=1, G=8, L=0.3, m=0.5, eps=5e-2, erange=None, qrange=None, inters=None, screen=0):
-#         self.m = m
-#         self.T = T
-#         self.L = L
-#         self.G = G
-#         self.eps = eps
-#         self.screen = screen
-#         self.Fa = Fa
-#         self.channel = channel
-
-#         if len(set(channel)) == 2:
-#             self.statistics = 'f'
-#         else:
-#             self.statistics = 'b'
-
-#         if channel == 'bb':
-#             self.func = tm.sigma_bb
-#         elif channel == 'bf':
-#             self.func = tm.sigma_bf
-#         elif channel == 'ff':
-#             self.func = tm.sigma_ff
-#         elif channel == 'fb':
-#             self.func = tm.sigma_fb
-        
-#         if erange is None:
-#             self.erange = np.linspace(-5, 5, 100)
-#         else: self.erange = erange
-#         if qrange is None:
-#             self.qrange = np.linspace(0, 5, 50)
-#         else: self.qrange = qrange
-#         if inters is None:
-#             self.iV = tm.Interpolator(self.qrange, self.v(self.qrange), 'linear')
-#             self.iOm = tm.Interpolator(self.qrange, self.om0(self.qrange), 'linear')
-#             arrGqq = np.array([[self.Gqq0(e, k) for k in self.qrange] for e in self.erange])
-#             self.iReGqq = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(arrGqq)))
-#             self.iImGqq = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(arrGqq)))
-#             self.inters = [self.iV, self.iOm, self.iReGqq, self.iImGqq]
-#             arrGq = np.array([[-2*np.imag(self.Gq0(_e, _k)) for _k in self.qrange] for _e in self.erange])
-#             self.iGq = tm.Interpolator2D(self.qrange, self.erange, (arrGq))
-#         else:
-#             self.inters = inters
-#             self.iV, self.iOm, self.iReGqq, self.iImGqq, self.iGq = inters
-
-#     def v(self, q):
-#         # return self.G * self.L**2 / (q**2 + self.L**2)#exp(-k**2 / L**2)
-#         mult = 1 / (1 + self.screen*self.T**2)
-#         return self.Fa * self.G * np.exp(-q**2 / (self.L * mult)**2)
-
-#     def V(self, q, q1):
-#         return self.v(q) * self.v(q1)
-
-#     def om0(self, k, m=None):
-#         if m == None:
-#             m = self.m
-#         return np.sqrt(m**2 + k**2)
-
-#     def Gqq0(self, E, k):
-#         return 1/2/(E/2 - self.om0(k) + 1j*self.eps)
-
-#     def Gq0(self, E, k):    
-#         return 1 / (E - self.om0(k) + 1j*self.eps)
-
-#     def populate_T(self):
-#         self.TM = np.array([[tm.T_solve(E, k, k, self.T, self.iV, self.iOm, self.iReGqq, self.iImGqq) for k in (self.qrange)]
-#                 for E in tqdm.tqdm(self.erange)])
-
-#         self.iImT = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag((self.TM))))
-
-#     def populate_S(self):
-#         ress_cm = np.array([[self.func(e, q, self.T, self.iImT, self.iGq) for q in self.qrange]
-#         for e in tqdm.tqdm(self.erange)])
-#         self.ImS = ress_cm
-
-#         ReSigmas = []
-
-#         for res in tqdm.tqdm(ress_cm.transpose()):
-#             iImSigma = tm.Interpolator(self.erange, np.ascontiguousarray(res), 'cubic')
-#             ReSigma = [tm.ReSigmaKK(e, iImSigma) for e in self.erange]
-#             ReSigmas += [ReSigma]
-
-#         self.ReS = np.array(ReSigmas).transpose()
-
-#     def nf(self, e, T):
-#         return 1/(np.exp(e/T) + 1)
-
-#     def nb(self, e, T):
-#         # if e == 0:
-#         #     return 10
-#         res = 1/(np.exp(e/T) - 1)
-#         res[e == 0] = 10
-#         return res
-
-#     def next_step(self):
-#         om0_k = np.array([self.om0(self.qrange) for e in self.erange])
-#         arrE = np.array([self.erange for q in self.qrange]).transpose()
-#         Gq_res = 1/(arrE - om0_k + 1j*self.eps - (self.ReS + 1j*self.ImS))
-#         self.rhoQ_new = -2*np.imag(Gq_res)
-#         de = self.erange[1] - self.erange[0]
-#         self.ImGqq_new = -np.array([
-#             signal.convolve(_rho, _rho, mode='same')* de / 4 / np.pi for _rho in self.rhoQ_new.transpose()
-#         ])
-
-#         if self.channel[0] == 'f':
-#             cf1 = lambda z, T: self.nf(z, T)
-#         else:
-#             cf1 = lambda z, T: -self.nb(z, T)
-
-#         if self.channel[1] == 'f':
-#             cf2 = lambda z, T: self.nf(z, T)
-#         else:
-#             cf2 = lambda z, T: -self.nb(z, T)
-
-#         self.ImGqq_new += np.array([
-#             signal.convolve(_rho, _rho*cf1(self.erange, self.T), mode='same')* de / 4 / np.pi for _rho in self.rhoQ_new.transpose()
-#         ])
-
-#         self.ImGqq_new += np.array([
-#             signal.convolve(_rho, _rho*cf2(self.erange, self.T), mode='same')* de / 4 / np.pi for _rho in self.rhoQ_new.transpose()
-#         ])
-
-#         ReGqq_new = []
-
-#         for _im in self.ImGqq_new:
-#             iImNew = tm.Interpolator(self.erange, _im, 'linear')
-#             ReNew = np.array([tm.ReSigmaKK(e, iImNew) for e in self.erange])
-#             ReGqq_new += [ReNew]
-
-#         self.ReGqq_new = np.array(ReGqq_new)
-        
-
-#         iImGqq_new = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(self.ImGqq_new.transpose()))
-#         iReGqq_new = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(self.ReGqq_new.transpose()))
-
-#         iGq_new = tm.Interpolator2D(self.qrange, self.erange, self.rhoQ_new)
-
-#         r_new = Runner(self.T, self.channel, self.Fa, self.G, self.L, self.m, self.eps, self.erange, self.qrange, 
-#                     inters=[self.iV, self.iOm, iReGqq_new, iImGqq_new, iGq_new])
-
-#         return r_new
-
-
-        
+from scipy.optimize import minimize
+from scipy.interpolate import UnivariateSpline
+from matplotlib import pyplot as plt    
 
 class Particle:
-    def __init__(self, m, qrange, erange, R=None, stat='f', eps=5e-2, d=6, 
+    def __init__(self, m, qrange, erange, stat='f', eps=5e-2, d=6, 
             propagator=1, Gtab=None, mu=0):
         self.m = m
         self.eps = eps
@@ -170,27 +25,68 @@ class Particle:
         self.d = d
         if Gtab is not None:
             self.Gtab = Gtab
-            self.set_R(-np.imag(Gtab) / np.pi)
-            self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(Gtab)))
-            self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(Gtab)))
         else:
-            if R is None:
-                self.Gtab =np.array([[self.G0(_e, _k, mu=mu)
-                                for _k in self.qrange]
-                                for _e in self.erange])
-                self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(self.Gtab)))
-                self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Gtab)))
-                arrR0 = - np.imag(self.Gtab) / np.pi
-                self.set_R(arrR0)
-            else:
-                self.set_R(R)
+            # if R is None:
+            self.Gtab =np.array([[self.G0(_e, _k, mu=mu)
+                            for _k in self.qrange]
+                            for _e in self.erange])
+            # else:
+            #     self.set_R(R)
+        # print(Gtab)
+        self.set_R(-np.imag(self.Gtab) / np.pi)
+
+        peaks = []
+        widths = []
+        init = self.m
+        r1 = 0.9*self.m
+        r2 = 1.1*self.m
+        for q, ge in zip(self.qrange, self.Gtab.transpose()):
+            iIm = interp1d(self.erange, np.imag(ge), 'cubic')
+            x = minimize(iIm, init, bounds=[[r1, r2]])
+            peaks += [x.x[0]]
+
+            # find the half-peak
+            f_peak = iIm(x.x[0])
+            iIm2 = UnivariateSpline(self.erange, np.imag(ge) - f_peak/2, s=1e-10)
+            rr = iIm2.roots()
+            # print(rr)
+            try:
+                r1, r2 = rr
+                width = r2 - r1
+                widths += [width]
+            except:
+                width = widths[-1]
+                widths += [width]
+
+        self.peaks = np.array(peaks)
+        self.widths = np.array(widths)
+                
+            # print(q, x.x, f_peak, r1, r2)
+        plt.plot(self.qrange, peaks)
+        plt.plot(self.qrange, widths)
+
+        # self.iPeaks = tm.Interpolator(self.qrange, self.peaks, "cubic")
+        # self.iWidths = tm.Interpolator(self.qrange, self.widths, 'cubic')
+
+        self.iImG = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(1/self.Gtab)),
+                    np.ascontiguousarray(np.imag(1/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
+
+        self.iReG = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(1/self.Gtab)),
+                    np.ascontiguousarray(np.imag(1/self.Gtab)), self.qrange, self.peaks, self.widths, 'real')
+
+        self.R = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(-np.pi/self.Gtab)),
+                    np.ascontiguousarray(np.imag(-np.pi/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
+
+        # self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(self.Gtab)))
+        # self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Gtab)))
     
     def set_R(self, Rtab):
         if Rtab.shape[0] != len(self.erange) or Rtab.shape[1] != len(self.qrange):
             raise
         self.Rtab = Rtab
-        self.R = tm.Interpolator2D(self.qrange, self.erange,
-            np.ascontiguousarray(Rtab))
+        # self.R = tm.Interpolator2D(self.qrange, self.erange,
+        #     np.ascontiguousarray(Rtab))
+        self.R = tm.Interpolator2D(self.qrange, self.erange, self.Rtab)
 
         
     def om0(self, q):
@@ -226,15 +122,13 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float, 
                 Fa=1, G=6, L=0.5, screen=0, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0, G2_mode=1, expand=0):
         self.p_i = p_i
         self.p_j = p_j
         self.l = l
         self.mu = mu
         self.set_Gs(G, G1)
 
-        
-        
         self.test_potential = test_potential
 
         if p_i.stat == 'b' and p_j.stat == 'b':
@@ -279,6 +173,10 @@ class Channel:
 
         self.erange = p_i.erange ### TODO: dirty
         self.qrange = p_i.qrange
+
+        self.erange2b = np.linspace(2*min(p_i.erange), 2*max(p_i.erange), 2*len(p_i.erange) - 1)
+        self.qrange2b = np.linspace(2*min(p_i.qrange), 2*max(p_i.qrange), 2*len(p_i.qrange) - 1)
+
         self.screen = screen
         self.T = T
         self.Fa = Fa
@@ -290,12 +188,17 @@ class Channel:
         self.init_iV()
         self.iOm = tm.Interpolator(self.qrange, self.p_i.om0(self.qrange), 'cubic')
         # if calc_G2:
-        self.set_G2(G2)
 
         self.eps_i = tm.Interpolator(self.p_i.qrange, self.p_i.om0(self.p_i.qrange),
             'cubic')
         self.eps_j = tm.Interpolator(self.p_j.qrange, self.p_j.om0(self.p_j.qrange),
         'cubic')
+        self.expand = expand
+        if expand:
+            self.erange = self.erange2b
+            self.qrange = self.qrange2b
+
+        self.set_G2(G2, G2_mode=G2_mode)
 
     def set_Gs(self, G, G1=None):
         # if self.lmax == 0:
@@ -307,7 +210,7 @@ class Channel:
                 # self.Gs = [G, G]
         
     def init_iV(self):
-        self.iVS = [tm.Interpolator(self.qrange, self.v(self.qrange, do_rel=self.do_rel), 'cubic')]
+        self.iVS = [tm.Interpolator(self.qrange2b, self.v(self.qrange2b, do_rel=self.do_rel), 'cubic')]
 
     def get_TMChannel(self):
         TM = tm.TMChannel()
@@ -350,64 +253,76 @@ class Channel:
         # res[e == 0] = 10
         return res
 
-    def set_G2(self, G2=None):
+    def set_G2(self, G2=None, G2_mode=1):
         if G2 is None:
-            de = self.p_i.erange[1] - self.p_i.erange[0]
+            # de = self.p_i.erange[1] - self.p_i.erange[0]
 
 
 
-            self.ImG2 = -np.array([
-                signal.convolve(r1, r2, mode='same') * de * np.pi
-                for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-            ]).transpose()
+            # self.ImG2 = -np.array([
+            #     signal.convolve(r1, r2, mode='same') * de * np.pi
+            #     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+            # ]).transpose()
             
             
 
-            if self.p_i.stat == 'f':
-                cf1 = lambda z, T: self.nf(z, T)
-            else:
-                cf1 = lambda z, T: -self.nb(z, T)
+            # if self.p_i.stat == 'f':
+            #     cf1 = lambda z, T: self.nf(z, T)
+            # else:
+            #     cf1 = lambda z, T: -self.nb(z, T)
 
-            if self.p_j.stat == 'f':
-                cf2 = lambda z, T: self.nf(z, T)
-            else:
-                cf2 = lambda z, T: -self.nb(z, T)
+            # if self.p_j.stat == 'f':
+            #     cf2 = lambda z, T: self.nf(z, T)
+            # else:
+            #     cf2 = lambda z, T: -self.nb(z, T)
                 
                 
             
-            self.ImG2 += np.array([
-                signal.convolve(r1*cf1(self.erange, self.T), r2, 
-                                mode='same')* de * np.pi
-                for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-            ]).transpose()
+            # self.ImG2 += np.array([
+            #     signal.convolve(r1*cf1(self.erange, self.T), r2, 
+            #                     mode='same')* de * np.pi
+            #     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+            # ]).transpose()
             
-            self.ImG2 += np.array([
-                signal.convolve(r1, r2*cf2(self.erange, self.T), 
-                                mode='same')* de * np.pi
-                for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-            ]).transpose()
+            # self.ImG2 += np.array([
+            #     signal.convolve(r1, r2*cf2(self.erange, self.T), 
+            #                     mode='same')* de * np.pi
+            #     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+            # ]).transpose()
+            self.ImG2 = np.array([
+                [-np.pi*tm.G2_conv_ff(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange]
+            for q in tqdm.tqdm(self.qrange)]).transpose()
             
-                
-                
             ReG2 = []
-                
-            for _im in self.ImG2.transpose():
-                iImNew = tm.Interpolator(self.erange, _im, 'cubic')
-                ReNew = np.array([tm.ReSigmaKK(e, iImNew) for e in self.erange])
-                ReG2 += [ReNew]
+
+            if G2_mode == 1:
+                for q in tqdm.tqdm(self.qrange):
+                    res = np.array([-tm.ReG2_pole(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange])
+                    ReG2 += [res]
+            elif G2_mode == 0:
+                for _im in self.ImG2.transpose():
+                    iImNew = tm.Interpolator(self.erange, _im, 'cubic')
+                    Lambda = 5
+                    if self.expand:
+                        Lambda = 10
+                    ReNew = np.array([tm.ReSigmaKK(e, iImNew, Lambda) for e in self.erange])
+                    ReG2 += [ReNew]
+            else:
+                raise
 
             self.ReG2 = np.array(ReG2).transpose()
-            
-            
+
         else:
             self.ReG2 = np.real(G2)
             self.ImG2 = np.imag(G2)
-            
-        self.iReG2 = tm.Interpolator2D(self.qrange, self.erange, 
-                                np.ascontiguousarray(self.ReG2))
-        self.iImG2 = tm.Interpolator2D(self.qrange, self.erange, 
-                                np.ascontiguousarray(self.ImG2))
+
         self.G2 = self.ReG2 + 1j*self.ImG2
+
+        self.iReG2 = tm.InterDenom2D(self.qrange, self.erange, 
+                                np.ascontiguousarray(np.real(1/self.G2)), np.ascontiguousarray(np.imag(1/self.G2)), 'real')
+        self.iImG2 = tm.InterDenom2D(self.qrange, self.erange, 
+                                np.ascontiguousarray(np.real(1/self.G2)), np.ascontiguousarray(np.imag(1/self.G2)), 'imag')
+        
 
     def G20(self, E, k):#1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2
         return 1/2/(E/2 - self.p_i.om0(k) + 1j*self.p_i.eps)
@@ -425,13 +340,17 @@ class Channel:
         
     def populate_T(self):
         # if self.p_i.stat == 'b' and self.p_j.stat == 'b':
+        Lambda = 5
+        if self.expand:
+            Lambda = 10.5
 
         if not self.test_potential:
             self.TMS = []
             self.XS = []
             self.TM = 0.
+            
             for l, G in enumerate(self.Gs):
-                X = np.array([[tm.x_solve(E, k, k, self.T, self.iVS[l], self.iOm, self.iReG2, self.iImG2, 5,
+                X = np.array([[tm.x_solve(E, k, k, self.T, self.iVS[l], self.iOm, self.iReG2, self.iImG2, Lambda,
                     int(np.sign(self.G))) for k in self.qrange]
                     for E in (self.erange)])
                 self.XS += [X]
@@ -446,7 +365,7 @@ class Channel:
 
         else:
             print('XXXX')
-            self.X = np.array([[tm.J_solve_explicit(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, 5,
+            self.X = np.array([[tm.J_solve_explicit(E, k, k, self.T, self.iV, self.iOm, self.iReG2, self.iImG2, Lambda,
                     int(np.sign(self.G))) for k in self.qrange]
                 for E in tqdm.tqdm(self.erange)])
 

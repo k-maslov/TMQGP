@@ -719,7 +719,7 @@ double ReSigmaKK_2D(double E, double q, Interpolator2D & iImS){
     return res;
 }
 
-double ReSigmaKK(double E,Interpolator & iImS){
+double ReSigmaKK(double E,Interpolator & iImS, double Lambda){
     gsl_set_error_handler_off();
     double res, err;
 
@@ -727,7 +727,7 @@ double ReSigmaKK(double E,Interpolator & iImS){
         return iImS(z) / M_PI;
     };
     
-    inter_cauchy.integrate(&i_func, -5, 5, E, res, err);
+    inter_cauchy.integrate(&i_func, -Lambda, Lambda, E, res, err);
     return res;
 }
 // double k_integral()

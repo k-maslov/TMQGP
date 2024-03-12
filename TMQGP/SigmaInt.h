@@ -69,7 +69,7 @@ double T_solveRe(double E, double q, double q1, double T, Interpolator & iVK, In
             double Lambda);
 
 double ReSigmaKK_2D(double E, double q, Interpolator2D & iImS);
-double ReSigmaKK(double E, Interpolator & iImS);
+double ReSigmaKK(double E, Interpolator & iImS, double Lambda=5);
 
 double sigma_bb(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG);
 double sigma_bf(double om, double p, double T, Interpolator2D & iImT, Interpolator2D & iImG);
