@@ -190,6 +190,9 @@ while abs(delta) > thr:
         QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
     )
 
+    f.attrs.update({'erange2b': channels_QQ['qq3'].chs[0].erange2b, 
+                    'qrange2b': channels_QQ['qq3'].chs[0].qrange2b})
+
     # channels_QQ.addChannel(
     #     QuarkTM.ChannelL('qq6', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=6, Fa=1/4, mu=mu)
     # )
@@ -311,7 +314,7 @@ while abs(delta) > thr:
     keys = ['QQ', 'QA', 
             'AQ', 'AA']
 
-    funcs = [tm., tm.sigma_ff_onshell, 
+    funcs = [tm.sigma_ff_onshell, tm.sigma_ff_onshell, 
              tm.sigma_ff_onshell, tm.sigma_ff_onshell]
 
     chg_list = [channels_QQ, channels_QA,
@@ -329,7 +332,7 @@ while abs(delta) > thr:
 
         # plt.plot(erange, imag(TM_tot[:, 0]))
         ch = list(channels.channels.items())[0][1] #ch = list(channels.items())[0][1] # take any of the channels since SFs are the same
-        iImTM_tot = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(np.imag(TM_tot)))
+        iImTM_tot = tm.Interpolator2D(ch.chs[0].qrange, ch.chs[0].erange, np.ascontiguousarray(np.imag(TM_tot)))
         eps1 = tm.Interpolator(qrange, ch.p_i.om0(qrange), 'cubic')
         eps2 = tm.Interpolator(qrange, ch.p_j.om0(qrange), 'cubic')
         Ntot = len(erange)*len(qrange)

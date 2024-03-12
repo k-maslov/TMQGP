@@ -122,7 +122,7 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float, 
                 Fa=1, G=6, L=0.5, screen=0, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0, G2_mode=1, expand=0):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0, G2_mode=0, expand=1):
         self.p_i = p_i
         self.p_j = p_j
         self.l = l
@@ -291,7 +291,7 @@ class Channel:
             # ]).transpose()
             self.ImG2 = np.array([
                 [-np.pi*tm.G2_conv_ff(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange]
-            for q in tqdm.tqdm(self.qrange)]).transpose()
+            for q in (self.qrange)]).transpose()
             
             ReG2 = []
 
@@ -318,6 +318,7 @@ class Channel:
 
         self.G2 = self.ReG2 + 1j*self.ImG2
 
+        self.G2[np.real(self.G2) < 1e-13] = 1e-13 + 0j
         self.iReG2 = tm.InterDenom2D(self.qrange, self.erange, 
                                 np.ascontiguousarray(np.real(1/self.G2)), np.ascontiguousarray(np.imag(1/self.G2)), 'real')
         self.iImG2 = tm.InterDenom2D(self.qrange, self.erange, 
