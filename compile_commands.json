@@ -1,0 +1,74 @@
+[
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/IntGSL.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/IntGSL.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/IntGSL.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/IntGSL.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/Interpolator.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/Interpolator.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/Interpolator.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/Interpolator.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/Particle.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/Particle.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/Particle.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/Particle.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/SigmaGSL.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/SigmaGSL.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/SigmaGSL.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/SigmaGSL.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/SigmaInt.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/SigmaInt.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/SigmaInt.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/SigmaInt.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/SigmaProd.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/SigmaProd.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/SigmaProd.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/SigmaProd.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/SigmaQP.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/SigmaQP.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/SigmaQP.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/SigmaQP.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/Sigma_Efirst.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/Sigma_Efirst.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/Sigma_Efirst.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/Sigma_Efirst.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/Thermo.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/Thermo.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/Thermo.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/Thermo.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DlibTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/libTMQGP.dir/TMQGP/Tmatrix.cpp.o -c /home/const/Numerics/TMQGP/TMQGP/Tmatrix.cpp",
+  "file": "/home/const/Numerics/TMQGP/TMQGP/Tmatrix.cpp",
+  "output": "CMakeFiles/libTMQGP.dir/TMQGP/Tmatrix.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++ -DTMQGP_EXPORTS -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -fPIC -o CMakeFiles/TMQGP.dir/wrap.cpp.o -c /home/const/Numerics/TMQGP/wrap.cpp",
+  "file": "/home/const/Numerics/TMQGP/wrap.cpp",
+  "output": "CMakeFiles/TMQGP.dir/wrap.cpp.o"
+},
+{
+  "directory": "/home/const/Numerics/TMQGP",
+  "command": "/usr/bin/g++  -I/usr/include/python3.11 -I/usr/lib/python3.11/site-packages/numpy/core/include -I/home/const/Numerics/TMQGP/TMQGP  -fPIC -g -Ofast -std=c++2a -fopenmp -g -std=gnu++14 -o CMakeFiles/DirectUse.dir/DirectUse.cpp.o -c /home/const/Numerics/TMQGP/DirectUse.cpp",
+  "file": "/home/const/Numerics/TMQGP/DirectUse.cpp",
+  "output": "CMakeFiles/DirectUse.dir/DirectUse.cpp.o"
+}
+]

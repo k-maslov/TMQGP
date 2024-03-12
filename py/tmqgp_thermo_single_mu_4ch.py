@@ -64,6 +64,8 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
     pAs += [pA]
 
 ps_Q = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pQs)])
+print(pQs[0].Gtab[:, 0])
+print(ps_Q)
 ps_A = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pAs)])
 # ps_G = np.array([tm.OmQ_B(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pGs)])
 
