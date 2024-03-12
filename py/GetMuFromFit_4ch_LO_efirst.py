@@ -71,7 +71,7 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
     
     if not exists or force_iterate:
         mu = args.mu_B/3 * T
-        cmd = f'python3 -m tmqgp_iterate_single_mu_4ch {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter --mode HI --showtime '
+        cmd = f'python3 -m tmqgp_iterate_single_mu_4ch_efirst {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter --mode LO --showtime '
         cmd += init_arg
         print('Running ' + cmd)
         ret_code = os.system(cmd)
@@ -82,6 +82,6 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
 
     ## calculate pressure
     if not exists or force_thermo:
-        cmd_th = f'python3 -m tmqgp_thermo_single_mu_4ch {fname}'
+        cmd_th = f'python3 -m tmqgp_thermo_single_mu_4ch_efirst {fname}'
         print('Running ' + cmd_th)
         os.system(cmd_th)

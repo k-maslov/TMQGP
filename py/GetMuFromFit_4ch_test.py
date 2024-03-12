@@ -29,7 +29,11 @@ args = parser.parse_args()
 # mGs = df_fit.attrs['mGs']
 # mQs = df_fit.attrs['mQs']
 
-Trange, mQs, mGs = np.loadtxt(os.path.join(os.path.dirname(__file__), "fit_params_HD.txt"))
+# Trange, mQs, mGs = np.loadtxt(os.path.join(os.path.dirname(__file__), "fit_params_HD.txt"))
+
+Trange = [0.17, 0.2, 0.3, 0.4]
+mQs = [0.6, 0.6, 0.6, 0.6]
+mGs = [1.4, 1.4, 1.4, 1.4]
 
 step = 1
 Trange = Trange[::step]
@@ -43,12 +47,12 @@ out_folder = '.'
 # mGs = [1.4, 1.25, 1., 0.9]
 # mQs = [0.61, 0.6, 0.56, 0.49]
 
-screen = 0.0065
-suppress = 0.8
+screen = 0.00
+suppress = 1
 
-G = 14.0
-G1 = 14.5
-L = 0.2
+G = 6
+G1 = 5
+L = 0.5
 
 ##### Iteration logic ######
 init_arg = ''
@@ -71,7 +75,7 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
     
     if not exists or force_iterate:
         mu = args.mu_B/3 * T
-        cmd = f'python3 -m tmqgp_iterate_single_mu_4ch {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter --mode HI --showtime '
+        cmd = f'python3 -m tmqgp_iterate_single_mu_4ch {mu} {T} {mQ} {mG} {G} {G1} {L} {screen} {suppress} --save_iter --mode LO --showtime '
         cmd += init_arg
         print('Running ' + cmd)
         ret_code = os.system(cmd)

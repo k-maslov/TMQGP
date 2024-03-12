@@ -12,8 +12,8 @@ endif(UNIX)
 
 find_package(Python3 COMPONENTS Interpreter Development NumPy)
 
-find_package(MPI)
-include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+# find_package(MPI)
+# include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
 #IF(MPI_CXX_FOUND)
 #        INCLUDE_DIRECTORIES(${MPI_CXX_INCLUDE_PATH})
@@ -23,7 +23,7 @@ include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 if(WIN32)
 #set(SWIG_EXEC "C:\\msys64\\usr\\bin\\swig.exe"
 set(SWIG_EXEC "C:\\Users\\const.maslov\\Numerics\\swigwin-4.0.1\\swig.exe")
-endif(WIN32) 
+endif(WIN32)
 
 if(UNIX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -g -Ofast -std=c++2a -fopenmp")

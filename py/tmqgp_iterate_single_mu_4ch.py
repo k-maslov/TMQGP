@@ -311,7 +311,7 @@ while abs(delta) > thr:
     keys = ['QQ', 'QA', 
             'AQ', 'AA']
 
-    funcs = [tm., tm.sigma_ff_onshell, 
+    funcs = [tm.sigma_ff_onshell, tm.sigma_ff_onshell, 
              tm.sigma_ff_onshell, tm.sigma_ff_onshell]
 
     chg_list = [channels_QQ, channels_QA,
