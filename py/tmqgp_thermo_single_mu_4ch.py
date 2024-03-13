@@ -55,8 +55,8 @@ pQs = []
 pAs = []
 
 for T, mQ, mG in zip(Trange, mQs, mGs):
-    pQ = Particle(mQ, qrange, erange, Gtab=df['Q']['G'])
-    pA = Particle(mQ, qrange, erange, Gtab=df['A']['G'])
+    pQ = Particle(mQ, qrange, erange, Gtab=np.array(df['Q']['G']))
+    pA = Particle(mQ, qrange, erange, Gtab=np.array(df['A']['G']))
     # pG = Particle(mG, qrange, erange, Gtab=df['G']['G'], stat='b', d=16)
 
     pQs += [pQ]
@@ -64,8 +64,8 @@ for T, mQ, mG in zip(Trange, mQs, mGs):
     pAs += [pA]
 
 ps_Q = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pQs)])
-print(pQs[0].Gtab[:, 0])
-print(ps_Q)
+# print(pQs[0].Gtab[:, 0])
+# print(ps_Q)
 ps_A = np.array([tm.OmQ_F(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pAs)])
 # ps_G = np.array([tm.OmQ_B(T, pt.iImG, pt.iReG) for T, pt in zip(Trange, pGs)])
 

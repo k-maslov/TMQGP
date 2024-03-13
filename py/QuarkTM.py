@@ -33,8 +33,8 @@ class Particle:
             # else:
             #     self.set_R(R)
         # print(Gtab)
-        self.set_R(-np.imag(self.Gtab) / np.pi)
-
+        # self.set_R(-np.imag(self.Gtab) / np.pi)
+        self.Rtab = -1/np.pi*np.imag(self.Gtab)
         peaks = []
         widths = []
         init = self.m
@@ -62,8 +62,8 @@ class Particle:
         self.widths = np.array(widths)
                 
             # print(q, x.x, f_peak, r1, r2)
-        plt.plot(self.qrange, peaks)
-        plt.plot(self.qrange, widths)
+        # plt.plot(self.qrange, peaks)
+        # plt.plot(self.qrange, widths)
 
         # self.iPeaks = tm.Interpolator(self.qrange, self.peaks, "cubic")
         # self.iWidths = tm.Interpolator(self.qrange, self.widths, 'cubic')
@@ -81,12 +81,13 @@ class Particle:
         # self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Gtab)))
     
     def set_R(self, Rtab):
-        if Rtab.shape[0] != len(self.erange) or Rtab.shape[1] != len(self.qrange):
-            raise
-        self.Rtab = Rtab
-        # self.R = tm.Interpolator2D(self.qrange, self.erange,
-        #     np.ascontiguousarray(Rtab))
-        self.R = tm.Interpolator2D(self.qrange, self.erange, self.Rtab)
+        raise
+        # if Rtab.shape[0] != len(self.erange) or Rtab.shape[1] != len(self.qrange):
+        #     raise
+        # self.Rtab = Rtab
+        # # self.R = tm.Interpolator2D(self.qrange, self.erange,
+        # #     np.ascontiguousarray(Rtab))
+        # self.R = tm.Interpolator2D(self.qrange, self.erange, self.Rtab)
 
         
     def om0(self, q):
@@ -317,8 +318,10 @@ class Channel:
             self.ImG2 = np.imag(G2)
 
         self.G2 = self.ReG2 + 1j*self.ImG2
+        self.G2[0, :] = self.G2[1, :]
+        self.G2[-1, :] = self.G2[-2, :]
 
-        self.G2[np.real(self.G2) < 1e-13] = 1e-13 + 0j
+        self.G2[abs(self.G2) < 1e-13] = 1e-3 + 1e-3j
         self.iReG2 = tm.InterDenom2D(self.qrange, self.erange, 
                                 np.ascontiguousarray(np.real(1/self.G2)), np.ascontiguousarray(np.imag(1/self.G2)), 'real')
         self.iImG2 = tm.InterDenom2D(self.qrange, self.erange, 
@@ -489,8 +492,8 @@ class ChannelL:
         self.p_i = p_i
         self.p_j = p_j
         self.T = T
-        self.erange = p_i.erange
-        self.qrange = p_i.qrange
+        # self.erange = p_i.erange
+        # self.qrange = p_i.qrange
 
         self.chs = []
         for l, p in zip(range(0, lmax + 1), params):

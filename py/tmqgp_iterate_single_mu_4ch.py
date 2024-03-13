@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 import TMQGP as tm
 import QuarkTM
 from QuarkTM import Channel, Particle
-
+from matplotlib import pyplot as plt
 import tqdm
 import numpy as np
 from scipy import signal
@@ -16,6 +16,8 @@ from scipy.integrate import quad
 from syntax_sugar import END, pipe
 from syntax_sugar import process_syntax as p
 from syntax_sugar import thread_syntax as t
+
+
 NTHR = 18
 
 ################## Reading the parameter file ######################
@@ -82,7 +84,7 @@ if mode == 'XHI':
     qrange = np.linspace(0, 5, 201)   
 elif mode == 'HI':
     erange = np.linspace(-5, 5, 201)
-    qrange = np.linspace(0, 5, 51)    
+    qrange = np.linspace(0, 5, 51)
 
 elif mode == 'HI_Q':
     erange = np.linspace(-5, 5, 201)
@@ -90,11 +92,11 @@ elif mode == 'HI_Q':
     
 elif mode == 'LO':
     erange = np.linspace(-5, 5, 101)
-    qrange = np.linspace(0, 5, 21)
+    qrange = np.linspace(0, 5, 51)
 else:
     raise ValueError
 
-eps = 0.05
+eps = 0.2
 
 params = {'G' : G, 'L' : L, 'screen' : screen}
 params1 = {'G' : G1, 'L' : L, 'screen' : screen}
@@ -158,6 +160,14 @@ else:
     #                      d=16, propagator=1, Gtab=np.array(f_init['G']['G']))
     f_init.close()
 
+
+# plt.plot(qrange, quark_run.peaks)
+# plt.show()
+
+# plt.plot(erange, [quark_run.R(0, e) for e in erange])
+# plt.show()
+
+
 print('Running G = ', G, 'T = ', T)
 
 chss = []
@@ -170,7 +180,7 @@ delta = 1
 
 n_iter = 0
 current_iter = 0
-thr = 1e-4
+thr = 1e-1
 
 while abs(delta) > thr:
     channels_QQ = QuarkTM.ChannelGroup(mu0=False)
@@ -192,6 +202,15 @@ while abs(delta) > thr:
 
     f.attrs.update({'erange2b': channels_QQ['qq3'].chs[0].erange2b, 
                     'qrange2b': channels_QQ['qq3'].chs[0].qrange2b})
+
+    ch = channels_QQ['qq3'].chs[0]
+
+    # plt.cla()
+    # # plt.plot(ch.erange2b, [quark_run.iImG(0, e) for e in ch.erange2b])
+    # # plt.plot(ch.erange2b, np.imag(channels_QQ['qq3'].chs[0].TM[:, 0]))
+    # plt.plot(ch.erange2b, np.imag(channels_QQ['qq3'].chs[0].G2[:, 0]))
+    # plt.plot(ch.erange2b, np.real(channels_QQ['qq3'].chs[0].G2[:, 0]))
+    # plt.show()
 
     # channels_QQ.addChannel(
     #     QuarkTM.ChannelL('qq6', lmax, quark_run, quark_run, T, pss_rep, ds=4, da=6, Fa=1/4, mu=mu)
@@ -303,7 +322,7 @@ while abs(delta) > thr:
                 # print(lbl)
                 f.create_dataset(lbl, data=ch.v(ch.qrange))
                 f[f'V/{k}/{l}'].attrs.update({'ds': ch.ds, 'da' : ch.da, 'Fa' : ch.Fa})
-
+    
 
     # exit()
     # for chg in [channels_QQ, channels_QG, channels_GQ, channels_GG]:
@@ -322,6 +341,8 @@ while abs(delta) > thr:
 
     for key, func, channels in zip(keys, funcs, chg_list):
         TM_tot = channels.get_T()
+
+
         # print(key)
 
         # # break
@@ -332,7 +353,12 @@ while abs(delta) > thr:
 
         # plt.plot(erange, imag(TM_tot[:, 0]))
         ch = list(channels.channels.items())[0][1] #ch = list(channels.items())[0][1] # take any of the channels since SFs are the same
-        iImTM_tot = tm.Interpolator2D(ch.chs[0].qrange, ch.chs[0].erange, np.ascontiguousarray(np.imag(TM_tot)))
+        iImTM_tot = tm.Interpolator2D(ch.chs[0].qrange2b, ch.chs[0].erange2b, np.ascontiguousarray(np.imag(TM_tot)))
+
+
+        
+
+
         eps1 = tm.Interpolator(qrange, ch.p_i.om0(qrange), 'cubic')
         eps2 = tm.Interpolator(qrange, ch.p_j.om0(qrange), 'cubic')
         Ntot = len(erange)*len(qrange)
@@ -355,8 +381,8 @@ while abs(delta) > thr:
         ReSigmas = []
 
         for res in ress.transpose():
-            iImSigma = tm.Interpolator(ch.erange, np.ascontiguousarray(res), 'cubic')
-            ReSigma = [tm.ReSigmaKK(e, iImSigma) for e in ch.erange]
+            iImSigma = tm.Interpolator(erange, np.ascontiguousarray(res), 'cubic')
+            ReSigma = [tm.ReSigmaKK(e, iImSigma) for e in erange]
             ReSigmas += [ReSigma]
 
         REALs[key] = np.array(ReSigmas).transpose()            
@@ -372,6 +398,7 @@ while abs(delta) > thr:
 
     G_Q_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_Q + 1j*ImS_Q) + mu)
 
+
     quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new, mu=mu)
     
     quark_new.S = ReS_Q + 1j*ImS_Q
@@ -383,6 +410,7 @@ while abs(delta) > thr:
     arrE = np.array([aquark_run.erange for q in aquark_run.qrange]).transpose()
 
     G_A_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_A + 1j*ImS_A) - mu)
+    
 
     aquark_new = Particle(mQ, qrange, erange, eps=aquark_run.eps, Gtab=G_A_new, mu=-mu)
     
@@ -469,6 +497,9 @@ while abs(delta) > thr:
         # f_iter.create_dataset(f'G/G', data=gluon_new.Gtab)
         f_iter.create_dataset(f'Q/S', data=quark_new.S)
         f_iter.create_dataset(f'A/S', data=aquark_new.S)
+        for _k, gr in zip(keys, chg_list):
+            f_iter.create_dataset(f'G2/{_k}', data=list(gr.channels.items())[0][1].chs[0].G2)
+
         # f_iter.create_dataset(f'G/S', data=gluon_new.S)
         for key, func, channels in zip(keys, funcs, chg_list):
             TM_tot = channels.get_T()
@@ -501,6 +532,8 @@ for _k, gr in zip(keys, chg_list):
             c = chl.chs[l]
             f.create_dataset(f'TM/{k}/{l}', data=c.TM)
             f.create_dataset(f'X/{k}/{l}', data=c.XS[0])
+
+    f.create_dataset(f'G2/{_k}', data=list(gr.channels.items())[0][1].chs[0].G2)
 
 
 for k in IMAGs.keys():
