@@ -88,4 +88,23 @@ double sigma_ff_onshell2(double om, double p, double T,
     Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
     int l);
 
+double x_cm_onshell_integrand_allom(double x, double omp, double om, double p, 
+            double k, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator & eps1, Interpolator & eps2, int debug, int l);
+
+double x_integral_cm_onshell_allom(double omp, double om, double p, 
+            double k, Interpolator2D & iImT, Interpolator2D & iImG, 
+            Interpolator & eps1, Interpolator & eps2, int debug, int l);
+
+double k_integral_onshell_allom(double omp, double om, double p, 
+Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
+int l);
+
+double sigma_ff_onshell_allom(double om, double p, double T, 
+    Interpolator2D & iImT, Interpolator2D & iImG, Interpolator & eps1, Interpolator & eps2, 
+    int l);
+
+
+
+
 #endif

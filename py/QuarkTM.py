@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 from syntax_sugar import thread_syntax as t, process_syntax as p
 
 from scipy.optimize import minimize
-from scipy.interpolate import UnivariateSpline
+from scipy.interpolate import UnivariateSpline, Akima1DInterpolator
 from matplotlib import pyplot as plt    
 
 class Particle:
@@ -47,7 +47,7 @@ class Particle:
 
             # find the half-peak
             f_peak = iIm(x.x[0])
-            iIm2 = UnivariateSpline(self.erange, np.imag(ge) - f_peak/2, s=1e-10)
+            iIm2 = Akima1DInterpolator(self.erange, np.imag(ge) - f_peak/2)
             rr = iIm2.roots()
             # print(rr)
             try:
@@ -397,6 +397,7 @@ class Channel:
         #         for E in tqdm.tqdm(self.erange)])
             v1v2 = np.sign(self.G)*self.v(self.qrange)**2
             TM = - 4*np.pi*v1v2 / (1 - X)
+            TM[self.erange < 0] = np.real(TM[self.erange < 0])
             self.TM += (2*l + 1)*TM
             self.TMS += [TM]
 
