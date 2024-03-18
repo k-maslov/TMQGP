@@ -123,7 +123,7 @@ class Channel:
     def __init__(self, p_i: Particle, p_j: Particle, T : float, 
                 Fa=1, G=6, L=0.5, screen=0, ds=1, da=1, calc=2, 
                  do_rel=1, parallel=-1,
-                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0, G2_mode=0, expand=1):
+                 test_potential=0, l=0, G1=None, calc_G2=1, G2=None, mu0=True, mu=0, screen_mu=0, G2_mode=0, expand=1, ImMode=1):
         self.p_i = p_i
         self.p_j = p_j
         self.l = l
@@ -199,7 +199,7 @@ class Channel:
             self.erange = self.erange2b
             self.qrange = self.qrange2b
 
-        self.set_G2(G2, G2_mode=G2_mode)
+        self.set_G2(G2, G2_mode=G2_mode, ImMode=ImMode)
 
     def set_Gs(self, G, G1=None):
         # if self.lmax == 0:
@@ -254,45 +254,49 @@ class Channel:
         # res[e == 0] = 10
         return res
 
-    def set_G2(self, G2=None, G2_mode=1):
+    def set_G2(self, G2=None, G2_mode=1, ImMode=1):
         if G2 is None:
-            # de = self.p_i.erange[1] - self.p_i.erange[0]
+            if ImMode == 0:
+                de = self.p_i.erange[1] - self.p_i.erange[0]
 
 
 
-            # self.ImG2 = -np.array([
-            #     signal.convolve(r1, r2, mode='same') * de * np.pi
-            #     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-            # ]).transpose()
-            
-            
-
-            # if self.p_i.stat == 'f':
-            #     cf1 = lambda z, T: self.nf(z, T)
-            # else:
-            #     cf1 = lambda z, T: -self.nb(z, T)
-
-            # if self.p_j.stat == 'f':
-            #     cf2 = lambda z, T: self.nf(z, T)
-            # else:
-            #     cf2 = lambda z, T: -self.nb(z, T)
+                self.ImG2 = -np.array([
+                    signal.convolve(r1, r2, mode='same') * de * np.pi
+                    for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+                ]).transpose()
                 
                 
-            
-            # self.ImG2 += np.array([
-            #     signal.convolve(r1*cf1(self.erange, self.T), r2, 
-            #                     mode='same')* de * np.pi
-            #     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-            # ]).transpose()
-            
-            # self.ImG2 += np.array([
-            #     signal.convolve(r1, r2*cf2(self.erange, self.T), 
-            #                     mode='same')* de * np.pi
-            #     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
-            # ]).transpose()
-            self.ImG2 = np.array([
-                [-np.pi*tm.G2_conv_ff(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange]
-            for q in (self.qrange)]).transpose()
+
+                if self.p_i.stat == 'f':
+                    cf1 = lambda z, T: self.nf(z, T)
+                else:
+                    cf1 = lambda z, T: -self.nb(z, T)
+
+                if self.p_j.stat == 'f':
+                    cf2 = lambda z, T: self.nf(z, T)
+                else:
+                    cf2 = lambda z, T: -self.nb(z, T)
+                    
+                    
+                
+                self.ImG2 += np.array([
+                    signal.convolve(r1*cf1(self.erange, self.T), r2, 
+                                    mode='same')* de * np.pi
+                    for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+                ]).transpose()
+                
+                self.ImG2 += np.array([
+                    signal.convolve(r1, r2*cf2(self.erange, self.T), 
+                                    mode='same')* de * np.pi
+                    for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
+                ]).transpose()
+            elif ImMode == 1:
+                self.ImG2 = np.array([
+                    [-np.pi*tm.G2_conv_ff(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange]
+                for q in (self.qrange)]).transpose()
+            else:
+                raise
             
             ReG2 = []
 
