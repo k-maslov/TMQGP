@@ -75,8 +75,8 @@ class InterDenom2D : public Interpolator2D{
 
 		vector<double> z2;
 		string what;
-		double real(double x, double y);
-		double imag(double x, double y);
+		virtual double real(double x, double y);
+		virtual double imag(double x, double y);
 		double operator()(double x, double y) override;
 };
 // ########## Write the integrations here temporarily
@@ -95,6 +95,21 @@ class PoleInterpolator: public InterDenom2D{
 		~PoleInterpolator();
 };
 
+// Interpolating Sigma and return G on evaluation
+class GFInterpolator: public PoleInterpolator{
+	public:
+		GFInterpolator(){};
+		GFInterpolator(double *x, int dimX, double *y, int dimY, 
+			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m);
+
+		~GFInterpolator();
+
+		double m;
+		double real(double x, double y) override;
+		double imag(double x, double y) override;
+		double operator()(double x, double y) override;
+};
 
 
 #endif

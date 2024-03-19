@@ -195,3 +195,81 @@ PoleInterpolator::~PoleInterpolator(){
 	delete iPole;
 	delete iWidth;
 }
+
+GFInterpolator::GFInterpolator(double *x, int dimX, double *y, int dimY, 
+			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m)
+{
+	this->m = m;
+	this->interp = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
+	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
+	accImX = gsl_interp_accel_alloc();
+	accImY = gsl_interp_accel_alloc();
+	accX = gsl_interp_accel_alloc();
+	accY = gsl_interp_accel_alloc();
+	gsl_spline2d_init(interp, x, y, ReZ2, dimX, dimY);
+	gsl_spline2d_init(iIm, x, y, ImZ2, dimX, dimY);
+
+	this->what = what;
+
+	this->x.clear();
+	this->y.clear();
+	this->z.clear();
+	this->z2.clear();
+
+	for (int i = 0; i < dimX; i++){
+		this->x.push_back(x[i]);
+	}
+
+	for (int i = 0; i < dimY; i++){
+		this->y.push_back(y[i]);
+	}
+
+	for (int i = 0; i < dimY*dimX; i++){
+		this->z.push_back(ReZ2[i]);
+	}
+
+	for (int i = 0; i < dimY*dimX; i++){
+		this->z2.push_back(ImZ2[i]);
+	}
+
+	debug = 0;	
+	iPole = new Interpolator(q, dimQ, pole, dimPole, "cubic");
+	iWidth = new Interpolator(q, dimQ, width, dimWidth, "cubic");
+}
+
+GFInterpolator::~GFInterpolator()
+{
+	
+}
+
+double GFInterpolator::real(double x, double y)
+{
+	return gsl_spline2d_eval(interp, x, y, accX, accY);
+}
+
+double GFInterpolator::imag(double x, double y)
+{
+	return gsl_spline2d_eval(iIm, x, y, accImX, accImY);
+}
+
+double GFInterpolator::operator()(double x, double y)
+{
+	double eps = sqrt(x*x + this->m*this->m);
+	double res;
+	complex<double> G = 1./(y - eps - complex<double>(this->real(x, y), this->imag(x, y)));
+	if (this->what == "real"){
+		res = G.real();
+	}
+	else if (this->what == "imag"){
+		res = G.imag();
+	}
+	else{
+		res = -1;
+	}
+	if (gsl_isnan(res)){
+		return 0;
+	}
+	return res;
+}
+
