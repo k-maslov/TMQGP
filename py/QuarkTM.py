@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 class Particle:
     def __init__(self, m, qrange, erange, stat='f', eps=5e-2, d=6, 
-            propagator=1, Gtab=None, mu=0):
+            propagator=1, Gtab=None, mu=0, S=None):
         self.m = m
         self.eps = eps
         self.R = None
@@ -23,6 +23,14 @@ class Particle:
         self.stat = stat
         self.propagator = propagator
         self.d = d
+
+        if S is not None:
+            self.S = S
+        else:
+            self.S = np.array([[
+                -self.eps for q in self.qrange
+            ] for e in self.erange])
+
         if Gtab is not None:
             self.Gtab = Gtab
         else:
@@ -40,23 +48,20 @@ class Particle:
         init = self.m
         r1 = 0.9*self.m
         r2 = 1.1*self.m
-        for q, ge in zip(self.qrange, self.Gtab.transpose()):
-            iIm = interp1d(self.erange, np.imag(ge), 'cubic')
-            x = minimize(iIm, init, bounds=[[r1, r2]])
-            peaks += [x.x[0]]
+        for i, q, ge, s in zip(range(len(qrange)), qrange, self.Gtab.transpose(), self.S.transpose()):
+            init = self.erange[np.argmin(np.imag(ge))]
+            # sols_rough += [init]
+            # iIm = interp1d(erange, imag(ge), 'linear')
+            iIm = Akima1DInterpolator(erange, np.imag(ge))
+            iImS = Akima1DInterpolator(erange, np.imag(s))
+            # plt.plot(erange, iIm(erange))
 
-            # find the half-peak
-            f_peak = iIm(x.x[0])
-            iIm2 = Akima1DInterpolator(self.erange, np.imag(ge) - f_peak/2)
-            rr = iIm2.roots()
-            # print(rr)
-            try:
-                r1, r2 = rr
-                width = r2 - r1
-                widths += [width]
-            except:
-                width = widths[-1]
-                widths += [width]
+            # break
+            x = minimize(iIm, init, bounds=[[0.9*init, 1.1*init]])
+            # print(i, x.x, init, x.status)
+            # init = x.x
+            peaks += [x.x[0]]
+            widths += [-4*iImS(init)]
 
         self.peaks = np.array(peaks)
         self.widths = np.array(widths)
