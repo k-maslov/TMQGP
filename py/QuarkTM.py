@@ -28,7 +28,7 @@ class Particle:
             self.S = S
         else:
             self.S = np.array([[
-                -self.eps for q in self.qrange
+                -1j*self.eps for q in self.qrange
             ] for e in self.erange])
 
         if Gtab is not None:
@@ -260,11 +260,18 @@ class Channel:
         return res
 
     def set_G2(self, G2=None, G2_mode=1, ImMode=1):
+        Lambda = 5
+        if self.expand:
+            Lambda = 10
+
         if G2 is None:
             if ImMode == 0:
-                de = self.p_i.erange[1] - self.p_i.erange[0]
+                de = self.erange[1] - self.erange[0]
 
-
+                # # map spectral function on expanded grids
+                # Rtab1 = np.array([
+                    
+                # ])
 
                 self.ImG2 = -np.array([
                     signal.convolve(r1, r2, mode='same') * de * np.pi
@@ -292,13 +299,13 @@ class Channel:
                 ]).transpose()
                 
                 self.ImG2 += np.array([
-                    signal.convolve(r1, r2*cf2(self.erange, self.T), 
+                    signal.convolve(r1, r2*cf2(self.erange, self.T),
                                     mode='same')* de * np.pi
                     for r1, r2 in zip(self.p_i.Rtab.transpose(), self.p_j.Rtab.transpose())
                 ]).transpose()
             elif ImMode == 1:
                 self.ImG2 = np.array([
-                    [-np.pi*tm.G2_conv_ff(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange]
+                    [-np.pi*tm.G2_conv_ff(e, q, self.T, self.p_i.R, self.p_j.R, Lambda=Lambda) for e in self.erange]
                 for q in (self.qrange)]).transpose()
             else:
                 raise
@@ -307,14 +314,11 @@ class Channel:
 
             if G2_mode == 1:
                 for q in tqdm.tqdm(self.qrange):
-                    res = np.array([-tm.ReG2_pole(e, q, self.T, self.p_i.R, self.p_j.R) for e in self.erange])
+                    res = np.array([-tm.ReG2_pole(e, q, self.T, self.p_i.R, self.p_j.R, Lambda=Lambda) for e in self.erange])
                     ReG2 += [res]
             elif G2_mode == 0:
                 for _im in self.ImG2.transpose():
                     iImNew = tm.Interpolator(self.erange, _im, 'cubic')
-                    Lambda = 5
-                    if self.expand:
-                        Lambda = 10
                     ReNew = np.array([tm.ReSigmaKK(e, iImNew, Lambda) for e in self.erange])
                     ReG2 += [ReNew]
             else:
