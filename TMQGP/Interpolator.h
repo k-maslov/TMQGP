@@ -112,4 +112,14 @@ class GFInterpolator: public PoleInterpolator{
 };
 
 
+class RhoInterpolator: public GFInterpolator{
+	public:
+		RhoInterpolator(){};
+		RhoInterpolator(double *x, int dimX, double *y, int dimY, 
+			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m);
+
+		double operator()(double x, double y) override;
+};
+
 #endif

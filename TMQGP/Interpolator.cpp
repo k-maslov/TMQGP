@@ -43,13 +43,18 @@ Interpolator::~Interpolator() {
 double Interpolator::operator()(double x) {
 // 	cout << interp->x[0] << " ; " << interp->x[interp->size - 1] << endl;
 // 	cout << interp->y[0] << " ; " << interp->y[interp->size - 1] << endl;
-	return gsl_spline_eval(interp, x, accel);
+	double res = gsl_spline_eval(interp, x, accel);
+	if (gsl_isnan(res)){
+		return 0;
+	}
+	
+	return res;
 }
 
 
 Interpolator2D::Interpolator2D(double *x, int dimX, double *y, int dimY, 
 			double * z2, int dimZ1, int dimZ2){
-	interp = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
+	interp = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
 	accX = gsl_interp_accel_alloc();
 	accY = gsl_interp_accel_alloc();
 	gsl_spline2d_init(interp, x, y, z2, dimX, dimY);
@@ -107,8 +112,8 @@ double Interpolator2D::operator()(double x, double y){
 
 InterDenom2D::InterDenom2D(double *x, int dimX, double *y, int dimY, double *ReZ2, 
 			int dimZ1, int dimZ2, double *ImZ2, int dimZ3, int dimZ4, string what){
-	this->interp = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
-	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
+	this->interp = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
+	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
 	accImX = gsl_interp_accel_alloc();
 	accImY = gsl_interp_accel_alloc();
 	accX = gsl_interp_accel_alloc();
@@ -201,8 +206,8 @@ GFInterpolator::GFInterpolator(double *x, int dimX, double *y, int dimY,
 			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m)
 {
 	this->m = m;
-	this->interp = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
-	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bicubic, dimX, dimY);
+	this->interp = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
+	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
 	accImX = gsl_interp_accel_alloc();
 	accImY = gsl_interp_accel_alloc();
 	accX = gsl_interp_accel_alloc();
@@ -271,5 +276,32 @@ double GFInterpolator::operator()(double x, double y)
 		return 0;
 	}
 	return res;
+}
+
+RhoInterpolator::RhoInterpolator(double *x, int dimX, double *y, int dimY, 
+			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m) : 
+			GFInterpolator(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4, q, dimQ, pole, dimPole, width, dimWidth, what, m)
+{
+	
+}
+
+double RhoInterpolator::operator()(double x, double y)
+{
+	double eps = sqrt(x*x + this->m*this->m);
+	double re = this->real(x, y);
+	if (gsl_isnan(re)){
+		re = 0;
+	}
+
+	double im = this->imag(x, y);
+	if (gsl_isnan(im)){
+		im = 0;
+	}
+
+	double res;
+	complex<double> G = 1./(y - eps - complex<double>(re, im));
+	
+	return -G.imag() / M_PI;
 }
 

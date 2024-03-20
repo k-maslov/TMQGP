@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 class Particle:
     def __init__(self, m, qrange, erange, stat='f', eps=5e-2, d=6, 
-            propagator=1, Gtab=None, mu=0, S=None):
+            propagator=1, Gtab=None, mu=0, S=None, S_lim=5e-3):
         self.m = m
         self.eps = eps
         self.R = None
@@ -30,6 +30,18 @@ class Particle:
             self.S = np.array([[
                 -1j*self.eps for q in self.qrange
             ] for e in self.erange])
+
+
+        self.Stab_lim = []
+        self.S_lim = S_lim
+        for s in self.S.transpose():
+            if max(np.abs(np.imag(s))) < self.S_lim:
+                s_new = np.real(s) + 1j*np.imag(s) / max(abs(np.imag(s))) * self.S_lim
+            else:
+                s_new = s
+            self.Stab_lim += [s_new]
+
+        self.Stab_lim = np.array(self.Stab_lim).transpose()
 
         if Gtab is not None:
             self.Gtab = Gtab
@@ -73,15 +85,23 @@ class Particle:
         # self.iPeaks = tm.Interpolator(self.qrange, self.peaks, "cubic")
         # self.iWidths = tm.Interpolator(self.qrange, self.widths, 'cubic')
 
-        self.iImG = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(1/self.Gtab)),
-                    np.ascontiguousarray(np.imag(1/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
+        # self.iImG = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(1/self.Gtab)),
+        #             np.ascontiguousarray(np.imag(1/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
 
-        self.iReG = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(1/self.Gtab)),
-                    np.ascontiguousarray(np.imag(1/self.Gtab)), self.qrange, self.peaks, self.widths, 'real')
+        # self.iReG = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(1/self.Gtab)),
+        #             np.ascontiguousarray(np.imag(1/self.Gtab)), self.qrange, self.peaks, self.widths, 'real')
 
-        self.R = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(-np.pi/self.Gtab)),
-                    np.ascontiguousarray(np.imag(-np.pi/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
+        # self.R = tm.PoleInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(-np.pi/self.Gtab)),
+        #             np.ascontiguousarray(np.imag(-np.pi/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
 
+        self.iImG = tm.GFInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Stab_lim)),
+                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'imag', self.m)
+
+        self.iReG = tm.GFInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Stab_lim)),
+                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'real', self.m)
+        
+        self.R = tm.RhoInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Stab_lim)),
+                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'imag', self.m)
         # self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(self.Gtab)))
         # self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Gtab)))
     
@@ -180,8 +200,11 @@ class Channel:
         self.erange = p_i.erange ### TODO: dirty
         self.qrange = p_i.qrange
 
-        self.erange2b = np.linspace(2*min(p_i.erange), 2*max(p_i.erange), 2*len(p_i.erange) - 1)
+        self.erange2b = np.linspace(0, 2*max(p_i.erange), len(p_i.erange))
         self.qrange2b = np.linspace(2*min(p_i.qrange), 2*max(p_i.qrange), 2*len(p_i.qrange) - 1)
+        if expand == 2:
+            self.erange2b = np.linspace(0, 2*max(p_i.erange), 1501)
+            self.qrange2b = np.linspace(2*min(p_i.qrange), 2*max(p_i.qrange), 501)
 
         self.screen = screen
         self.T = T
@@ -317,8 +340,8 @@ class Channel:
                     res = np.array([-tm.ReG2_pole(e, q, self.T, self.p_i.R, self.p_j.R, Lambda=Lambda) for e in self.erange])
                     ReG2 += [res]
             elif G2_mode == 0:
-                for _im in self.ImG2.transpose():
-                    iImNew = tm.Interpolator(self.erange, _im, 'cubic')
+                for _im in tqdm.tqdm(self.ImG2.transpose()):
+                    iImNew = tm.Interpolator(self.erange, _im, 'linear')
                     ReNew = np.array([tm.ReSigmaKK(e, iImNew, Lambda) for e in self.erange])
                     ReG2 += [ReNew]
             else:
@@ -334,7 +357,7 @@ class Channel:
         self.G2[0, :] = self.G2[1, :]
         self.G2[-1, :] = self.G2[-2, :]
 
-        self.G2[abs(self.G2) < 1e-13] = 1e-3 + 1e-3j
+        # self.G2[abs(self.G2) < 1e-13] = 1e-3 + 1e-3j
         self.iReG2 = tm.InterDenom2D(self.qrange, self.erange, 
                                 np.ascontiguousarray(np.real(1/self.G2)), np.ascontiguousarray(np.imag(1/self.G2)), 'real')
         self.iImG2 = tm.InterDenom2D(self.qrange, self.erange, 
