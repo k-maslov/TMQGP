@@ -96,7 +96,7 @@ elif mode == 'LO':
 else:
     raise ValueError
 
-eps = 0.2
+eps = 0.05
 
 params = {'G' : G, 'L' : L, 'screen' : screen}
 params1 = {'G' : G1, 'L' : L, 'screen' : screen}
@@ -399,9 +399,9 @@ while abs(delta) > thr:
     G_Q_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_Q + 1j*ImS_Q) + mu)
 
 
-    quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new, mu=mu)
+    quark_new = Particle(mQ, qrange, erange, eps=quark_run.eps, Gtab=G_Q_new, mu=mu, S=ReS_Q + 1j*ImS_Q)
     
-    quark_new.S = ReS_Q + 1j*ImS_Q
+    # quark_new.S = ReS_Q + 1j*ImS_Q
 ##########
     ImS_A = IMAGs['AA'] + IMAGs['AQ']
     ReS_A = REALs['AA'] + REALs['AQ']
@@ -412,9 +412,9 @@ while abs(delta) > thr:
     G_A_new = 1/(arrE - om0_k + 0*1j*quark_run.eps - (ReS_A + 1j*ImS_A) - mu)
     
 
-    aquark_new = Particle(mQ, qrange, erange, eps=aquark_run.eps, Gtab=G_A_new, mu=-mu)
+    aquark_new = Particle(mQ, qrange, erange, eps=aquark_run.eps, Gtab=G_A_new, mu=-mu, S=ReS_A + 1j*ImS_A)
     
-    aquark_new.S = ReS_A + 1j*ImS_A
+    # aquark_new.S = ReS_A + 1j*ImS_A
 ####    
 #     ImS_G = 0.05#IMAGs['GG'] + IMAGs['GQ'] + IMAGs['GA']
 #     ReS_G = 0# REALs['GG'] + REALs['GQ'] + REALs['GA']
