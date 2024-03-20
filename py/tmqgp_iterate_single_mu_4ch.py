@@ -310,6 +310,11 @@ while abs(delta) > thr:
 #     channels_GG.addChannel(
 #         QuarkTM.ChannelL('gg27', lmax, gluon_run, gluon_run, T, pss_rep_GG, ds=4, da=27, Fa=3/4, mu=mu)
 #     )
+    
+
+    erange_dense = np.linspace(-5, 5, 1001)
+    plt.plot(erange_dense, [quark_run.R(0, e) for e in erange_dense])
+    plt.show()
 
     if n_iter == 0:
         for k, ch_l in (list(channels_QQ.channels.items()) + 
@@ -325,8 +330,13 @@ while abs(delta) > thr:
     
 
     # exit()
-    # for chg in [channels_QQ, channels_QG, channels_GQ, channels_GG]:
-    #     TM = chg.get_T()
+    for chg in [channels_QQ, channels_QA, channels_AQ, channels_AA]:
+        TM = chg.get_T()
+
+    ch = channels_QA['qa1'].chs[0]
+
+    plt.plot(ch.erange, np.imag(ch.TM[:, 0]))
+    plt.show()
 
     IMAGs = dict()
     REALs = dict()
