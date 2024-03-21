@@ -45,6 +45,9 @@ mu = df.attrs['mu']
 qrange = df.attrs['qrange']
 erange = df.attrs['erange']
 
+qrange2b = df.attrs['qrange2b']
+erange2b = df.attrs['erange2b']
+
 # mQ = df.attrs['mQ']
 mQs = [df.attrs['mQ']]
 # mG = df.attrs['mG']
@@ -83,10 +86,10 @@ for T, pt in zip(Trange, pQs):
     iReS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(sigma)))
     iImS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(sigma)))
     
-    iImG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(pt.Gtab)))
-    iReG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(pt.Gtab)))
+    # iImG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(pt.Gtab)))
+    # iReG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(pt.Gtab)))
     
-    ps_S_Q += [tm.OmS_F(T, iImG, iReG, iImS, iReS)]
+    ps_S_Q += [tm.OmS_F(T, pt.iImG, pt.iReG, iImS, iReS)]
 
 for T, pt in zip(Trange, pAs):
     sigma = df['A']['S']
@@ -94,10 +97,10 @@ for T, pt in zip(Trange, pAs):
     iReS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(sigma)))
     iImS = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(sigma)))
     
-    iImG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(pt.Gtab)))
-    iReG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(pt.Gtab)))
+    # iImG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(pt.Gtab)))
+    # iReG = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(real(pt.Gtab)))
     
-    ps_S_A += [tm.OmS_F(T, iImG, iReG, iImS, iReS)]
+    ps_S_A += [tm.OmS_F(T, pt.iImG, pt.iReG, iImS, iReS)]
 
 
 # for T, pt in zip(Trange, pGs):
@@ -234,7 +237,7 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_Q):
                 [pQs[i], pAs[i]]):
         LT = LTs[key]
 
-        iImLT = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(LT)))
+        iImLT = tm.Interpolator2D(qrange2b, erange2b, np.ascontiguousarray(imag(LT)))
 
         iEps1 = tm.Interpolator(qrange, pQs[i].om0(qrange), 'cubic')
         iEps2 = tm.Interpolator(qrange, p2.om0(qrange), 'cubic')
@@ -275,7 +278,7 @@ for i, T, LTs in zip(range(len(Trange)), Trange, LTs_A):
                 [pAs[i], pQs[i]]):
         LT = LTs[key]
 
-        iImLT = tm.Interpolator2D(qrange, erange, np.ascontiguousarray(imag(LT)))
+        iImLT = tm.Interpolator2D(qrange2b, erange2b, np.ascontiguousarray(imag(LT)))
 
         iEps1 = tm.Interpolator(qrange, pAs[i].om0(qrange), 'cubic')
         iEps2 = tm.Interpolator(qrange, p2.om0(qrange), 'cubic')
