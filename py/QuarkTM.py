@@ -28,7 +28,7 @@ class Particle:
             self.S = S
         else:
             self.S = np.array([[
-                -1j*self.eps for q in self.qrange
+                -1j*self.eps*(1 + np.tanh(e/0.001))/2 for q in self.qrange
             ] for e in self.erange])
 
 

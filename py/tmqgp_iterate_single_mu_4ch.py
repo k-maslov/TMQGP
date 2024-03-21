@@ -313,8 +313,8 @@ while abs(delta) > thr:
     
 
     erange_dense = np.linspace(-5, 5, 1001)
-    plt.plot(erange_dense, [quark_run.R(0, e) for e in erange_dense])
-    plt.show()
+    # plt.plot(erange_dense, [quark_run.R(0, e) for e in erange_dense])
+    # plt.show()
 
     if n_iter == 0:
         for k, ch_l in (list(channels_QQ.channels.items()) + 
@@ -335,8 +335,8 @@ while abs(delta) > thr:
 
     ch = channels_QA['qa1'].chs[0]
 
-    plt.plot(ch.erange, np.imag(ch.TM[:, 0]))
-    plt.show()
+    # plt.plot(ch.erange, np.imag(ch.TM[:, 0]))
+    # plt.show()
 
     IMAGs = dict()
     REALs = dict()
@@ -366,8 +366,8 @@ while abs(delta) > thr:
         iImTM_tot = tm.Interpolator2D(ch.chs[0].qrange, ch.chs[0].erange, np.ascontiguousarray(np.imag(TM_tot)))
 
 
-        plt.plot(erange_dense, [iImTM_tot(0, e) for e in erange_dense])
-        plt.show()
+        # plt.plot(erange_dense, [iImTM_tot(0, e) for e in erange_dense])
+        # plt.show()
         
 
 
