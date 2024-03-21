@@ -196,9 +196,33 @@ while abs(delta) > thr:
     pss_GG = [params_GG, params_GG1]
     pss_rep_GG = [params_rep_GG, params_rep_GG1]
 
+
+    ##### Parallel calculation of G_QQ
+    Ntot = len(qrange) * len(erange)
+    pairs = np.array([[[q, e] for e in erange] for q in qrange]).reshape(1, Ntot, 2)[0]
+
+    # ImG2_QQ = np.array([
+    #     [-np.pi*tm.G2_conv_ff(e, q, T, quark_run.R, quark_run.R, Lambda=10) for e in erange]
+    # for q in (qrange)]).transpose()
+
+    start = timer()
+    ImG2_QQ = np.array(pipe(pairs) | p[lambda z: -np.pi*tm.G2_conv_ff(z[1], z[0], T, quark_run.R, quark_run.R, Lambda=10)]*(NTHR//1) | END)
+    end = timer()
+    if args.showtime:
+        print('Channel QQ time = ', end-start, ' s')
+
+    ImG2_QQ = ImG2_QQ.reshape(len(qrange), len(erange)).transpose()
+
+    ch_test = QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
+
     channels_QQ.addChannel(
-        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
+        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu, G2=G2_QQ)
     )
+
+    plt.plot(erange, np.imag(G2_QQ[:, 0]))
+    plt.plot(erange, np.imag(ch_test.G2[:, 0]))
+
+    plt.show()
 
     f.attrs.update({'erange2b': channels_QQ['qq3'].chs[0].erange, 
                     'qrange2b': channels_QQ['qq3'].chs[0].qrange})
