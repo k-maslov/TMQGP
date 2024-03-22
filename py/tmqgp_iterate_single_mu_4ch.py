@@ -17,7 +17,8 @@ from syntax_sugar import END, pipe
 from syntax_sugar import process_syntax as p
 from syntax_sugar import thread_syntax as t
 
-
+import warnings
+warnings.filterwarnings('ignore')
 NTHR = 18
 
 ################## Reading the parameter file ######################
@@ -182,6 +183,15 @@ n_iter = 0
 current_iter = 0
 thr = 1e-4
 
+erange2b = np.linspace(0, 10, 1501)
+qrange2b = np.linspace(0, 10, 501)
+
+def getReKK(erange, ims):
+    iIm = tm.Interpolator(erange, ims, 'cubic')
+    
+    res = np.array([tm.ReSigmaKK(e, iIm, Lambda=10) for e in erange])
+    return res
+
 while abs(delta) > thr:
     channels_QQ = QuarkTM.ChannelGroup(mu0=False)
     # channels_QG = QuarkTM.ChannelGroup(mu0=False)
@@ -196,8 +206,54 @@ while abs(delta) > thr:
     pss_GG = [params_GG, params_GG1]
     pss_rep_GG = [params_rep_GG, params_rep_GG1]
 
+
+
+    ##### Parallel calculation of G_QQ
+    Ntot = len(qrange2b) * len(erange2b)
+    pairs = np.array([[[q, e] for e in erange2b] for q in qrange2b]).reshape(1, Ntot, 2)[0]
+
+    
+
+    def getIm(q, pt1, pt2):
+        return np.array([-np.pi*tm.G2_conv_ff(e, q, T, pt1.R, pt2.R) for e in erange2b])
+
+
+    # print('Calculating Im')
+    # ImG2_QQ = np.array([
+    #     [-np.pi*tm.G2_conv_ff(e, q, T, quark_run.R, quark_run.R, Lambda=10) for e in erange2b]
+    # for q in (qrange2b)]).transpose()
+
+    
+    # ImG2_QQ = np.array(pipe(pairs) | p[lambda z: -np.pi*tm.G2_conv_ff(z[1], z[0], T, quark_run.R, quark_run.R, Lambda=10)]*(NTHR//1) | END)
+    start = timer()
+    ImG2_QQ = np.array(pipe(qrange2b) | p[lambda z: getIm(z, quark_run, quark_run)]*(NTHR//1) | END)
+    ImG2_QQ = ImG2_QQ.transpose()
+    # ImG2_QQ = ImG2_QQ.reshape(len(qrange2b), len(erange2b)).transpose()
+    # print('Done')
+
+    # print('Calculating Re')
+
+    ReG2_QQ = np.array(pipe(ImG2_QQ.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
+    ReG2_QQ = ReG2_QQ.transpose()
+    # print('done')
+
+    end = timer()
+
+    if args.showtime:
+        print('Channel QQ time = ', end-start, ' s')
+
+
+    # # ch_test = QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
+    # plt.plot(erange2b, ImG2_QQ[:, 0])
+    # plt.plot(erange2b, np.imag(ch_test.G2[:, 0]))
+
+    # plt.show()
+
+    # # exit()
+
+
     channels_QQ.addChannel(
-        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
+        QuarkTM.ChannelL('qq3', lmax, quark_run, quark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu, G2=ReG2_QQ + 1j*ImG2_QQ)
     )
 
     f.attrs.update({'erange2b': channels_QQ['qq3'].chs[0].erange, 
@@ -220,8 +276,25 @@ while abs(delta) > thr:
     #     QuarkTM.ChannelL('qa8', lmax, quark_run, aquark_run, T, pss_rep, ds=4, da=8, Fa=1/8, mu=mu)
     # )
 
+    start = timer()
+    ImG2_QA = np.array(pipe(qrange2b) | p[lambda z: getIm(z, quark_run, aquark_run)]*(NTHR//1) | END)
+    ImG2_QA = ImG2_QA.transpose()
+    # ImG2_QQ = ImG2_QQ.reshape(len(qrange2b), len(erange2b)).transpose()
+    # print('Done')
+
+    # print('Calculating Re')
+
+    ReG2_QA = np.array(pipe(ImG2_QQ.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
+    ReG2_QA = ReG2_QA.transpose()
+    # print('done')
+
+    end = timer()
+
+    if args.showtime:
+        print('Channel QA time = ', end-start, ' s')
+
     channels_QA.addChannel(
-        QuarkTM.ChannelL('qa1', lmax, quark_run, aquark_run, T, pss, ds=4, da=1, Fa=1, mu=mu)
+        QuarkTM.ChannelL('qa1', lmax, quark_run, aquark_run, T, pss, ds=4, da=1, Fa=1, mu=mu, G2=ReG2_QA + 1j*ImG2_QA)
     )
 
     # channels_QG.addChannel(
@@ -242,8 +315,26 @@ while abs(delta) > thr:
     channels_AQ = QuarkTM.ChannelGroup(mu0=False)
 
 
+    start = timer()
+    ImG2_AA = np.array(pipe(qrange2b) | p[lambda z: getIm(z, aquark_run, aquark_run)]*(NTHR//1) | END)
+    ImG2_AA = ImG2_AA.transpose()
+    # ImG2_QQ = ImG2_QQ.reshape(len(qrange2b), len(erange2b)).transpose()
+    # print('Done')
+
+    # print('Calculating Re')
+
+    ReG2_AA = np.array(pipe(ImG2_QQ.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
+    ReG2_AA = ReG2_AA.transpose()
+    # print('done')
+
+    end = timer()
+
+    if args.showtime:
+        print('Channel AA time = ', end-start, ' s')
+
+
     channels_AA.addChannel(
-        QuarkTM.ChannelL('aa3', lmax, aquark_run, aquark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu)
+        QuarkTM.ChannelL('aa3', lmax, aquark_run, aquark_run, T, pss, ds=4, da=3, Fa=1/2, mu=mu, G2=ReG2_AA + 1j*ImG2_AA)
     )
 
     # channels_AA.addChannel(
@@ -255,7 +346,7 @@ while abs(delta) > thr:
     # )
 
     channels_AQ.addChannel(
-        QuarkTM.ChannelL('aq1', lmax, aquark_run, quark_run, T, pss, ds=4, da=1, Fa=1, mu=mu)
+        QuarkTM.ChannelL('aq1', lmax, aquark_run, quark_run, T, pss, ds=4, da=1, Fa=1, mu=mu, G2=ReG2_QA + 1j*ImG2_QA)
     )
 
     # channels_AG.addChannel(
