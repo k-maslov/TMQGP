@@ -203,9 +203,10 @@ PoleInterpolator::~PoleInterpolator(){
 
 GFInterpolator::GFInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m)
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m, double mu)
 {
 	this->m = m;
+	this->mu = mu;
 	this->interp = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
 	this->iIm = gsl_spline2d_alloc(gsl_interp2d_bilinear, dimX, dimY);
 	accImX = gsl_interp_accel_alloc();
@@ -262,7 +263,9 @@ double GFInterpolator::operator()(double x, double y)
 {
 	double eps = sqrt(x*x + this->m*this->m);
 	double res;
-	complex<double> G = 1./(y - eps - complex<double>(this->real(x, y), this->imag(x, y)));
+	complex<double> G = 1./(y - eps - complex<double>(this->real(x, y), this->imag(x, y)) 
+			+ this->mu);
+			
 	if (this->what == "real"){
 		res = G.real();
 	}
@@ -280,8 +283,8 @@ double GFInterpolator::operator()(double x, double y)
 
 RhoInterpolator::RhoInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m) : 
-			GFInterpolator(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4, q, dimQ, pole, dimPole, width, dimWidth, what, m)
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m, double mu) : 
+			GFInterpolator(x, dimX, y, dimY, ReZ2, dimZ1, dimZ2, ImZ2, dimZ3, dimZ4, q, dimQ, pole, dimPole, width, dimWidth, what, m, mu)
 {
 	
 }
@@ -300,7 +303,7 @@ double RhoInterpolator::operator()(double x, double y)
 	}
 
 	double res;
-	complex<double> G = 1./(y - eps - complex<double>(re, im));
+	complex<double> G = 1./(y - eps - complex<double>(re, im) + this->mu);
 	
 	return -G.imag() / M_PI;
 }
