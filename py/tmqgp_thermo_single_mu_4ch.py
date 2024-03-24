@@ -20,7 +20,7 @@ NTHR = 18
 from numpy import log, sqrt, exp, pi, real, imag, array
 from matplotlib import pyplot as plt
 import matplotlib
-matplotlib.style.use('publication')
+# matplotlib.style.use('publication')
 # parse the arguments
 
 # print(os.path.dirname(__file__))
