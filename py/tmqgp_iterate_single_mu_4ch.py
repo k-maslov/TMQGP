@@ -149,8 +149,8 @@ f.attrs.update({
 ########################### Iteration logic ###################
 
 if args.init == '':
-    quark_run = Particle(mQ, qrange, erange, eps=eps, mu=0)
-    aquark_run = Particle(mQ, qrange, erange, eps=eps, mu=0)
+    quark_run = Particle(mQ, qrange, erange, eps=eps, mu=mu)
+    aquark_run = Particle(mQ, qrange, erange, eps=eps, mu=-mu)
     # gluon_run = Particle(mG, qrange, erange, eps=eps, stat='b', d=16, propagator=1)
 else:
     print('Loading init from ' + args.init)

@@ -23,12 +23,13 @@ class Particle:
         self.stat = stat
         self.propagator = propagator
         self.d = d
+        self.mu = mu
 
         if S is not None:
             self.S = S
         else:
             self.S = np.array([[
-                -1j*self.eps*(1 + np.tanh(e/0.001))/2 for q in self.qrange
+                -1j*self.eps*(1 + np.tanh((e + self.mu)/0.001))/2 for q in self.qrange
             ] for e in self.erange])
 
 
@@ -64,12 +65,15 @@ class Particle:
             init = self.erange[np.argmin(np.imag(ge))]
             # sols_rough += [init]
             # iIm = interp1d(erange, imag(ge), 'linear')
+            if any(np.isinf(ge)):
+                plt.plot(erange, np.imag(ge))
+                print(ge)
             iIm = Akima1DInterpolator(erange, np.imag(ge))
             iImS = Akima1DInterpolator(erange, np.imag(s))
             # plt.plot(erange, iIm(erange))
 
             # break
-            x = minimize(iIm, init, bounds=[[0.9*init, 1.1*init]])
+            x = minimize(iIm, init, bounds=[[init - 0.1*np.abs(init), init + 0.1*abs(init)]])
             # print(i, x.x, init, x.status)
             # init = x.x
             peaks += [x.x[0]]
@@ -95,13 +99,13 @@ class Particle:
         #             np.ascontiguousarray(np.imag(-np.pi/self.Gtab)), self.qrange, self.peaks, self.widths, 'imag')
 
         self.iImG = tm.GFInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Stab_lim)),
-                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'imag', self.m)
+                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'imag', self.m, self.mu)
 
         self.iReG = tm.GFInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Stab_lim)),
-                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'real', self.m)
+                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'real', self.m, self.mu)
         
         self.R = tm.RhoInterpolator(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Stab_lim)),
-                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'imag', self.m)
+                    np.ascontiguousarray(np.imag(self.Stab_lim)), self.qrange, self.peaks, self.widths, 'imag', self.m, self.mu)
         # self.iImG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.imag(self.Gtab)))
         # self.iReG = tm.Interpolator2D(self.qrange, self.erange, np.ascontiguousarray(np.real(self.Gtab)))
     
@@ -121,8 +125,8 @@ class Particle:
     def G0(self, E, q, mu=0):
         # if self.propagator == 'Th':
         if self.stat == 'f':
-            # return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh(E/0.001))/2 + mu)
-            return 1 / (E - self.om0(q) + 1j*self.eps + mu)
+            return 1 / (E - self.om0(q) + 1j*self.eps*(1 + np.tanh((E + self.mu)/0.001))/2 + mu)
+            # return 1 / (E - self.om0(q) + 1j*self.eps + mu)
         # elif self.propagator == 'BBS':
         elif self.stat == 'b':
             if self.propagator == 1:
