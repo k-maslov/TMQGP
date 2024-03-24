@@ -101,11 +101,12 @@ class GFInterpolator: public PoleInterpolator{
 		GFInterpolator(){};
 		GFInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m);
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m, double mu);
 
 		~GFInterpolator();
 
 		double m;
+		double mu;
 		double real(double x, double y) override;
 		double imag(double x, double y) override;
 		double operator()(double x, double y) override;
@@ -117,7 +118,7 @@ class RhoInterpolator: public GFInterpolator{
 		RhoInterpolator(){};
 		RhoInterpolator(double *x, int dimX, double *y, int dimY, 
 			double * ReZ2, int dimZ1, int dimZ2, double * ImZ2, int dimZ3, int dimZ4, 
-			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m);
+			double * q, int dimQ, double * pole, int dimPole, double * width, int dimWidth, string what, double m, double mu);
 
 		double operator()(double x, double y) override;
 };
