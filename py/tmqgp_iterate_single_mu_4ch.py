@@ -284,7 +284,7 @@ while abs(delta) > thr:
 
     # print('Calculating Re')
 
-    ReG2_QA = np.array(pipe(ImG2_QQ.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
+    ReG2_QA = np.array(pipe(ImG2_QA.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
     ReG2_QA = ReG2_QA.transpose()
     # print('done')
 
@@ -323,7 +323,7 @@ while abs(delta) > thr:
 
     # print('Calculating Re')
 
-    ReG2_AA = np.array(pipe(ImG2_QQ.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
+    ReG2_AA = np.array(pipe(ImG2_AA.transpose()) | p[lambda z: getReKK(erange2b, z)]*(NTHR//1) | END)
     ReG2_AA = ReG2_AA.transpose()
     # print('done')
 

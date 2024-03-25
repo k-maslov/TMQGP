@@ -39,6 +39,8 @@ df_p = pd.DataFrame(d_p)
 
 print(df_p)
 
+df_p.to_csv('PT.csv')
+
 print(df_p.to_dict('list'))
 
 df_out.attrs.update(df_p.to_dict('list'))
