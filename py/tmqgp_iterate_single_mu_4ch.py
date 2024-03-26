@@ -67,7 +67,7 @@ else:
 
 # comment = 'Both masses decrease, m_g 1.4 to 1.0\nscreen  0.9'
 
-save_iterations = 1 #args.save_iter
+save_iterations = args.save_iter
 
 if out_folder != '.':
     if not os.path.exists(out_folder):
